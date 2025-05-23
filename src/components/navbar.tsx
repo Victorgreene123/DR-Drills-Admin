@@ -15,7 +15,7 @@ const Navbar: React.FC = () => {
       <div className='w-[85%]  h-full px-6 flex items-center justify-between'>
         <p className='text-[#73777F]'>Dashboard / Analytics</p>
         <div className='flex gap-3'>
-            <div className='w-[320px] relative bg-[#F2F3FA] border-[1px] flex items-center border-[#C3C6CF] rounded-[8px] h-32px '>
+            <div className='w-[320px] relative bg-[#F2F3FA] border-[1px] flex items-center border-[#C3C6CF] rounded-[8px] h-[32px] '>
                 <IoSearch  className='mx-2 text-[#0F172A] opacity-50 '/>
                 <input type="text" className='w-full flex items-center outline-none border-none  pl-8 rounded-[8px] h-full absolute top-0  text-[14px] text-[#73777F]' placeholder='Search for Content or User' />
             </div>

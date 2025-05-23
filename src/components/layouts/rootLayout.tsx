@@ -1,6 +1,7 @@
 import React from 'react';
 import Navbar from '../navbar';
 import Sidebar from '../sidebar';
+import { Outlet } from 'react-router-dom';
 
 
 
@@ -13,8 +14,9 @@ const RootLayout: React.FC = () => {
           {/* Sidebar content */}
           <Sidebar />
         </div>
-        <div className=" min-w-[85%]  overflow-y-auto h-[92vh]">
+        <div className=" min-w-[85%] p-10  overflow-y-auto h-[92vh]">
           {/* Main content */}
+          <Outlet />
         </div>
       </div>
     </div>

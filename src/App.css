@@ -1,0 +1,10 @@
+@font-face {
+  font-family: 'custom';
+  src: url("./assets/fonts/AG Old Face Regular.otf");
+  font-weight: 400; /* bold */
+}
+
+
+*{
+    font-family: "Fira Sans", sans-serif;
+}
