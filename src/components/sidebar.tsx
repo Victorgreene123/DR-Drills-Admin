@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { HiOutlineBars3 } from "react-icons/hi2";
-import { FaChevronDown  , FaChevronUp, FaMoneyCheckAlt, FaRegHeart, FaRegUserCircle } from "react-icons/fa";
+import { FaChevronDown  , FaChevronRight, FaChevronUp, FaHeart, FaMoneyCheckAlt, FaRegHeart, FaRegUserCircle } from "react-icons/fa";
 import pfp from '../assets/pfp.jpg'
 import { BsWindowSidebar } from "react-icons/bs";
 import { PiVideoCameraThin } from "react-icons/pi";
@@ -19,37 +19,37 @@ const Sidebar: React.FC = () => {
             {
                 id: 1,
                 label : "Dashboard",
-                icon : <BsWindowSidebar />,
+                icon : [<BsWindowSidebar />],
             },
               {
                 id: 2,
                 label : "Lectures",
-                icon : <PiVideoCameraThin />,
+                icon : [<PiVideoCameraThin />],
             },  {
                 id : 3,
                 label : "Quizzes",
-                icon : <FaRegHeart />,
+                icon : [<FaRegHeart /> , <FaHeart />],
             },  {
                 id : 4,
                 label : "Users",
-                icon : <FaRegUserCircle />,
+                icon : [<FaRegUserCircle />],
             },  {
                 id: 5,
                 label : "Subscriptions",
-                icon : <FaMoneyCheckAlt />,
+                icon : [<FaMoneyCheckAlt />],
             },  {
                 id : 6,
                 label : "Analytics",
-                icon : <RiBarChartBoxLine />,
+                icon : [<RiBarChartBoxLine />],
 
             },  {
                 id : 7,
                 label : "Marketing",
-                icon : <MdOutlineCampaign />,
+                icon : [<MdOutlineCampaign />],
             },  {
                 id: 8,
                 label : "Settings",
-                icon : <IoMdSettings />,
+                icon : [<IoMdSettings />],
             },
     ]
   return (
@@ -57,6 +57,8 @@ const Sidebar: React.FC = () => {
       <button className="w-[32px] mx-5 mt-5 flex items-center justify-center h-[32px] rounded-[4px] bg-[#ECEDF4] border-[1px] border-[#C3C6CF] ">
         <HiOutlineBars3 className="text-xl"/>
       </button>
+      <div className="relative px-2 w-full">
+      
       <button className="bg-[#0360AB] mx-3 mt-3 rounded-[36px] w-[112px] h-[48px] text-white flex items-center justify-between box-border px-5 " onClick={clickCreate}>
         Create
         {
@@ -65,13 +67,57 @@ const Sidebar: React.FC = () => {
        
 
         </button>
+        {
+            isCreateClicked && (
+                <div className="bg-white absolute z-10 w-4/5 left-6 px-1 py-2 border-[1px] border-[#C3C6CF] rounded-[8px]   ">
+                    <ul className="w-full text-[14px] text-[#334155] ">
+                    <li className="p-2 px-3 group flex items-center justify-between hover:bg-[#ECEDF4]">
+                    Lecture
+                    <FaChevronRight className="hidden text-[#334155] text-sm group-hover:inline" />
+                    
+                    </li>
+
+                      <li className="p-2 px-3 group flex items-center justify-between hover:bg-[#ECEDF4]">
+                    Lecture Block
+                    <FaChevronRight className="hidden text-[#334155] text-sm group-hover:inline" />
+                    
+                    </li>
+
+                      <li className="p-2 px-3 group flex items-center justify-between hover:bg-[#ECEDF4]">
+                    Lecture Bank
+                    <FaChevronRight className="hidden text-[#334155] text-sm group-hover:inline" />
+                    
+                    </li>
+
+                     <li className="p-2 px-3 group flex items-center justify-between hover:bg-[#ECEDF4]">
+                    Quiz
+                    <FaChevronRight className="hidden text-[#334155] text-sm group-hover:inline" />
+                    
+                    </li>
+                     <li className="p-2 px-3 group flex items-center justify-between hover:bg-[#ECEDF4]">
+                    Quiz Block
+                    <FaChevronRight className="hidden text-[#334155]  text-sm group-hover:inline" />
+                    
+                    </li>
+                    
+                    </ul>
+                </div>
+            )
+        }
+      </div>
+      
       <nav>
         <ul className="list-none space-y-[3px] p-0">
             {
                 sidebarArr.map((item) =>{
                     return (
                         <li className="group flex gap-4 text-black items-center w-full hover:bg-[#D4E3FF] hover:border-l-3 hover:border-[#0360AB] py-2 border-box px-4" key={item.id}>
-                            <span className="text-xl group-hover:text-[#004883] ">{item.icon}</span>
+                            <span className={`text-xl group-hover:text-[#004883] ${item.icon[1]? "group-hover:hidden" : " " }`}>{item.icon[0]}</span>
+                            {
+                                item.icon[1] && (
+                                    <span className={`text-xl group-hover:text-[#004883] hidden ${item.icon[1]? "group-hover:flex" : " " }`} >{item.icon[1]}</span>
+                                ) 
+                            }
                             <p className="text-[#43474E] text-[16px] group-hover:text-[#004883]">{item.label}</p>
 
                         </li>
