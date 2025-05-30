@@ -30,12 +30,13 @@ const UploadQuizPopUpFlow: React.FC<UploadQuizPopUpFlowProps> = ({
   const [isFastTrackOpen, setIsFastTrackOpen] = useState(false);
   const [selectedFastTrack, setSelectedFastTrack] = useState("Fast track");
   const [fastTrackSearchTerm, setFastTrackSearchTerm] = useState<string>("");
-
+  console.log("Fast Track Search Term: ", fastTrackSearchTerm);
   const [isUserRestrictionOpen, setIsUserRestrictionOpen] = useState(false);
   const [selectedUserRestriction, setSelectedUserRestriction] = useState("All Users");
 
   const [isLecturePopupOpen, setIsLecturePopupOpen] = useState(false);
   const [selectedLecture, setSelectedLecture] = useState<string | null>(null);
+  console.log("Selected Lecture: ", selectedLecture);
   const [lecturesSelected , setlectures ] = useState<any>([])
 
   const courses = [
