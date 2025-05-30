@@ -534,7 +534,10 @@ const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
             
           </div>
         )}
-           <div className="flex justify-end gap-4 mt-3 p-2 bg-[#F8F9FF] w-full">
+
+        {
+          step !== "upload" && (
+            <div className="flex justify-end gap-4 mt-3 p-2 bg-[#F8F9FF] w-full">
               <button className="px-3 py-1 text-xs bg-[#D4E3FF] rounded  text-[#0360AB] h-[28px]">
                 Save as Draft
               </button>
@@ -542,6 +545,9 @@ const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
                 Publish
               </button>
             </div>
+          )
+        }
+           
       </div>
    
 

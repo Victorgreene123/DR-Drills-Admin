@@ -13,6 +13,7 @@ const Quizzes: React.FC = () => {
     const toggleView = () =>{
         setView(view === 1 ? 2 : 1);
     }
+    const [showPop , setShowPop] = useState(false)
     const data = [
         {
             id : 1, 
@@ -99,8 +100,15 @@ const Quizzes: React.FC = () => {
                 initialRowsPerPage={40}
                 />
              </div>
+            <button className='bg-[#0360AB] flex mx-auto text-white rounded-[8px] w-[150px] h-[40px] flex items-center justify-center' onClick={() => setShowPop(true)}>
+                Upload Quiz
+            </button>
 
-             <UploadQuizPopUpFlow isOpen= {true} onClose={() => console.log("closed")}/>
+            {
+                showPop && (
+                    <UploadQuizPopUpFlow isOpen={showPop} onClose={() => setShowPop(false)} />)
+            }
+            {/* <UploadQuizPopUpFlow isOpen= {true} onClose={() => console.log("closed")}/> */}
         </div>
     );
 };
