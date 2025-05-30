@@ -7,6 +7,7 @@ import { PiVideoCameraThin } from "react-icons/pi";
 import { RiBarChartBoxLine } from "react-icons/ri";
 import {  MdOutlineCampaign } from "react-icons/md";
 import { IoMdSettings } from "react-icons/io";
+import { Link } from "react-router-dom";
 
 const Sidebar: React.FC = () => {
 
@@ -20,36 +21,45 @@ const Sidebar: React.FC = () => {
                 id: 1,
                 label : "Dashboard",
                 icon : [<BsWindowSidebar />],
+                link: "/"
             },
               {
                 id: 2,
                 label : "Lectures",
                 icon : [<PiVideoCameraThin />],
+                link : "lectures"
             },  {
                 id : 3,
                 label : "Quizzes",
                 icon : [<FaRegHeart /> , <FaHeart />],
+                link : "quizzes"
             },  {
                 id : 4,
                 label : "Users",
                 icon : [<FaRegUserCircle />],
+                link : "users"
             },  {
                 id: 5,
                 label : "Subscriptions",
                 icon : [<FaMoneyCheckAlt />],
+                link : "subscriptions"
             },  {
                 id : 6,
                 label : "Analytics",
                 icon : [<RiBarChartBoxLine />],
+                link : "analytics"
 
             },  {
                 id : 7,
                 label : "Marketing",
                 icon : [<MdOutlineCampaign />],
+                link : "marketing",
+
             },  {
                 id: 8,
                 label : "Settings",
                 icon : [<IoMdSettings />],
+                link : "settings"
             },
     ]
   return (
@@ -111,6 +121,7 @@ const Sidebar: React.FC = () => {
             {
                 sidebarArr.map((item) =>{
                     return (
+                        <Link to={`${item.link}`}>
                         <li className="group flex gap-4 text-black items-center w-full hover:bg-[#D4E3FF] hover:border-l-3 hover:border-[#0360AB] py-2 border-box px-4" key={item.id}>
                             <span className={`text-xl group-hover:text-[#004883] ${item.icon[1]? "group-hover:hidden" : " " }`}>{item.icon[0]}</span>
                             {
@@ -121,6 +132,7 @@ const Sidebar: React.FC = () => {
                             <p className="text-[#43474E] text-[16px] group-hover:text-[#004883]">{item.label}</p>
 
                         </li>
+                        </Link>
                     )
                 })
             }

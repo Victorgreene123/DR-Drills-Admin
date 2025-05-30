@@ -1,22 +1,63 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Stats from '../components/stats';
 import { IoSearch } from 'react-icons/io5';
 import Dropdown from '../components/dropdown';
+import DataTable from '../components/TableComponent';
+import UploadQuizPopUpFlow from '../components/popups/UploadQuizPopUpFlow';
 
 
 
 
 const Quizzes: React.FC = () => {
+    const [view , setView] = useState(1);
+    const toggleView = () =>{
+        setView(view === 1 ? 2 : 1);
+    }
+    const data = [
+        {
+            id : 1, 
+            title : "Introductory medical anatomy student first middle semester incourse objective examination",
+            course : "Psychology",
+            questions : 10,
+            source : "University of Lagos",
+            type : "Multiple Choice",
+            visibility : "Published",
+            year: "2023",
+
+        },
+        {
+            id : 2, 
+            title : "Quiz 2",
+            course : "Mathematics",
+            questions : 15,
+            source : "University of Ibadan",
+            type : "True/False",
+            visibility : "Draft",
+            year: "2023",
+
+        },
+        {
+            id : 3, 
+            title : "Quiz 3",
+            course : "Physics",
+            questions : 20,
+            source : "University of Lagos",
+            type : "Multiple Choice",
+            visibility : "Public",
+            year: "2023",
+
+        },
+    ]
     return (
         <div >
 
             <div className='space-y-4'>
             <h1 className='text-[#004883] font-[500] text-[24px]'>Quizzes</h1>
             <div className='border-b-[1px] border-[#C3C6CF] flex  w-[70%] '>
-                <div className="text-[16px] text-[#1A1C1E] font-[500] bg-[#F2F3FA] border-b-[2px] border-[#0360AB] p-2 px-3" >
+            <div className={`text-[16px] cursor-pointer font-[500] p-2 px-3 ${view === 1 ? "text-[#1A1C1E] bg-[#F2F3FA] border-b-[2px] border-[#0360AB]" : " text-[#73777F] bg-white "} `} onClick={toggleView} >
                     All Quizzes
                 </div>
-                <div className="text-[16px] text-[#73777F] font-[500] bg-white   p-2 px-3">
+                <div className={`text-[16px] cursor-pointer  p-2 px-3 font-[500] ${view === 2 ? "text-[#1A1C1E] bg-[#F2F3FA] border-b-[2px] border-[#0360AB]" : " text-[#73777F] bg-white "} `} onClick={toggleView}>
                     Quiz Blocks
                 </div>
             </div>
@@ -49,6 +90,17 @@ const Quizzes: React.FC = () => {
 
                 </div>
              </div>
+
+             <div>
+                <DataTable 
+                data={data} 
+                tableheads={["Quiz Title" , "Course" , "Source" , "Type" , "Questions" , "Year" , "Visibility"] } 
+                ids={[ "title" , "course" , "source", "type", "questions" ,"year"  ,"visibility" ]}
+                initialRowsPerPage={40}
+                />
+             </div>
+
+             <UploadQuizPopUpFlow isOpen= {true} onClose={() => console.log("closed")}/>
         </div>
     );
 };

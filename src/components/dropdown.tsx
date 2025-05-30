@@ -16,10 +16,10 @@ const Dropdown: React.FC<DropDown> = ({options , defaultValue}) => {
     return (
           <div className="relative px-2 w-full">
         
-        <button className="bg-[#F2F3FA] border-[1px] border-[#C3C6CF]  rounded-[8px] w-[73px] h-[32px] text-[#43474E] flex items-center justify-between  px-2 gap-2 " onClick={clickCreate}>
+        <button className="bg-[#F2F3FA] border-[1px] border-[#C3C6CF]  rounded-[8px]  h-[32px] text-[#43474E] flex items-center justify-between  px-2 gap-2 " onClick={clickCreate}>
           {defaultValue && defaultValue}
           {
-              isCreateClicked ? <FaChevronUp className="text-sm text-[#49454F]"/> :  <FaChevronDown className="text-sm text-[#49454F] "/>
+              isCreateClicked ? <FaChevronUp className="text-[14px] text-[#49454F]"/> :  <FaChevronDown className="text-[14px] text-[#49454F] "/>
           }
          
   
