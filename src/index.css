@@ -1,1 +1,40 @@
 @import "tailwindcss";
+
+::-webkit-scrollbar {
+  width: 5px;
+  background: #F2F3FA; /* sidebar/page bg */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #C3C6CF; /* border color */
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0360AB; /* primary blue */
+}
+
+/* Reduce all font sizes by 10% */
+html {
+  font-size: 90%;
+}
+
+/* Optionally, reduce Tailwind base font size if using Tailwind's preflight */
+body {
+  font-size: 0.95rem;
+}
+
+/* You may also want to adjust headings if needed: */
+h1, .text-\[24px\] { font-size: 21.6px !important; }
+h2, .text-\[20px\] { font-size: 18px !important; }
+h3, .text-\[18px\] { font-size: 16.2px !important; }
+.text-\[24px\] { font-size: 21.6px !important; }
+.text-\[20px\] { font-size: 18px !important; }
+.text-\[18px\] { font-size: 16.2px !important; }
+.text-\[16px\] { font-size: 14.4px !important; }
+.text-\[14px\] { font-size: 12.6px !important; }
+.text-\[12px\] { font-size: 10.8px !important; }
+.text-\[10px\] { font-size: 9px !important; }
+.text-\[8px\] { font-size: 7.2px !important; }
+/* .text-sm { font-size: 0.81rem !important; }
+.text-xs { font-size: 0.63rem !important; } */

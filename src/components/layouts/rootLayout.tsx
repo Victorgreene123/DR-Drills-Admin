@@ -10,7 +10,7 @@ const RootLayout: React.FC = () => {
     <div className="w-full h-screen max-h-screen overflow-y-hidden">
       <Navbar />
       <div className="w-full flex">
-        <div className="h-[80vh] min-w-[15%] w-[15%]">
+        <div className="h-[100vh] min-w-[15%] w-[15%]">
           {/* Sidebar content */}
           <Sidebar />
         </div>

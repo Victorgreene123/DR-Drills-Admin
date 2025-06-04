@@ -139,7 +139,7 @@ const Sidebar: React.FC = () => {
         </ul>
       </nav>
 
-      <div className="w-full bg-white py-1 flex items-center mt-3 gap-2 px-[8px] border-[1px] border-[#C3C6CF] rounded-[4px] ">
+      <div className="w-[93%] bg-white py-1 flex items-center mt-14 mx-2 gap-2 px-[8px] border-[1px] border-[#C3C6CF] rounded-[4px] ">
         <img src={pfp} className="w-[36px] h-[36px] rounded-full object-cover" alt="" />
         <div>
             <h2 className="text-[14px] text-[#1A1C1E]">Orisajo Toluwanimi</h2>
