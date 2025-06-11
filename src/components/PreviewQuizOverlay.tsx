@@ -8,6 +8,13 @@ const PreviewQuizOverlay: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const questions = mockPreviewQuestions;
   const total = questions.length;
 
+  // Store edited questions state
+  const [editedQuestions, setEditedQuestions] = useState(() =>
+    questions.map(q => ({ ...q, options: [...q.options] }))
+  );
+  // Track edit mode for the current question
+  const [editMode, setEditMode] = useState<{ [idx: number]: boolean }>({});
+
   // Keyboard navigation for left/right arrow keys
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -21,10 +28,11 @@ const PreviewQuizOverlay: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [current, total]);
+
   // Helper for rendering a question card (center or side)
   const QuestionCard = ({
     q,
-   
+    idx,
     active,
     side,
   }: {
@@ -32,90 +40,174 @@ const PreviewQuizOverlay: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     idx: number;
     active?: boolean;
     side?: boolean;
-  }) => (
-    <div
-      className={`
+  }) => {
+    // Local state for editing
+    const [localQ, setLocalQ] = useState({ ...q, options: [...q.options] });
+
+    useEffect(() => {
+      setLocalQ({ ...q, options: [...q.options] });
+    }, [q]);
+
+    const handleOptionChange = (optIdx: number, value: string) => {
+      setLocalQ(lq => {
+        const newOpts = [...lq.options];
+        newOpts[optIdx] = value;
+        return { ...lq, options: newOpts };
+      });
+    };
+
+    const handleQuestionChange = (value: string) => {
+      setLocalQ(lq => ({ ...lq, question: value }));
+    };
+
+    const handleCorrectChange = (optIdx: number) => {
+      setLocalQ(lq => ({ ...lq, correct: optIdx }));
+    };
+
+    const handleDone = () => {
+      setEditedQuestions(prev => {
+        const updated = [...prev];
+        updated[idx] = { ...localQ };
+        return updated;
+      });
+      setEditMode(em => ({ ...em, [idx]: false }));
+    };
+
+    return (
+      <div
+        className={`
         bg-white rounded-xl shadow-lg flex flex-col relative
         ${active ? "w-[370px] min-h-[540px] max-h-[90vh] z-10" : "w-[220px] min-h-[340px] opacity-60 scale-90 z-0"}
         ${side ? "mx-[-30px]" : ""}
         transition-all duration-200
       `}
-      style={{
-        border: active ? "1.5px solid #E0E0E0" : "1px solid #E0E0E0",
-        boxShadow: active
-          ? "0 8px 32px 0 rgba(60,60,60,0.18)"
-          : "0 2px 8px 0 rgba(60,60,60,0.10)",
-      }}
-    >
-      <div className="p-4 pb-2 border-b border-[#C3C6CF] flex items-center justify-between">
-        <span className="font-semibold text-[#1A1C1E]">{q.id}</span>
-        {active && (
-          <button
-            className="w-8 h-8 flex items-center justify-center bg-[#ECEDF4] rounded-full hover:bg-[#d1d3db] transition"
-            onClick={onClose}
-            aria-label="Close"
-          >
-            <LiaTimesSolid className="text-[#1A1C1E] text-xl" />
-          </button>
-        )}
-      </div>
-      <div className={`p-4 flex-1 overflow-y-auto ${active ? "" : "pb-0"}`}>
-        <div className="text-xs text-[#73777F] mb-2">
-          {active && <span className="font-semibold text-[#1A1C1E]">Edit Question</span>}
-          <div className="mt-1">{q.question}</div>
-        </div>
-        <div className="mb-2 text-xs font-medium text-[#1A1C1E]">
-          {active && "Select an answer as correct"}
-        </div>
-        <div className="flex flex-col gap-2">
-          {q.options.map((opt, oidx) => (
-            <div
-              key={oidx}
-              className={`
-                flex items-center rounded px-2 py-2 text-xs
-                ${q.correct === oidx ? "bg-[#D4F3E3]" : "bg-[#F8F9FF]"}
-                ${active && q.correct === oidx ? "border-l-4 border-[#1ABC9C]" : ""}
-              `}
+        style={{
+          border: active ? "1.5px solid #E0E0E0" : "1px solid #E0E0E0",
+          boxShadow: active
+            ? "0 8px 32px 0 rgba(60,60,60,0.18)"
+            : "0 2px 8px 0 rgba(60,60,60,0.10)",
+        }}
+      >
+        <div className="p-4 pb-2 border-b border-[#C3C6CF] flex items-center justify-between">
+          <span className="font-semibold text-[#1A1C1E]">{q.id}</span>
+          {active && (
+            <button
+              className="w-8 h-8 flex items-center justify-center bg-[#ECEDF4] rounded-full hover:bg-[#d1d3db] transition"
+              onClick={onClose}
+              aria-label="Close"
             >
-              <span
-                className={`
-                  mr-2 w-6 h-6 flex items-center justify-center rounded-full font-bold
-                  ${q.correct === oidx ? "bg-[#1ABC9C] text-white" : "bg-[#E0E0E0] text-[#73777F]"}
-                `}
-              >
-                {String.fromCharCode(65 + oidx)}
+              <LiaTimesSolid className="text-[#1A1C1E] text-xl" />
+            </button>
+          )}
+        </div>
+        <div className={`p-4 flex-1 overflow-y-auto ${active ? "" : "pb-0"}`}>
+          <div className="text-xs text-[#73777F] mb-2">
+            {active && (
+              <span className="font-semibold text-[#1A1C1E]">
+                {editMode[idx] ? "Edit Question" : "Preview Question"}
               </span>
-              <span className="truncate">{opt}</span>
-              {active && (
-                <div className="ml-auto relative group">
-                  <button className="p-1 rounded hover:bg-[#ECEDF4]">
-                    <span className="text-lg">⋮</span>
-                  </button>
-                  <div className="hidden group-hover:block absolute right-0 top-6 bg-white border border-[#C3C6CF] rounded shadow z-10 min-w-[120px]">
-                    <button className="px-4 py-2 text-xs hover:bg-[#F2F3FA] w-full text-left">
-                      Delete Option
-                    </button>
-                  </div>
-                </div>
+            )}
+            <div className="mt-1">
+              {active && editMode[idx] ? (
+                <textarea
+                  className="w-full border rounded p-1 text-xs"
+                  value={localQ.question}
+                  onChange={e => handleQuestionChange(e.target.value)}
+                  rows={2}
+                />
+              ) : (
+                localQ.question
               )}
             </div>
-          ))}
+          </div>
+          <div className="mb-2 text-xs font-medium text-[#1A1C1E]">
+            {active && editMode[idx] && "Select an answer as correct"}
+          </div>
+          <div className="flex flex-col gap-2">
+            {localQ.options.map((opt, oidx) => (
+              <div
+                key={oidx}
+                className={`
+                flex items-center rounded px-2 py-2 text-xs
+                ${localQ.correct === oidx ? "bg-[#D4F3E3]" : "bg-[#F8F9FF]"}
+                ${active && localQ.correct === oidx ? "border-l-4 border-[#1ABC9C]" : ""}
+              `}
+              >
+                <span
+                  className={`
+                  mr-2 w-6 h-6 flex items-center justify-center rounded-full font-bold cursor-pointer
+                  ${localQ.correct === oidx ? "bg-[#1ABC9C] text-white" : "bg-[#E0E0E0] text-[#73777F]"}
+                `}
+                  onClick={() => {
+                    if (active && editMode[idx]) handleCorrectChange(oidx);
+                  }}
+                  style={{ userSelect: "none" }}
+                >
+                  {String.fromCharCode(65 + oidx)}
+                </span>
+                {active && editMode[idx] ? (
+                  <input
+                    className="truncate border rounded px-1 py-0.5 text-xs w-full"
+                    value={opt}
+                    onChange={e => handleOptionChange(oidx, e.target.value)}
+                  />
+                ) : (
+                  <span className="truncate">{opt}</span>
+                )}
+                {active && (
+                  <div className="ml-auto relative group">
+                    <button className="p-1 rounded hover:bg-[#ECEDF4]">
+                      <span className="text-lg">⋮</span>
+                    </button>
+                    <div className="hidden group-hover:block absolute right-0 top-6 bg-white border border-[#C3C6CF] rounded shadow z-10 min-w-[120px]">
+                      <button className="px-4 py-2 text-xs hover:bg-[#F2F3FA] w-full text-left">
+                        Delete Option
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 text-xs text-[#73777F] font-semibold">
+            {active && editMode[idx] && "Explain your answer"}
+          </div>
         </div>
-        <div className="mt-4 text-xs text-[#73777F] font-semibold">
-          {active && "Explain your answer"}
+        <div className="px-4 pb-4 text-xs text-[#73777F]">
+          <div>
+            <span className="font-semibold">Answer</span>
+            <div>
+              {active && editMode[idx]
+                ? localQ.options[localQ.correct] || ""
+                : localQ.options[localQ.correct] || ""}
+            </div>
+          </div>
         </div>
+        {/* Edit/Done button */}
+        {active && (
+          <div className="px-4 pb-4 flex justify-end">
+            {editMode[idx] ? (
+              <button
+                className="bg-[#0360AB] text-white px-4 py-1 rounded text-xs"
+                onClick={handleDone}
+              >
+                Done
+              </button>
+            ) : (
+              <button
+                className="bg-[#F2F3FA] text-[#0360AB] px-4 py-1 rounded text-xs"
+                onClick={() => setEditMode(em => ({ ...em, [idx]: true }))}
+              >
+                Edit
+              </button>
+            )}
+          </div>
+        )}
       </div>
-      <div className="px-4 pb-4 text-xs text-[#73777F]">
-        <div>
-          <span className="font-semibold">Answer</span>
-          <div>{q.answer}</div>
-        </div>
-      </div>
-    </div>
-  );
+    );
+  };
 
   // Get indices for carousel: two before, one before, current, one after, two after
-
 
   // Fix: Only render carousel and footer if there are questions
   if (!questions.length) return null;
@@ -157,7 +249,7 @@ const PreviewQuizOverlay: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               if (end - start < windowSize && questions.length >= windowSize) {
                 start = Math.max(0, end - windowSize);
               }
-              return questions.slice(start, end).map((q, idx) => {
+              return editedQuestions.slice(start, end).map((q, idx) => {
                 const realIdx = start + idx;
                 return (
                   <div

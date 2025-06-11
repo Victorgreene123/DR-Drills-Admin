@@ -5,9 +5,7 @@ import { FaChevronDown } from "react-icons/fa";
 
 import UploadQuizPopUpFlow from '../components/popups/UploadQuizPopUpFlow';
 import QuizzesTable from '../components/QuizzesTable';
-
-
-
+import QuizBlocksScreen from '../components/QuizBlocksScreen'; // Add import for QuizBlocksScreen (to be created)
 
 const Quizzes: React.FC = () => {
     const [view , setView] = useState(1);
@@ -100,11 +98,11 @@ const Quizzes: React.FC = () => {
 ];
 
 const filterOptions = [
-  { label: "Course", value: "course" },
-  { label: "Visibility", value: "visibility" },
-  { label: "Year", value: "year" },
-  { label: "Type", value: "type" },
-  { label: "Drafts", value: "Drafts" }
+  { label: "Course", value: "course", dropdown: true },
+  { label: "Visibility", value: "visibility", dropdown: true },
+  { label: "Year", value: "year", dropdown: true },
+  { label: "Type", value: "type", dropdown: true },
+  { label: "Drafts", value: "Drafts", dropdown: false }
 ];
 
 const courseOptions = [
@@ -115,50 +113,94 @@ const courseOptions = [
   "Microbiology"
 ];
 
+const visibilityOptions = ["Published", "Draft"];
+const yearOptions = Array.from(new Set(data.map(q => q.year))).sort((a, b) => b - a);
+const typeOptions = Array.from(new Set(data.map(q => q.type)));
+
 const [activeFilters, setActiveFilters] = useState<{ type: string; value: string }[]>([]);
 const [showFilterDropdown, setShowFilterDropdown] = useState(false);
-const [showCourseDropdown, setShowCourseDropdown] = useState(false);
+const [dropdownType, setDropdownType] = useState<string | null>(null);
+// Track selected years in the year dropdown
+const [selectedYears, setSelectedYears] = useState<string[]>([]);
 
-const handleAddFilter = (type: string, value?: string) => {
-  if (type === "course") {
-    setShowCourseDropdown(true);
+const handleAddFilter = (type: string) => {
+  // Show dropdown for filter types with options
+  if (type === "course" || type === "visibility" || type === "year" || type === "type") {
+    setDropdownType(type);
     setShowFilterDropdown(false);
+    // For year, initialize selectedYears with currently active year filters
+    if (type === "year") {
+      setSelectedYears(activeFilters.filter(f => f.type === "year").map(f => f.value));
+    }
     return;
   }
-  if (!activeFilters.some(f => f.type === type && f.value === (value || type))) {
-    setActiveFilters([...activeFilters, { type, value: value || type }]);
+  if (!activeFilters.some(f => f.type === type && f.value === type)) {
+    setActiveFilters([...activeFilters, { type, value: type }]);
   }
   setShowFilterDropdown(false);
 };
 
-const handleCourseSelect = (course: string) => {
-  if (!activeFilters.some(f => f.type === "course" && f.value === course)) {
-    setActiveFilters([...activeFilters, { type: "course", value: course }]);
+const handleDropdownSelect = (type: string, value: string) => {
+  if (type === "year") {
+    // Toggle year selection
+    setSelectedYears(prev =>
+      prev.includes(value)
+        ? prev.filter(y => y !== value)
+        : [...prev, value]
+    );
+    return;
   }
-  setShowCourseDropdown(false);
+  if (!activeFilters.some(f => f.type === type && f.value === value)) {
+    setActiveFilters([...activeFilters, { type, value }]);
+  }
+  setDropdownType(null);
+};
+
+// When user clicks "Done" in year dropdown, update activeFilters
+const handleYearDropdownDone = () => {
+  // Remove all year filters, then add selectedYears
+  setActiveFilters(prev =>
+    [
+      ...prev.filter(f => f.type !== "year"),
+      ...selectedYears.map(y => ({ type: "year", value: y }))
+    ]
+  );
+  setDropdownType(null);
 };
 
 const handleRemoveFilter = (type: string, value: string) => {
   setActiveFilters(activeFilters.filter(f => !(f.type === type && f.value === value)));
+  // If removing a year filter, also update selectedYears
+  if (type === "year") {
+    setSelectedYears(selectedYears.filter(y => y !== value));
+  }
 };
 
-const handleClearFilters = () => setActiveFilters([]);
+const handleClearFilters = () => {
+  setActiveFilters([]);
+  setSelectedYears([]);
+};
 
 // Filtering logic
 const filteredData = data.filter((quiz) => {
-  // If no filters, show all
   if (activeFilters.length === 0) return true;
 
-  // All filters must match
-  return activeFilters.every((filter) => {
+  // Separate year filters from others
+  const yearFilters = activeFilters.filter(f => f.type === "year").map(f => f.value);
+  const otherFilters = activeFilters.filter(f => f.type !== "year");
+
+  // If there are year filters, quiz.year must match at least one
+  if (yearFilters.length > 0 && !yearFilters.includes(String(quiz.year))) {
+    return false;
+  }
+
+  // All other filters must match (AND logic)
+  return otherFilters.every((filter) => {
     if (filter.type === "course") {
       return quiz.course === filter.value;
     }
     if (filter.type === "visibility") {
       return quiz.visibility === filter.value;
-    }
-    if (filter.type === "year") {
-      return String(quiz.year) === filter.value;
     }
     if (filter.type === "type") {
       return quiz.type === filter.value;
@@ -203,48 +245,107 @@ const filteredData = data.filter((quiz) => {
                     </div>
                     {/* Filter UI */}
                     <div className="relative">
-    <button
-      className="bg-[#F2F3FA] border-[1px] border-[#C3C6CF] rounded-[8px] px-[12px] h-[32px] flex items-center gap-2 text-[#43474E] text-[13px] min-w-[100px]"
-      onClick={() => {
-        setShowFilterDropdown((v) => !v);
-        setShowCourseDropdown(false);
-      }}
-    >
-      Add Filter
-      <IoFilterOutline className="ml-1" />
-    </button>
-    {showFilterDropdown && (
-      <div className="absolute left-0 top-full mt-1 bg-white border border-[#C3C6CF] rounded shadow-lg min-w-[140px] z-20">
-        <ul>
-          {filterOptions.map((option) => (
-            <li
-              key={option.value}
-              className="px-4 py-2 cursor-pointer hover:bg-[#F2F3FA] text-[#1A1C1E] text-sm"
-              onClick={() => handleAddFilter(option.value)}
-            >
-              {option.label}
-              {option.value === "course" && <FaChevronDown className="inline ml-2 text-xs" />}
-            </li>
-          ))}
-        </ul>
-      </div>
-    )}
-    {showCourseDropdown && (
-      <div className="absolute left-0 top-full mt-1 bg-white border border-[#C3C6CF] rounded shadow-lg min-w-[140px] z-30">
-        <ul>
-          {courseOptions.map((course) => (
-            <li
-              key={course}
-              className="px-4 py-2 cursor-pointer hover:bg-[#F2F3FA] text-[#1A1C1E] text-sm"
-              onClick={() => handleCourseSelect(course)}
-            >
-              {course}
-            </li>
-          ))}
-        </ul>
-      </div>
-    )}
-  </div>
+                  <button
+                    className="bg-[#F2F3FA] border-[1px] border-[#C3C6CF] rounded-[8px] px-[12px] h-[32px] flex items-center gap-2 text-[#43474E] text-[13px] min-w-[100px]"
+                    onClick={() => {
+                      setShowFilterDropdown((v) => !v);
+                      setDropdownType(null);
+                    }}
+                  >
+                    Add Filter
+                    <IoFilterOutline className="ml-1" />
+                  </button>
+                  {showFilterDropdown && (
+                    <div className="absolute left-0 top-full mt-1 bg-white border border-[#C3C6CF] rounded shadow-lg min-w-[140px] z-20">
+                      <ul>
+                        {filterOptions.map((option) => (
+                          <li
+                            key={option.value}
+                            className="px-4 py-2 cursor-pointer hover:bg-[#F2F3FA] text-[#1A1C1E] text-sm"
+                            onClick={() => handleAddFilter(option.value)}
+                          >
+                            {option.label}
+                            {option.dropdown && <FaChevronDown className="inline ml-2 text-xs" />}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {/* Dropdown for filter values */}
+                  {dropdownType === "course" && (
+                    <div className="absolute left-0 top-full mt-1 bg-white border border-[#C3C6CF] rounded shadow-lg min-w-[140px] z-30">
+                      <ul>
+                        {courseOptions.map((course) => (
+                          <li
+                            key={course}
+                            className="px-4 py-2 cursor-pointer hover:bg-[#F2F3FA] text-[#1A1C1E] text-sm"
+                            onClick={() => handleDropdownSelect("course", course)}
+                          >
+                            {course}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {dropdownType === "visibility" && (
+                    <div className="absolute left-0 top-full mt-1 bg-white border border-[#C3C6CF] rounded shadow-lg min-w-[140px] z-30">
+                      <ul>
+                        {visibilityOptions.map((v) => (
+                          <li
+                            key={v}
+                            className="px-4 py-2 cursor-pointer hover:bg-[#F2F3FA] text-[#1A1C1E] text-sm"
+                            onClick={() => handleDropdownSelect("visibility", v)}
+                          >
+                            {v}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {dropdownType === "year" && (
+                    <div className="absolute left-0 top-full mt-1 bg-white border border-[#C3C6CF] rounded shadow-lg min-w-[140px] z-30 p-2">
+                      <ul>
+                        {yearOptions.map((y) => (
+                          <li
+                            key={y}
+                            className="flex items-center px-2 py-1 cursor-pointer hover:bg-[#F2F3FA] text-[#1A1C1E] text-sm"
+                            onClick={e => e.stopPropagation()}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedYears.includes(String(y))}
+                              onChange={() => handleDropdownSelect("year", String(y))}
+                              className="mr-2"
+                              id={`year-checkbox-${y}`}
+                            />
+                            <label htmlFor={`year-checkbox-${y}`} className="cursor-pointer">{y}</label>
+                          </li>
+                        ))}
+                      </ul>
+                      <button
+                        className="mt-2 bg-[#0360AB] text-white rounded px-3 py-1 text-xs"
+                        onClick={handleYearDropdownDone}
+                      >
+                        Done
+                      </button>
+                    </div>
+                  )}
+                  {dropdownType === "type" && (
+                    <div className="absolute left-0 top-full mt-1 bg-white border border-[#C3C6CF] rounded shadow-lg min-w-[140px] z-30">
+                      <ul>
+                        {typeOptions.map((t) => (
+                          <li
+                            key={t}
+                            className="px-4 py-2 cursor-pointer hover:bg-[#F2F3FA] text-[#1A1C1E] text-sm"
+                            onClick={() => handleDropdownSelect("type", t)}
+                          >
+                            {t}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
   {/* Render active filters */}
   {activeFilters.map((filter) => (
     <div
@@ -272,16 +373,24 @@ const filteredData = data.filter((quiz) => {
              </div>
 
              <div>
-                <QuizzesTable
-                data={filteredData} 
-                tableheads={["Quiz Title" , "Course" , "Source" , "Type" , "Questions" , "Year" , "Visibility"] } 
-                ids={[ "title" , "course" , "source", "type", "questions" ,"year"  ,"visibility" ]}
-                initialRowsPerPage={40}
-                />
-             </div>
-            <button className='bg-[#0360AB] flex mx-auto text-white rounded-[8px] w-[150px] h-[40px] flex items-center justify-center' onClick={() => setShowPop(true)}>
+                {view === 1 ? (
+                  <div>
+
+                  <QuizzesTable
+                    data={filteredData} 
+                    tableheads={["Quiz Title" , "Course" , "Source" , "Type" , "Questions" , "Year" , "Visibility"] } 
+                    ids={[ "title" , "course" , "source", "type", "questions" ,"year"  ,"visibility" ]}
+                    initialRowsPerPage={40}
+                  />
+                <button className='bg-[#0360AB] flex mx-auto text-white rounded-[8px] w-[150px] h-[40px] flex items-center justify-center' onClick={() => setShowPop(true)}>
                 Upload Quiz
             </button>
+                  </div>
+                ) : (
+                  <QuizBlocksScreen />
+                )}
+            </div>
+            
 
             {
                 showPop && (
