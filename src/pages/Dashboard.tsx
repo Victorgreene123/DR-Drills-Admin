@@ -4,6 +4,8 @@ import { FaUserCircle } from 'react-icons/fa';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import DashboardSection from '../components/dashboardSection';
+import thumbnail1 from '../assets/thumbnail-1.png';
+
 
 const Dashboard: React.FC = () => {
     const MockData = [
@@ -109,6 +111,35 @@ const Dashboard: React.FC = () => {
     const totalPages = Math.ceil(MockData.length / pageSize);
 
     const pagedData = MockData.slice(page * pageSize, (page + 1) * pageSize);
+
+    // Mock data for Top Lectures
+    const topLectures = [
+        {
+            img: thumbnail1,
+            title: "Anatomical Naming conventions, Planes and Axes",
+            views: 380,
+        },
+        {
+            img: thumbnail1,
+            title: "Introduction to Physiology",
+            views: 312,
+        },
+        {
+            img: thumbnail1,
+            title: "Biochemistry Basics",
+            views: 290,
+        },
+        {
+            img: thumbnail1,
+            title: "Neuroanatomy Overview",
+            views: 250,
+        },
+        {
+            img: thumbnail1,
+            title: "Cell Biology Essentials",
+            views: 210,
+        },
+    ];
 
     return (
         <div className='space-y-4 '>
@@ -220,17 +251,128 @@ const Dashboard: React.FC = () => {
             
                 <div className='w-[68%]  flex items-center gap-3'>
             
-            <DashboardSection title='Top Lectures' className='w-[55%]' >
-                <div>
+            <DashboardSection title='Top Lectures' className='w-[50%] relative' >
+                <div className="py-1 ">
+                    {topLectures.map((lecture, idx) => (
+                        <div key={idx} className="flex items-center px-2 w-full gap-3 py-2">
+                            <img
+                                src={lecture.img}
+                                alt="thumb"
+                                className="w-[82px] h-[47px] rounded flex-shrink-0"
+                            />
+                            <div className='w-[70%]'>
+                                <span className="block truncate text-sm max-w-full" style={{ lineHeight: "1.2" }}>
+                                    {lecture.title}
+                                </span>
+                                <span className="block">
+                                    {lecture.views} Views
+                                </span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </DashboardSection>
 
+            <DashboardSection title='Top Quizzes' className='w-1/2 relative'>
+                <div className="py-2 space-y-3">
+                    {[
+                        {
+                            icon: "📝",
+                            title: "introduction to physiology",
+                            subtitle: "Unilag 2014 incourse incourse NNNNN",
+                            tags: ["Anatomy", "Physiology", "Physiology", "+3"],
+                        },
+                        {
+                            icon: <img src={"YOUR_IMAGE_SRC"} alt="quiz" className="w-8 h-8 rounded-full bg-[#E8F0FE] object-cover" />, // replace YOUR_IMAGE_SRC
+                            title: "Head and neck osteology",
+                            subtitle: "",
+                            tags: ["Anatomy", "Anatomy", "Physiology"],
+                        },
+                        {
+                            icon: "📝",
+                            title: "introduction to physiology",
+                            subtitle: "Unilag 2014 incourse incourse NNNNN",
+                            tags: ["Anatomy", "Physiology", "Physiology", "+3"],
+                        },
+                        {
+                            icon: "🥇",
+                            title: "Head and neck osteology",
+                            subtitle: "",
+                            tags: ["Anatomy"],
+                        },
+                        {
+                            icon: "🟩",
+                            title: "Head and neck osteology",
+                            subtitle: "",
+                            tags: ["Anatomy", "Physiology", "Physiology"],
+                        },
+                    ].map((quiz, idx) => (
+                        <div key={idx} className="flex items-start gap-3">
+                            <div className="w-10 h-10 flex items-center justify-center rounded-full bg-[#E8F0FE] text-2xl flex-shrink-0 overflow-hidden">
+                                {typeof quiz.icon === "string" ? quiz.icon : quiz.icon}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <div className="text-[14px] font-medium text-[#1A1C1E] truncate">{quiz.title}</div>
+                                {quiz.subtitle && (
+                                    <div className="text-xs text-[#73777F] truncate">{quiz.subtitle}</div>
+                                )}
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                    {quiz.tags.map((tag, i) => (
+                                        <span
+                                            key={i}
+                                            className="bg-[#DFE2EB] text-[#43474E] px-2 py-0.5 rounded text-[11px]"
+                                        >
+                                            {tag}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </DashboardSection>
+
+
+                </div>
+                  <div className='w-[68%]  flex items-center gap-3'>
+            
+            <DashboardSection title='Top ranking schools' className='w-[55%]' >
+              <div className=' w-full space-y-1 py-2'>
+                        <div className='px-2 flex items-center justify-between gap-3'>
+                                    <p>University of Lagos</p>
+                                    <p>240,656</p>
+                            </div>
+                            <div className='px-2 flex items-center justify-between gap-3'>
+                                    <p>University of Lagos</p>
+                                    <p>240,656</p>
+                            </div><div className='px-2 flex items-center justify-between gap-3'>
+                                    <p>University of Lagos</p>
+                                    <p>240,656</p>
+                            </div><div className='px-2 flex items-center justify-between gap-3'>
+                                    <p>University of Lagos</p>
+                                    <p>240,656</p>
+                            </div>
                 </div>
 
                 </DashboardSection>
 
-            <DashboardSection title='Top Quizzes' className='w-1/2'>
+            <DashboardSection title='Your users’ top courses' className='w-1/2'>
 
-                <div>
-
+              <div className=' w-full space-y-1 py-2'>
+                        <div className='px-2 flex items-center justify-between gap-3'>
+                                    <p>Pharmacognosy</p>
+                                    <p>240,656</p>
+                            </div>
+                            <div className='px-2 flex items-center justify-between gap-3'>
+                                    <p>Biochemistry</p>
+                                    <p>240,656</p>
+                            </div><div className='px-2 flex items-center justify-between gap-3'>
+                                    <p>Anatomy</p>
+                                    <p>240,656</p>
+                            </div><div className='px-2 flex items-center justify-between gap-3'>
+                                    <p>Physiology</p>
+                                    <p>240,656</p>
+                            </div>
                 </div>
             </DashboardSection>
 
