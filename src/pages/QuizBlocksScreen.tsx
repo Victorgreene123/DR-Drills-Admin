@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
-import CreateQuizBlockModal from "./quizblocks/CreateQuizBlockModal";
+import CreateQuizBlockModal from "../components/quizblocks/CreateQuizBlockModal";
+import { Link } from "react-router-dom";
 
 const quizBlocks = [
   {
@@ -39,6 +40,7 @@ const QuizBlocksScreen: React.FC = () => {
      
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {quizBlocks.map((block) => (
+          <Link to={`./${block.id}`} key={block.id}>
           <div
             key={block.id}
             className="bg-[#F2F3FA] rounded-xl p-4 shadow hover:shadow-lg cursor-pointer"
@@ -60,6 +62,7 @@ const QuizBlocksScreen: React.FC = () => {
               ))}
             </div>
           </div>
+          </Link>
         ))}
          
       </div>
@@ -73,11 +76,9 @@ const QuizBlocksScreen: React.FC = () => {
         </button>
       </div>
       {showCreate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#000000CC] ">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-lg">
+    
             <CreateQuizBlockModal onClose={() => setShowCreate(false)} />
-          </div>
-        </div>
+          
       )}
     </div>
   );

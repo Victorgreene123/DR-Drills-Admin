@@ -5,7 +5,7 @@ import { FaChevronDown } from "react-icons/fa";
 
 import UploadQuizPopUpFlow from '../components/popups/UploadQuizPopUpFlow';
 import QuizzesTable from '../components/QuizzesTable';
-import QuizBlocksScreen from '../components/QuizBlocksScreen'; // Add import for QuizBlocksScreen (to be created)
+import QuizBlocksScreen from './QuizBlocksScreen'; // Add import for QuizBlocksScreen (to be created)
 
 const Quizzes: React.FC = () => {
     const [view , setView] = useState(1);
