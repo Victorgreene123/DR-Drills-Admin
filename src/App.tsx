@@ -7,6 +7,7 @@ import Quizzes from './pages/Quizzes';
 import Dashboard from './pages/Dashboard';
 import ViewQuizBlockScreen from './pages/ViewQuizBlockScreen';
 import AnalyticsPage from './pages/Analytics';
+import Users from './pages/Users';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
 
           <Route path="quizzes" element={<Quizzes />}/>
           <Route path="quizzes/:id" element={<ViewQuizBlockScreen />}/>
+          <Route path='users' element={<Users />} />
           <Route path="analytics" element={<AnalyticsPage />} />        </Route>
       </Routes>
     </Router>
