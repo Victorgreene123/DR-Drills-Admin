@@ -14,6 +14,7 @@ interface QuizzesTableProps {
   ids: string[];
   tableheads: string[];
   initialRowsPerPage?: number;
+  renderCell?: Record<string, (row: Record<string, any>) => React.ReactNode>;
 }
 
 // Mock preview data for quiz questions
@@ -27,6 +28,7 @@ const QuizzesTable: React.FC<QuizzesTableProps> = ({
   ids,
   tableheads,
   initialRowsPerPage = 10,
+  renderCell = { }
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(initialRowsPerPage);
@@ -74,7 +76,7 @@ const QuizzesTable: React.FC<QuizzesTableProps> = ({
         {/* Main scrollable content */}
         <div className="flex-1 w-full py-6 px-4 flex flex-col overflow-y-auto" style={{ minHeight: 0 }}>
           <div className="w-full gap-4 flex items-start">
-            <div className="flex-1">
+            <div className="flex-1 items-start">
               <h2 className="text-[#1A1C1E] text-[18px] font-semibold mb-1">
                 {dataItem.title}
               </h2>
@@ -227,7 +229,7 @@ const QuizzesTable: React.FC<QuizzesTableProps> = ({
               key={ids[startIdx + rowIdx] || rowIdx}
               className={
                 rowIdx % 2 === 0
-                  ? "cursor-pointer bg-white"
+                  ? "cursor-pointer bg-white "
                   : "cursor-pointer bg-[#FAFAFA] hover:bg-[#F0F0F0] transition"
               }
               onDoubleClick={ () =>{
@@ -239,20 +241,17 @@ const QuizzesTable: React.FC<QuizzesTableProps> = ({
             >
               {ids.map((id, colIdx) => (
                 <td
-                  key={colIdx}
-                  className="px-4 py-3 border-r border-[#E0E0E0] last:border-r-0 whitespace-nowrap"
-                >
-                  {id === "title" ? (
-                    <span
-                      className="block truncate max-w-[200px]"
-                      title={row[id]}
-                    >
-                      {row[id] ?? "--"}
-                    </span>
-                  ) : (
-                    row[id] ?? "--"
-                  )}
-                </td>
+  key={colIdx}
+  className="px-4 py-3 border-r border-[#E0E0E0] last:border-r-0 whitespace-nowrap"
+>
+  {renderCell[id] ? ( //instead of the former way of rendering cells, 
+                      //  if a custom render function exists for this cell, it runs the same as the previous way.
+      renderCell[id](row)
+  ) : (
+      
+      row[id] ?? "--" 
+  )}
+</td>
               ))}
             </tr>
           ))}
