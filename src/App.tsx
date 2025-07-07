@@ -5,6 +5,8 @@ import './App.css'
 import RootLayout from './components/layouts/rootLayout'
 import Quizzes from './pages/Quizzes';
 import Dashboard from './pages/Dashboard';
+import ViewQuizBlockScreen from './pages/ViewQuizBlockScreen';
+import AnalyticsPage from './pages/Analytics';
 
 function App() {
   return (
@@ -14,7 +16,8 @@ function App() {
           <Route index element={<Dashboard />} />
 
           <Route path="quizzes" element={<Quizzes />}/>
-        </Route>
+          <Route path="quizzes/:id" element={<ViewQuizBlockScreen />}/>
+          <Route path="analytics" element={<AnalyticsPage />} />        </Route>
       </Routes>
     </Router>
   );
