@@ -2,6 +2,8 @@ import React, { useState } from "react";
 
 import { FaChevronDown } from "react-icons/fa6";
 import UserMetrics from "../components/userMetrics";
+import RevenueMetrics from "../components/revenueMetrics";
+import ContentMetrics from "../components/contentMetrics";
 
 const AnalyticsPage: React.FC = () => {
   const [view, setView] = React.useState(1);
@@ -94,6 +96,12 @@ const AnalyticsPage: React.FC = () => {
       {
         view === 1 && <UserMetrics />
 
+      }
+      {
+        view === 2 && <RevenueMetrics />
+      }
+      {
+        view === 3 && <ContentMetrics />
       }
     
    
