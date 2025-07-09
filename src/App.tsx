@@ -1,5 +1,3 @@
-
-
 import { BrowserRouter as Router , Routes , Route } from 'react-router-dom'
 import './App.css'
 import RootLayout from './components/layouts/rootLayout'
@@ -8,18 +6,22 @@ import Dashboard from './pages/Dashboard';
 import ViewQuizBlockScreen from './pages/ViewQuizBlockScreen';
 import AnalyticsPage from './pages/Analytics';
 import Users from './pages/Users';
+import Subscription from './pages/Subscriptions';
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<RootLayout />}>
-          <Route index element={<Dashboard />} />
 
+          <Route index element={<Dashboard />} />
           <Route path="quizzes" element={<Quizzes />}/>
           <Route path="quizzes/:id" element={<ViewQuizBlockScreen />}/>
           <Route path='users' element={<Users />} />
-          <Route path="analytics" element={<AnalyticsPage />} />        </Route>
+          <Route path = "subscriptions" element = {<Subscription />} /> 
+          <Route path="analytics" element={<AnalyticsPage />} />       
+
+         </Route>
       </Routes>
     </Router>
   );

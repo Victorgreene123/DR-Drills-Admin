@@ -68,7 +68,7 @@ const Users = () => {
             <div className="relative">
 
               <button
-                className="bg-[#F2F3FA] border-[1px] border-[#C3C6CF] rounded-[8px] px-[12px] h-[32px] flex items-center gap-2 text-[#43474E] text-[13px] min-w-[100px]"
+                className="bg-[#F2F3FA] cursor-pointer border-[1px] border-[#C3C6CF] rounded-[8px] px-[12px] h-[32px] flex items-center gap-2 text-[#43474E] text-[13px] min-w-[100px]"
                 // onClick={() => {
                 //   setShowFilterDropdown((v) => !v);
                 //   setDropdownType(null);
