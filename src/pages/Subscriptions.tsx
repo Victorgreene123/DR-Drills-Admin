@@ -61,20 +61,20 @@ const Subscriptions = () => {
       <div className="space-y-8">
         <h1 className="text-[#004883] font-[500]">Subscription</h1>
         <div className=" flex items-center gap-3">
-          <Stats
-            value={
-              <button
-                className="cursor-pointer"
-                onClick={() => {
-                  setShowPopup(true);
-                }}
-              >
-                <img src={addIcon} style={{}} />
-              </button>
-            }
-            label="Add new plan"
-            className="flex flex-col w-30 cursor-pointer h-21  items-center gap-2 justify-center"
-          />
+          <button
+            className="rounded-[16px] border-[1px] py-4 px-5 flex flex-col items-center cursor-pointer space-y-1 gap-2 h-21  w-30  border-[#C3C6CF] justify-center  bg-[#F8F9FF]"
+            onClick={() => {
+              setShowPopup(true);
+            }}
+          >
+            <div>
+              <img src={addIcon} style={{}} />
+            </div>
+
+            <div className="text-[11px] font-[500] text-[#73777F] ">
+              Add new plan
+            </div>
+          </button>
           <Stats value={"#0"} label="Free Plan" />
           <Stats value={"5,000"} label="Monthly Premium" />
           <Stats value={"5,000"} label="Yearly Premium" />
@@ -106,7 +106,6 @@ const Subscriptions = () => {
           <div className="text-[16px] font-[500] ">73.4%</div>
         </div>
       </div>
-
       {/*Filter Section */}
       <div className="relative">
         <button
@@ -166,7 +165,6 @@ const Subscriptions = () => {
           />
         </div>
       </div>
-
       {showPopup && (
         <PopUp
           title="Create New Plan"
