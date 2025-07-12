@@ -7,6 +7,7 @@ import ViewQuizBlockScreen from './pages/ViewQuizBlockScreen';
 import AnalyticsPage from './pages/Analytics';
 import Users from './pages/Users';
 import Subscription from './pages/Subscriptions';
+import Campaigns from './pages/Campaigns';
 
 function App() {
   return (
@@ -19,7 +20,8 @@ function App() {
           <Route path="quizzes/:id" element={<ViewQuizBlockScreen />}/>
           <Route path='users' element={<Users />} />
           <Route path = "subscriptions" element = {<Subscription />} /> 
-          <Route path="analytics" element={<AnalyticsPage />} />       
+          <Route path="analytics" element={<AnalyticsPage />} />   
+          <Route path ="campaigns" element= {<Campaigns />} />                 
 
          </Route>
       </Routes>

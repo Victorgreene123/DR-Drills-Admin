@@ -51,9 +51,9 @@ const Sidebar: React.FC = () => {
 
             },  {
                 id : 7,
-                label : "Marketing",
+                label : "Campaigns",
                 icon : [<MdOutlineCampaign />],
-                link : "marketing",
+                link : "campaigns",
 
             },  {
                 id: 8,
