@@ -8,6 +8,8 @@ import MailIcon from "../assets/mailIcon.png";
 import RightArrowIcon from "../assets/rightArrowIcon.png";
 import NotificationsIcon from "../assets/notificationsIcon.png";
 import { useState } from "react";
+import PopUp from "../components/popups/PopUp";
+import { FiChevronRight } from "react-icons/fi";
 
 const Campaigns = () => {
   const data = [
@@ -79,7 +81,35 @@ const Campaigns = () => {
     },
   ];
 
-  const [showPopup, setShowPopup] = useState(false);
+  const [showPopup1, setShowPopup1] = useState(null);
+  const [showPopup2, setShowPopup2] = useState(false);
+  const [showCampaignPopup, setShowCampaignPopup] = useState(false);
+  const [selectedCampaignType, setSelectedCampaignType] = useState("");
+  const [selectedRecipients, setSelectedRecipients] = useState("");
+  const [showRecipientsPopup, setShowRecipientsPopup] = useState(false);
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+
+  const recipientTypes = [
+    "All users",
+    "Free users",
+    "Premium users",
+    "Unfrequent users",
+    "Power users",
+    "New sign ups",
+  ];
+
+  const campaignTypes = ["Email", "In-App notification", "Push notification"];
+
+  const handleCampaignTypeSelect = (type: string) => {
+    setSelectedCampaignType(type as string);
+    setShowCampaignPopup(false);
+  };
+
+  const handleRecipientsSelect = (type: string) => {
+    setSelectedRecipients(type);
+    setShowRecipientsPopup(false);
+  };
 
   return (
     <div className="space-y-5">
@@ -98,15 +128,18 @@ const Campaigns = () => {
           />
         </div>
 
-        <div className="flex items-center justify-center gap-2 cursor-pointer w-[143px] h-[40px] bg-[#D4E3FF] border text-[#004883] font-normal border-[#0360AB] rounded-[8px] p-2">
-          <div>
+        <button className="flex items-center justify-center gap-2 cursor-pointer w-[143px] h-[40px] bg-[#D4E3FF] border text-[#004883] font-normal border-[#0360AB] rounded-[8px] p-2" onClick={() => setShowPopup2(true)}>
+          <button
+            className="cursor-pointer"
+            
+          >
             <p>New Campaign</p>
-          </div>
+          </button>
 
           <div>
             <img src={addIcon} alt="saddIcon" />
           </div>
-        </div>
+        </button>
 
         {/*Filter Section */}
         <div className="relative">
@@ -193,33 +226,166 @@ const Campaigns = () => {
                     </span>
 
                     {rowData.image && (
-                      <button onClick={() => setShowPopup(true)}>
+                      <button
+                        onClick={() =>
+                          setShowPopup1(
+                            showPopup1 === rowData.id ? null : rowData.id
+                          )
+                        }
+                      >
                         <img
                           src={rowData.img}
                           alt={rowData.clicks}
                           style={{
                             objectFit: "cover",
+                            cursor: "pointer",
                             objectPosition: "right",
                           }}
                         />
                       </button>
                     )}
 
-                    {
-                      showPopup && (
-                        <div className="w-[200px] absolute bottom-0 top-7 right-2 h-[74px] shadow-2xl rounded-[8px] p-2 bg-white  border-[#73777F] ">
-                          <div className="hover:bg-[#F1F5F9]  rounded-[8px] py-2 pr-2 pl-4">Delete</div>
-                          <div className="hover:bg-[#F1F5F9]  rounded-[8px] py-2 pr-2 pl-4">Edit details</div>
+                    {showPopup1 === rowData.id && (
+                      <div className="w-[200px] absolute bottom-0 top-2 right-3 h-[74px] shadow-2xl rounded-[8px] p-2 bg-white  border-[#73777F] ">
+                        <div className="hover:bg-[#F1F5F9]  rounded-[8px] py-2 pr-2 pl-4">
+                          Delete
                         </div>
-                      ) 
-                    }
+                        <div className="hover:bg-[#F1F5F9]  rounded-[8px] py-2 pr-2 pl-4">
+                          Edit details
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ),
               }}
             />
           </div>
-
         </div>
+
+        {showPopup2 && (
+          <PopUp
+            title="Create New Plan"
+            onClose={() => {
+              // Handle close logic here
+              setShowPopup2(false);
+            }}
+            children={
+              <div className="flex py-3 flex-col gap-4">
+                  <div className="relative  px-10">
+                    <button
+                      onClick={() => setShowCampaignPopup(!showCampaignPopup)}
+                      className="w-85 cursor-pointer flex items-center justify-between p-3 border border-[#C3C6CF] rounded-lg text-left hover:bg-gray-50"
+                    >
+                      <span
+                        className={
+                          selectedCampaignType
+                            ? "text-[#1A1C1E]"
+                            : "text-[#73777F]"
+                            
+                        }
+                         style={{ fontSize: "14px",
+                          color: selectedCampaignType ? "#1A1C1E" : "#43474E"
+                          }}
+                      >
+                        {selectedCampaignType || "Campaign Type"}
+                      </span>
+                      <FiChevronRight size={20} className="text-[#1A1C1E]" />
+                    </button>
+
+                    {showCampaignPopup && (
+                      <div className="absolute top-full left-0 mt-1 w-full bg-white border border-[#C3C6CF] rounded-lg shadow-lg z-10">
+                        {campaignTypes.map((type, index) => (
+                          <button
+                            key={index}
+                            onClick={() => handleCampaignTypeSelect(type)}
+                            className="w-full text-left p-3 hover:bg-[#F1F5F9] text-sm text-[#1A1C1E] border-b border-gray-100 last:border-b-0"
+                          >
+                            {type}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Recipients */}
+                  <div className="relative  px-10">
+                    <button
+                      onClick={() =>
+                        setShowRecipientsPopup(!showRecipientsPopup)
+                      }
+                      className="w-85 cursor-pointer flex items-center justify-between p-3 border border-[#C3C6CF] rounded-lg text-left hover:bg-gray-50"
+                    >
+                      <span
+                        className={
+                          selectedRecipients
+                            ? "text-[#1A1C1E]"
+                            : "text-[#73777F]"
+                        }
+                        style={{ fontSize: "14px",
+                          color: selectedCampaignType ? "#1A1C1E" : "#43474E"
+                          }}
+                      >
+                        {selectedRecipients || "Recipients"}
+                      </span>
+                      <FiChevronRight size={20} className="text-[#1A1C1E]" />
+                    </button>
+
+                    {showRecipientsPopup && (
+                      <div className="absolute top-full left-0 mt-1 w-full bg-white border border-[#C3C6CF] rounded-lg shadow-lg z-10">
+                        {recipientTypes.map((type, index) => (
+                          <button
+                            key={index}
+                            onClick={() => handleRecipientsSelect(type)}
+                            className="w-full text-left p-3 hover:bg-[#F1F5F9] text-sm text-[#1A1C1E] border-b border-gray-100 last:border-b-0"
+                          >
+                            {type}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <hr className="w-[575px] -ml-7 text-[#C3C6CF]" />
+
+                  {/* Title */}
+                  <div className=" px-10">
+                    <label className="block text-sm font-medium text-[#1A1C1E] mb-2">
+                      Title
+                    </label>
+                    <input
+                      type="text"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      className="w-full p-3 border border-[#C3C6CF] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  {/* Body */}
+                  <div className=" px-10">
+                    <label className="block text-sm font-medium text-[#1A1C1E] mb-2">
+                      Body
+                    </label>
+                    <textarea
+                      value={body}
+                      onChange={(e) => setBody(e.target.value)}
+                      rows={8}
+                      className="w-full p-3 border border-[#C3C6CF] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    />
+                  </div>
+              </div>
+            }
+            footer={
+              <button
+                onClick={() => {
+                  setShowPopup2(false);
+                }}
+                className="bg-[#0360AB] text-white rounded-[8px] px-4 py-2 cursor-pointer hover:bg-[#035fabea]"
+              >
+                Send
+              </button>
+            }
+          />
+        )}
       </div>
     </div>
   );
