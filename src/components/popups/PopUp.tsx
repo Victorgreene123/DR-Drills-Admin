@@ -26,9 +26,21 @@ const PopUpContainer: React.FC<{
         {/* Main Content */}
         <div className="px-6 py-4 pb-16 space-y-4 text-xs">{children}</div>
 
-        <div className="flex items-center justify-end px-14 py-4 border-t border-[#C3C6CF] rounded-b-[16px] bg-[#F8F9FF] sticky top-0 z-10">
-          {footer}
-        </div>
+{/* Footer */}
+				<div className="flex justify-end gap-4 mt-3 p-2 bg-[#F8F9FF] w-full sticky bottom-0 z-10">
+					<button
+						className="px-3 py-1 text-xs bg-[#D4E3FF] rounded  text-[#0360AB] h-[28px]"
+						onClick={onClose}
+					>
+						Cancel
+					</button>
+					<button
+						className="px-3 py-1 text-xs rounded bg-[#0360AB] text-white h-[28px]"
+						onClick={onClose}
+					>
+						Done
+					</button>
+				</div>
       </div>
     </div>
   );

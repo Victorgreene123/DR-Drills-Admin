@@ -4,7 +4,7 @@ import { IoSearch } from 'react-icons/io5';
 import { MdCheckBox, MdCheckBoxOutlineBlank } from 'react-icons/md';
 
 interface SelectQuizBlockPopupProps {
-  quizBlocks: { id: number; name: string }[];
+  // quizBlocks: { id: number; name: string }[];
   selectedBlocks: { id: number; name: string }[];
   isOpen: boolean;
   onClose: () => void;
@@ -12,7 +12,7 @@ interface SelectQuizBlockPopupProps {
 }
 
 const SelectQuizBlockPopup: React.FC<SelectQuizBlockPopupProps> = ({
-  quizBlocks,
+  // quizBlocks,
   selectedBlocks,
   isOpen,
   onClose,
@@ -20,7 +20,12 @@ const SelectQuizBlockPopup: React.FC<SelectQuizBlockPopupProps> = ({
 }) => {
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<{ id: number; name: string }[]>([]);
-
+   const quizBlocks = [
+      { id: 1, name: "Block A" },
+      { id: 2, name: "Block B" },
+      { id: 3, name: "Block C" }
+    ];
+  
   useEffect(() => {
     setSelected(selectedBlocks || []);
   }, [selectedBlocks, isOpen]);

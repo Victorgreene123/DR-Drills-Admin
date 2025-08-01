@@ -182,21 +182,7 @@ const AddQuizzesToBlockModal: React.FC<{
 						</div>
 					</div>
 				</div>
-				{/* Footer */}
-				<div className="flex justify-end gap-4 mt-3 p-2 bg-[#F8F9FF] w-full sticky bottom-0 z-10">
-					<button
-						className="px-3 py-1 text-xs bg-[#D4E3FF] rounded  text-[#0360AB] h-[28px]"
-						onClick={onClose}
-					>
-						Cancel
-					</button>
-					<button
-						className="px-3 py-1 text-xs rounded bg-[#0360AB] text-white h-[28px]"
-						onClick={onClose}
-					>
-						Done
-					</button>
-				</div>
+
 		</PopUpContainer>
 				
 	

@@ -192,11 +192,7 @@ const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
   const [isQuizBlockPopupOpen, setIsQuizBlockPopupOpen] = useState(false);
   const [selectedQuizBlocks, setSelectedQuizBlocks] = useState<{ id: number; name: string }[]>([]);
 
-  const quizBlocksList = [
-    { id: 1, name: "Block A" },
-    { id: 2, name: "Block B" },
-    { id: 3, name: "Block C" }
-  ];
+
   
   return (
     <div className="fixed inset-0 bg-[#00000066] flex items-center justify-center z-[1000]">
@@ -219,7 +215,7 @@ const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         {step === "upload" && (
           <div
             className="px-5 py-4 min-h-[200px] flex items-center justify-center border-dashed border-[2px] border-[#C3C6CF] rounded-[12px] mx-6 my-4 cursor-pointer"
-            onClick={() => fileInputRef.current?.click()}
+            // onClick={() => fileInputRef.current?.click()}
             onDrop={handleDrop}
             onDragOver={(e) => e.preventDefault()}
           >
@@ -604,7 +600,7 @@ const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
 
       {isQuizBlockPopupOpen && (
         <SelectQuizBlockPopup
-          quizBlocks={quizBlocksList}
+        
           selectedBlocks={selectedQuizBlocks}
           isOpen={isQuizBlockPopupOpen}
           onClose={() => setIsQuizBlockPopupOpen(false)}

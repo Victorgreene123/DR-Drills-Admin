@@ -8,6 +8,7 @@ import AnalyticsPage from './pages/Analytics';
 import Users from './pages/Users';
 import Subscription from './pages/Subscriptions';
 import Campaigns from './pages/Campaigns';
+import Lectures from './pages/Lectures';
 
 function App() {
   return (
@@ -21,7 +22,8 @@ function App() {
           <Route path='users' element={<Users />} />
           <Route path = "subscriptions" element = {<Subscription />} /> 
           <Route path="analytics" element={<AnalyticsPage />} />   
-          <Route path ="campaigns" element= {<Campaigns />} />                 
+          <Route path ="campaigns" element= {<Campaigns />} /> 
+          <Route path="lectures" element={<Lectures />} />                
 
          </Route>
       </Routes>
