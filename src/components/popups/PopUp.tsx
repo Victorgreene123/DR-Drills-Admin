@@ -5,8 +5,8 @@ const PopUpContainer: React.FC<{
   title: string;
   onClose: () => void;
   children: React.ReactNode;
-  footer?: React.ReactNode;
-}> = ({ title, children, onClose, footer }) => {
+  // footer?: React.ReactNode;
+}> = ({ title, children, onClose }) => {
   return (
     <div className="fixed inset-0 bg-[#00000066]  flex items-center justify-center z-[1000] absolute ">
       <div className="bg-white rounded-[16px] max-h-[85vh] overflow-y-auto w-[577px] shadow-lg relative flex flex-col">
