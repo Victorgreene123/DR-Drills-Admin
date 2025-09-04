@@ -122,7 +122,14 @@ const Sidebar: React.FC = () => {
                 sidebarArr.map((item) =>{
                     return (
                         <Link to={`${item.link}`}>
-                        <li className="group flex gap-4 text-black items-center w-full hover:bg-[#D4E3FF] hover:border-l-3 hover:border-[#0360AB] py-2 border-box px-4" key={item.id}>
+                        <li
+  key={item.id}
+  className="group flex gap-4 text-black items-center w-full 
+             hover:bg-[#D4E3FF] 
+             transition-all duration-300 ease-in-out
+             hover:border-l-[3px] hover:border-[#0360AB] 
+             py-2 px-4 box-border border-l-[0px] border-transparent"
+>
                             <span className={`text-xl group-hover:text-[#004883] ${item.icon[1]? "group-hover:hidden" : " " }`}>{item.icon[0]}</span>
                             {
                                 item.icon[1] && (
