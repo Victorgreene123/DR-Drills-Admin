@@ -9,6 +9,7 @@ import Users from './pages/Users';
 import Subscription from './pages/Subscriptions';
 import Campaigns from './pages/Campaigns';
 import Lectures from './pages/Lectures';
+import Settings from './pages/Settings';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           <Route path="analytics" element={<AnalyticsPage />} />   
           <Route path ="campaigns" element= {<Campaigns />} /> 
           <Route path="lectures" element={<Lectures />} />                
+          <Route path="settings" element={<Settings />} />                
 
          </Route>
       </Routes>
