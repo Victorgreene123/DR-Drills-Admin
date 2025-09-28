@@ -121,7 +121,7 @@ const Sidebar: React.FC = () => {
             {
                 sidebarArr.map((item) =>{
                     return (
-                        <Link to={`${item.link}`}>
+                        <Link to={`${item.link}`} key={item.id}>
                         <li
   key={item.id}
   className="group flex gap-4 text-black items-center w-full 

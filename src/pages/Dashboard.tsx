@@ -1,103 +1,80 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Stats from '../components/stats';
 import { FaUserCircle } from 'react-icons/fa';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import DashboardSection from '../components/dashboardSection';
-import thumbnail1 from '../assets/thumbnail-1.png';
+
+import { useApi } from '../hooks/useApi';
 
 
 const Dashboard: React.FC = () => {
-    const MockData = [
-        {
-            activity: "Edited quiz details",
-            time : "12:34 AM",
-            type : "Documentation",
-            user: {
-                name: "John Doe",
-                role: "Admin",
-            }
-        },
-        {
-            activity: "Added new quiz",
-            time : "1:00 PM",
-            type : "Quiz Creation",
-            user: {
-                name: "Jane Smith",
-                role: "Editor",
-            }
-        },
-        {
-            activity: "Reviewed quiz",
-            time : "3:15 PM",
-            type : "Quiz Review",
-            user: {
-                name: "Alice Johnson",
-                role: "Reviewer",
-            }
-        },
-        {
-            activity: "Deleted quiz",
-            time : "4:45 PM",
-            type : "Quiz Deletion",
-            user: {
-                name: "Bob Brown",
-                role: "Admin",
-            }
-        },
-        {
-            activity: "Published quiz",
-            time : "5:30 PM",
-            type : "Quiz Publish",
-            user: {
-                name: "Emily White",
-                role: "Admin",
-            }
-        },
-        {
-            activity: "Archived quiz",
-            time : "6:00 PM",
-            type : "Quiz Archive",
-            user: {
-                name: "Michael Green",
-                role: "Editor",
-            }
-        },
-        {
-            activity: "Updated quiz settings",
-            time : "7:20 PM",
-            type : "Settings Update",
-            user: {
-                name: "Sarah Blue",
-                role: "Admin",
-            }
-        },
-        {
-            activity: "Created new quiz block",
-            time : "8:10 PM",
-            type : "Quiz Block Creation",
-            user: {
-                name: "David Black",
-                role: "Editor",
-            }
-        },
 
-    ];
+        const { apiFetch } = useApi();
+        const [active_users , setActiveusers] = useState<number>(0);
+        const [newsubscriptions , setNewSubscriptions] = useState<number>(0);
+        const [userDistribution, setuserDistribution] = useState<any>({
+            free_users: 0,
+            premium_users: 0
+        })
+        const [activity , setActivity] = useState<any []>([
+
+            {
+                        
+            time: "2025-09-16T14:36:04.000Z",
+            action_type: "view",
+            description: "GET action performed on /quiz/all",
+            name: "Medical School Admin",
+            role: "super_admin"
+        
+            }
+        ]);
+        const [topCourses , setTopCourses] = useState<any>();
+        const [topLectures , setTopLectures] = useState<any>();
+        const [topQuizzes , setTopQuizzes] = useState<any>();
+        const [topSchools , setTopSchools] = useState<any>();
+
+
+        useEffect(() => {
+            const loaddata = async () =>{
+                    try {
+        const res = await apiFetch("/api/admin/dashboard");
+        const data = await res.json();
+        const {
+            active_users , 
+            new_subscriptions , 
+            users_distribution , 
+            activityLog , 
+            topCourses , 
+            topLectures , 
+            topQuizzes , 
+            topSchools
+        } = data;
+        setActiveusers(active_users);
+        setNewSubscriptions(new_subscriptions);
+        setuserDistribution(users_distribution);
+        setActivity(activityLog);
+        setTopCourses(topCourses);
+        setTopLectures(topLectures);
+        setTopQuizzes(topQuizzes);
+        setTopSchools(topSchools);
+
+        
+        console.log(data);
+      } catch (err) {
+        console.error(err);
+      }
+            }
+            loaddata();
+        })
+
+
 
     // Example mock user data
-    const users = [
-        { id: 1, name: "John", type: "Premium" },
-        { id: 2, name: "Jane", type: "Free" },
-        { id: 3, name: "Alice", type: "Premium" },
-        { id: 4, name: "Bob", type: "Premium" },
-        { id: 5, name: "Eve", type: "Free" },
-        { id: 6, name: "Sam", type: "Premium" },
-        // ...add more users as needed
-    ];
 
     // Calculate counts for each type
-    const premiumCount = users.filter(u => u.type === "Premium").length;
-    const freeCount = users.filter(u => u.type === "Free").length;
+    const premiumCount = userDistribution.premium_users;
+    const freeCount = userDistribution.free_users;
 
     // Pie chart data based on mock users
     const pieData = [
@@ -107,46 +84,20 @@ const Dashboard: React.FC = () => {
 
     // Pagination state for activity log
     const [page, setPage] = React.useState(0);
-    const pageSize = 6;
-    const totalPages = Math.ceil(MockData.length / pageSize);
+    const pageSize = 5;
+    const totalPages = Math.ceil(activity.length / pageSize);
 
-    const pagedData = MockData.slice(page * pageSize, (page + 1) * pageSize);
+    const pagedData = activity.slice(page * pageSize, (page + 1) * pageSize);
 
     // Mock data for Top Lectures
-    const topLectures = [
-        {
-            img: thumbnail1,
-            title: "Anatomical Naming conventions, Planes and Axes",
-            views: 380,
-        },
-        {
-            img: thumbnail1,
-            title: "Introduction to Physiology",
-            views: 312,
-        },
-        {
-            img: thumbnail1,
-            title: "Biochemistry Basics",
-            views: 290,
-        },
-        {
-            img: thumbnail1,
-            title: "Neuroanatomy Overview",
-            views: 250,
-        },
-        {
-            img: thumbnail1,
-            title: "Cell Biology Essentials",
-            views: 210,
-        },
-    ];
+
 
     return (
         <div className='space-y-4 '>
             <h1 className='text-[#004883] font-[500]'>Dashboard</h1>
             <div className=' flex items-center gap-3'>
-                <Stats value={"580"} label='Active users' />
-                <Stats value={"204"} label='New subscriptions' />
+                <Stats value={active_users} label='Active users' />
+                <Stats value={newsubscriptions} label='New subscriptions' />
 
             </div>
             <div className='flex items-center gap-3'>
@@ -158,19 +109,20 @@ const Dashboard: React.FC = () => {
                             <p className=''>Role</p>
                         </div>
                         {
+                            pagedData && 
                             pagedData.map((item, index) => (
                                 <div key={index} className="grid grid-cols-[2.5fr_1.5fr_1fr] gap-2 px-3 py-2 border-t-[1px] border-[#C3C6CF]">
                                     <p className='text-[#1A1C1E] text-[14px] flex items-center gap-2'>
                                         <span>{item.time}</span>
-                                        <span className='text-[12px] border-[1px] border-[#C3C6CF] p-1 rounded-md'>{item.type}</span>
-                                        <span>{item.activity}</span>
+                                        <span className='text-[12px] border-[1px] border-[#C3C6CF] p-1 rounded-md'>{item.action_type}</span>
+                                        <span>{item.description}</span>
                                     </p>
                                     <p className='text-[#1A1C1E] text-[14px] flex items-center gap-2'>
                                         <FaUserCircle className='text-[#276EF1] text-[24px]' />
-                                        <span className='text-[14px]'>{item.user.name}</span>
+                                        <span className='text-[14px]'>{item.name}</span>
                                     </p>
                                     <p>
-                                        {item.user.role}
+                                        {item.role}
                                     </p>
                                 </div>
                             ))
@@ -253,19 +205,21 @@ const Dashboard: React.FC = () => {
             
             <DashboardSection title='Top Lectures' className='w-[50%] relative' >
                 <div className="py-1 ">
-                    {topLectures.map((lecture, idx) => (
+                    {
+                    topLectures && 
+                    topLectures.map((lecture:any, idx:number) => (
                         <div key={idx} className="flex items-center px-2 w-full gap-3 py-2">
                             <img
-                                src={lecture.img}
+                                src={lecture.thumbnail}
                                 alt="thumb"
                                 className="w-[82px] h-[47px] rounded flex-shrink-0"
                             />
                             <div className='w-[70%]'>
                                 <span className="block truncate text-sm max-w-full" style={{ lineHeight: "1.2" }}>
-                                    {lecture.title}
+                                    {lecture.name}
                                 </span>
                                 <span className="block">
-                                    {lecture.views} Views
+                                    {lecture.view_count} Views
                                 </span>
                             </div>
                         </div>
@@ -274,58 +228,27 @@ const Dashboard: React.FC = () => {
             </DashboardSection>
 
             <DashboardSection title='Top Quizzes' className='w-1/2 relative'>
+    
                 <div className="py-2 space-y-3">
-                    {[
-                        {
-                            icon: "📝",
-                            title: "introduction to physiology",
-                            subtitle: "Unilag 2014 incourse incourse NNNNN",
-                            tags: ["Anatomy", "Physiology", "Physiology", "+3"],
-                        },
-                        {
-                            icon: <img src={"YOUR_IMAGE_SRC"} alt="quiz" className="w-8 h-8 rounded-full bg-[#E8F0FE] object-cover" />, // replace YOUR_IMAGE_SRC
-                            title: "Head and neck osteology",
-                            subtitle: "",
-                            tags: ["Anatomy", "Anatomy", "Physiology"],
-                        },
-                        {
-                            icon: "📝",
-                            title: "introduction to physiology",
-                            subtitle: "Unilag 2014 incourse incourse NNNNN",
-                            tags: ["Anatomy", "Physiology", "Physiology", "+3"],
-                        },
-                        {
-                            icon: "🥇",
-                            title: "Head and neck osteology",
-                            subtitle: "",
-                            tags: ["Anatomy"],
-                        },
-                        {
-                            icon: "🟩",
-                            title: "Head and neck osteology",
-                            subtitle: "",
-                            tags: ["Anatomy", "Physiology", "Physiology"],
-                        },
-                    ].map((quiz, idx) => (
+                    {
+                        topQuizzes && 
+                    topQuizzes.map((quiz:any, idx:number) => (
                         <div key={idx} className="flex items-start gap-3">
-                            <div className="w-10 h-10 flex items-center justify-center rounded-full bg-[#E8F0FE] text-2xl flex-shrink-0 overflow-hidden">
-                                {typeof quiz.icon === "string" ? quiz.icon : quiz.icon}
-                            </div>
+                            <img
+                                src={quiz.thumbnail}
+                                alt="thumb"
+                                className="w-[82px] h-[47px] rounded flex-shrink-0"
+                            />
                             <div className="flex-1 min-w-0">
                                 <div className="text-[14px] font-medium text-[#1A1C1E] truncate">{quiz.title}</div>
                                 {quiz.subtitle && (
                                     <div className="text-xs text-[#73777F] truncate">{quiz.subtitle}</div>
                                 )}
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                    {quiz.tags.map((tag, i) => (
-                                        <span
-                                            key={i}
-                                            className="bg-[#DFE2EB] text-[#43474E] px-2 py-0.5 rounded text-[11px]"
-                                        >
-                                            {tag}
-                                        </span>
-                                    ))}
-                                </div>
+                                                                <span className="block">
+                                    {quiz.attempts} Attempts
+                                </span>
+                                
+
                             </div>
                         </div>
                     ))}
@@ -338,20 +261,16 @@ const Dashboard: React.FC = () => {
             
             <DashboardSection title='Top ranking schools' className='w-[55%]' >
               <div className=' w-full space-y-1 py-2'>
-                        <div className='px-2 flex items-center justify-between gap-3'>
-                                    <p>University of Lagos</p>
-                                    <p>240,656</p>
+                {
+                    topSchools && topSchools.map((school:any, idx:number) => (
+                        <div key={idx} className='px-2 flex items-center justify-between gap-3'>
+
+                                    <p>{school.name}</p>
+                                    <p>{school.total}</p>
                             </div>
-                            <div className='px-2 flex items-center justify-between gap-3'>
-                                    <p>University of Lagos</p>
-                                    <p>240,656</p>
-                            </div><div className='px-2 flex items-center justify-between gap-3'>
-                                    <p>University of Lagos</p>
-                                    <p>240,656</p>
-                            </div><div className='px-2 flex items-center justify-between gap-3'>
-                                    <p>University of Lagos</p>
-                                    <p>240,656</p>
-                            </div>
+                    ))
+                }
+
                 </div>
 
                 </DashboardSection>
@@ -359,20 +278,17 @@ const Dashboard: React.FC = () => {
             <DashboardSection title='Your users’ top courses' className='w-1/2'>
 
               <div className=' w-full space-y-1 py-2'>
-                        <div className='px-2 flex items-center justify-between gap-3'>
-                                    <p>Pharmacognosy</p>
-                                    <p>240,656</p>
+                {
+                    topCourses && topCourses.map((course:any, idx:number) => (
+                        <div key={idx} className='px-2 flex items-center justify-between gap-3'>
+
+                                    <p>{course.course_name}</p>
+                                    <p>{course.total}</p>
                             </div>
-                            <div className='px-2 flex items-center justify-between gap-3'>
-                                    <p>Biochemistry</p>
-                                    <p>240,656</p>
-                            </div><div className='px-2 flex items-center justify-between gap-3'>
-                                    <p>Anatomy</p>
-                                    <p>240,656</p>
-                            </div><div className='px-2 flex items-center justify-between gap-3'>
-                                    <p>Physiology</p>
-                                    <p>240,656</p>
-                            </div>
+                    ))
+                
+                }
+
                 </div>
             </DashboardSection>
 

@@ -3,51 +3,39 @@ import { IoFilterOutline} from 'react-icons/io5';
 // import { FaChevronDown } from "react-icons/fa";
 import QuizzesTable from '../components/QuizzesTable';
 import Pfp from '../assets/Users pfp.png'
+import { useApi } from '../hooks/useApi';
+import { useEffect, useState } from 'react';
 
 const Users = () => {
+      const [users , setUsers] =useState([]);
+      const { apiFetch } = useApi();
+  
 
-   const data = [
-      {
-        id: 1,
-        image: Pfp,
-        title: "Yemisi Olaoba",
-        email: "yemisiolaoba@gmail.com",
-        plan: "Premium",
-        lastSeen: "Oct 8, 2025"
-      },
-    {
-      id: 2,
-      image: Pfp,
-      title: "Yemisi Olaoba",
-      email: "yemisiolaoba@gmail.com",
-      plan: "Premium",
-      lastSeen: "Oct 8, 2025"
-    },
-    {
-      id: 3,
-      image: Pfp,
-      title: "Yemisi Olaoba",
-      email: "yemisiolaoba@gmail.com",
-      plan: "Premium",
-      lastSeen: "Oct 8, 2025"
-    },
-    {
-      id: 4,
-      image: Pfp,
-      title: "Yemisi Olaoba",
-      email: "yemisiolaoba@gmail.com",
-      plan: "Premium",
-      lastSeen: "Oct 8, 2025"
-    },
-    {
-      id: 5,
-      image: Pfp,
-      title: "Yemisi Olaoba",
-      email: "yemisiolaoba@gmail.com",
-      plan: "Premium",
-      lastSeen: "Oct 8, 2025"
+
+   const fetchUsers = async () => {
+    try {
+      const res = await apiFetch('/api/admin/users'); 
+      const data = await res.json();
+      const mappedUsers = data.data.map((user: any) => ({
+        id: user.user_id,
+        image: user.avatar || Pfp, // Use default if avatar is null
+        title: user.firstname + ' ' + user.surname,
+        email: user.email,
+        plan: user.premium === 0 ? "Free": "Premium",
+        lastSeen : user.last_login ? new Date(user.last_login).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Never',
+       }
+       )); // Default plan if not provided
+      console.log('Mapped users:', mappedUsers);
+      setUsers(mappedUsers); 
+    } catch (error) {
+      console.error('Error fetching users:', error);
     }
-   ]
+  };
+
+ useEffect(() => {
+
+    fetchUsers();
+ } , []);
 
   
   return (
@@ -80,7 +68,7 @@ const Users = () => {
 
                 <div>
                   <QuizzesTable 
-                    data = {data}
+                    data = {users}
                     tableheads={["User" , "Email" , "Plan" , "Last Seen"] }
                     ids={["title", "email", "plan", "lastSeen"]}
                     initialRowsPerPage={40} 
