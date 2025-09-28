@@ -34,33 +34,7 @@ const LectureBlocks:React.FC = () => {
       fetchQuizBlocks();
    } , [apiFetch]);
   
-    const quizBlocks = [
-  {
-    id: 1,
-    title: "Practice physiology with these",
-    quizzesCount: 5,
-    tags: ["Anatomy", "Upper limb", "University of Lagos"],
-  },
-  {
-    id: 2,
-    title: "Learn with systems",
-    quizzesCount: 5,
-    tags: ["Anatomy", "Physiology", "Upper limb"],
-  },
-  {
-    id: 3,
-    title: "New to Anatomy",
-    quizzesCount: 5,
-    tags: ["Anatomy", "Physiology", "Upper limb"],
-  },
-  {
-    id: 4,
-    title: "Introductory examination",
-    quizzesCount: 5,
-    tags: ["Anatomy", "Physiology", "Upper limb"],
-  },
-  // ...repeat as needed for demo
-];
+
     return (
         <div className="w-full">
         
