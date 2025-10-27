@@ -1,19 +1,22 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import thumbnailmain from "../assets/thumbnail-main.jpg";
 import { FaPlus } from "react-icons/fa";
 import AddLectures from "./popups/AddLecturePopup";
 import CreateLectureBankPopup from "./popups/CreateLectureBankPopup";
+import { useApi } from "../hooks/useApi";
+import  { LoadingAnimation } from "../pages/QuizBlocksScreen";
 const LectureBanks:React.FC = () => {
 
-    const [selectedBank, setSelectedBank] = React.useState<number | null>(1);
-
+    const [selectedBank, setSelectedBank] = React.useState<number | null>(null);
+          const { apiFetch } = useApi();
+  
     const [isOpen, setIsOpen] = React.useState(false);
     const [isCreateLectureClicked , setIsCreateLectureClicked]= useState(false)
 
-
+    const [isLoading, setIsLoading] = useState(true);
     const AllLectures = [
-      { id: 1, title: "Introduction to Anatomy", thumbnail: thumbnailmain },
-      { id: 2, title: "Skeletal System Overview", thumbnail: thumbnailmain },
+      { id: 1, title: "Introduction to Anatomy", thumbnail: thumbnailmain , description: "An overview of human anatomy covering basic concepts and terminology."},
+      { id: 2, title: "Skeletal System Overview", thumbnail: thumbnailmain , description: "Detailed study of the human skeletal system, including bone structure and function."},
       { id: 3, title: "Muscular System Basics", thumbnail: thumbnailmain },
       { id: 4, title: "Cardiovascular System", thumbnail: thumbnailmain },
       { id: 5, title: "Nervous System Fundamentals", thumbnail: thumbnailmain },
@@ -32,67 +35,58 @@ const [lectureBanksAndDetails, setLectureBanksAndDetails] = useState( [
     name: "Anatomy Lecture Bank",
     description: "A comprehensive collection of anatomy lectures covering all major systems. Includes detailed diagrams and 3D models.",
     lectures: [
-      { id: 1, title: "Introduction to Anatomy", thumbnail: thumbnailmain },
-      { id: 2, title: "Skeletal System Overview", thumbnail: thumbnailmain },
-      { id: 3, title: "Muscular System Basics", thumbnail: thumbnailmain },
+      { id: 1, title: "Introduction to Anatomy", thumbnail: thumbnailmain , description: "An overview of human anatomy covering basic concepts and terminology."},
+      { id: 2, title: "Skeletal System Overview", thumbnail: thumbnailmain , description: "Detailed study of the human skeletal system, including bone structure and function."},
+      { id: 3, title: "Muscular System Basics", thumbnail: thumbnailmain , description: "Introduction to the muscular system, muscle types, and their roles in movement."},
     ],
     course: "Anatomy",
     tags: ["Anatomy", "Skeletal System", "Muscular System"]
   },
-  {
-    id: 2,
-    thumbnail: thumbnailmain,
-    name: "Physiology Lecture Bank",
-    description: "A detailed collection of physiology lectures focusing on body functions and processes. Includes interactive quizzes.",
-    lectures: [
-      { id: 4, title: "Cardiovascular System", thumbnail: thumbnailmain },
-      { id: 5, title: "Nervous System Fundamentals", thumbnail: thumbnailmain },
-      { id: 6, title: "Digestive System Overview", thumbnail: thumbnailmain },
-    ],
-    course: "Physiology",
-    tags: ["Physiology", "Cardiovascular", "Nervous System"]
-  },
-  {
-    id: 3,
-    thumbnail: thumbnailmain,
-    name: "Biochemistry Lecture Bank",
-    description: "An extensive collection of biochemistry lectures covering metabolic pathways and biochemical processes.",
-    lectures: [
-      { id: 7, title: "Respiratory System Basics", thumbnail: thumbnailmain },
-      { id: 8, title: "Endocrine System Essentials", thumbnail: thumbnailmain },
-      { id: 9, title: "Reproductive System Overview", thumbnail: thumbnailmain },
-    ],
-    course: "Biochemistry",
-    tags: ["Biochemistry", "Metabolism", "Biochemical Processes"]
-  },
-  {
-    id: 4,
-    thumbnail: thumbnailmain,
-    name: "Advanced Anatomy Lecture Bank",
-    description: "An advanced collection of anatomy lectures with in-depth analysis and case studies.",
-    lectures: [
-      { id: 10, title: "Urinary System Basics", thumbnail: thumbnailmain },
-      { id: 11, title: "Integumentary System Essentials", thumbnail: thumbnailmain },
-      { id: 12, title: "Lymphatic System Overview", thumbnail: thumbnailmain },
-    ],
-    course: "Advanced Anatomy",
-    tags: ["Advanced Anatomy", "Case Studies", "In-Depth Analysis"]
-  },
-  {
-    id: 5,
-    thumbnail: thumbnailmain,
-    name: "Pharmacology Lecture Bank",
-    description: "Covers the fundamentals of pharmacology, drug actions, and clinical uses.",
-    lectures: [
-      { id: 13, title: "Introduction to Pharmacology", thumbnail: thumbnailmain },
-      { id: 14, title: "Antibiotics Overview", thumbnail: thumbnailmain },
-      { id: 15, title: "Cardiovascular Drugs", thumbnail: thumbnailmain },
-    ],
-    course: "Pharmacology",
-    tags: ["Pharmacology", "Drugs", "Clinical Use"]
-  },
+  
 
 ]);
+
+const loadBanks =  async () => {
+    try {
+      const res = await apiFetch("/api/admin/lecture-banks");
+      const data = await res.json();
+
+      if (!data.success){
+        throw new Error('Unexpeccted Error Occured')
+      }
+
+      const {data: blocks} = data;
+      const mappedBlocks = blocks.map((item: any , index: number) => {
+          return {
+              id: index,
+              thumbnail: thumbnailmain,
+              name : item.name,
+              description: "A comprehensive collection of anatomy lectures covering all major systems. Includes detailed diagrams and 3D models.",
+              lectures: item.data.map((lec: any) => ({
+                  id: lec.id,
+                  title: lec.name,
+                  thumbnail: lec.thumbnail || thumbnailmain,
+                  description: lec.description || "",
+              })),
+              course: item.course || "General",
+              tags: item.tags || ["Anatomy", "Skeletal System", "Muscular System"],
+          }
+      })
+      setLectureBanksAndDetails(mappedBlocks)
+      setSelectedBank(mappedBlocks[0]?.id || null);
+    } catch (error) {
+      console.error("An Error Occures" , error)
+    }
+    finally{
+      setIsLoading(false);
+    }
+
+}
+
+useEffect(() => {
+    loadBanks();
+}
+, []);
 
 
 const addToLectureBank = (ids: number[]) => {
@@ -103,7 +97,7 @@ const addToLectureBank = (ids: number[]) => {
       if (bank.id === selectedBank) {
         const newLecturesToAdd = ids
           .map(id => AllLectures.find(l => l.id === id))
-          .filter(Boolean) as { id: number, title: string, thumbnail: string }[];
+          .filter(Boolean) as { id: number, title: string, thumbnail: string , description: string }[];
 
         const updatedLectures = [...bank.lectures, ...newLecturesToAdd];
 
@@ -119,6 +113,7 @@ const addToLectureBank = (ids: number[]) => {
         if (selectedBank === null) return null;
         const bank = lectureBanksAndDetails.find(b => b.id === selectedBank);
         if (!bank) return null;
+        console.log("Rendering details for bank:", bank);
 
         return (
             <div className="pt-4  px-1 bg-white ">
@@ -157,7 +152,10 @@ const addToLectureBank = (ids: number[]) => {
                     {bank.lectures.map(lecture => (
                         <div key={lecture.id} className=" flex items-start gap-3 ">
                             <img src={lecture.thumbnail} alt={lecture.title} className="w-[120px] h-[75px] object-cover rounded-md mb-2" />
+                            <div>
                             <h3 className="text-[14px] font-regular">{lecture.title}</h3>
+                            <p className="text-[#73777F] text-[12px]"> {lecture.description}</p>
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -190,7 +188,11 @@ const addToLectureBank = (ids: number[]) => {
         <div className="w-full">
 
 
-
+        {
+                                isLoading ? 
+                      <LoadingAnimation />
+                      
+                      :
            <div className="flex items-start gap-[5%] mb-4">
 
                 {/* Left SECTION - Lectur Bank List  */}
@@ -204,8 +206,10 @@ const addToLectureBank = (ids: number[]) => {
                                     New
 
                                     </button>
+
                     
                     {
+
                         renderLectureBankList()
                     }
                 </div>
@@ -217,6 +221,8 @@ const addToLectureBank = (ids: number[]) => {
 
            </div>
 
+           }
+
            {
             isOpen && <AddLectures isOpen={isOpen} onClose={() => setIsOpen(false)} onAdd={addToLectureBank}/>
            }
@@ -224,6 +230,8 @@ const addToLectureBank = (ids: number[]) => {
            {
             isCreateLectureClicked && <CreateLectureBankPopup onClose={() => setIsCreateLectureClicked(false)} />
            }
+
+          
 
         </div>
     )

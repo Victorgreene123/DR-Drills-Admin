@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/authcontext";
 import { useNavigate } from "react-router-dom";
+import { FaSpinner } from "react-icons/fa6";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -104,26 +105,8 @@ const Login: React.FC = () => {
   disabled={loading}
 >
   {loading ? (
-    <svg
-      className="animate-spin h-5 w-5 text-white"
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-    >
-      <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="4"
-      />
-      <path
-        className="opacity-75"
-        fill="currentColor"
-        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-      />
-    </svg>
+     <FaSpinner className="animate-spin text-lg" />
+
   ) : (
     "Sign In"
   )}
@@ -135,7 +118,7 @@ const Login: React.FC = () => {
         <p className="mt-6 text-center text-sm text-gray-600">
           Not registered yet?{" "}
           <a href="#" className="font-medium text-[#004883] hover:underline">
-            Create an Account
+            Contact Admin
           </a>
         </p>
       </div>

@@ -3,6 +3,8 @@ import PopUpContainer from './PopUp';
 import { FaChevronDown, FaChevronRight, FaChevronUp } from 'react-icons/fa';
 import { IoSearch } from 'react-icons/io5';
 import SelectLecturePopup from './SelectLecturePopup';
+import { useApi } from '../../hooks/useApi';
+import { FaSpinner } from 'react-icons/fa6';
 
 
 const CreateLectureBankPopup: React.FC<
@@ -12,8 +14,14 @@ const CreateLectureBankPopup: React.FC<
 > = ({ onClose }) => {
 
      const [title, setTitle] = useState("");
+     const [description, setDescription] = useState("");
       const [selectedCourse, setSelectedCourse] = useState("Course");
+      const [selectedSchool, setSelectedSchool] = useState("School");
+
        const [courseSearchTerm, setCourseSearchTerm] = useState<string>("");
+        const [isSchoolDropped, setIsSchoolDropped] = useState(false);
+        const [schoolSearchTerm, setSchoolSearchTerm] = useState<string>("");
+
          const [isUserRestrictionOpen, setIsUserRestrictionOpen] = useState(false);
          const [selectedUserRestriction, setSelectedUserRestriction] = useState("All Users");
            const [isDropped, setIsDropped] = useState(false);
@@ -39,16 +47,55 @@ const CreateLectureBankPopup: React.FC<
         const [isAddLecturesOpen , setIsAddLectures] = useState(false)
 
 
-         
+
+          const {apiFetch} = useApi();
+          const [loading, setLoading] = useState(false);
+        
+        
+          
+        
+
+         const schools= [
+          {
+            id: 1,
+            name: "University of Lagos"
+          },
+          {
+            id: 2,
+            name: "Obafemi Awolowo University"
+          },
+          {
+            id: 3,
+            name: "University of Ibadan"
+          } 
+         ]
 
      const courses = [
-        "Anatomy",
-        "Physiology",
-        "Psychology",
-        "Neurology",
-        "Biomedics",
-        "Biotechnology",
-        "Devops Engineeering"
+      {
+        id: 1,
+        name: "Anatomy"
+      },
+      {
+        id: 2,
+        name: "Physiology"
+      },
+      {
+        id: 3,
+        name: "Pharmacology"
+      },
+      {
+        id: 4,
+        name: "Pathology"
+      },
+      {
+        id: 5,
+        name: "Microbiology"
+      },
+      {
+        id: 6,
+        name: "Biochemistry"
+      },
+
       ];
         const userRestrictions = [
         "All Users",
@@ -56,7 +103,10 @@ const CreateLectureBankPopup: React.FC<
         "Admins Only"
       ];
       const filteredCourses = courses.filter((item) =>
-        item.toLowerCase().includes(courseSearchTerm.toLowerCase())
+        item.name.toLowerCase().includes(courseSearchTerm.toLowerCase())
+      );
+        const filteredSchools = schools.filter((item) =>
+        item.name.toLowerCase().includes(schoolSearchTerm.toLowerCase())
       );
         const [tags, setTags] = useState<string[]>([]);
         const [tagInput, setTagInput] = useState<string>("");
@@ -79,6 +129,46 @@ const CreateLectureBankPopup: React.FC<
              );
            }
          }, [tagInput, tags]);
+
+
+         const handleSubmit = async () => {
+        
+            
+            // Handle form submission logic here
+            const newQuizBlock = {
+              name: title,
+              description: description,
+              // isPublic: isPublic,
+              thumbnail: null,
+              tags : tags,
+              course_id:  selectedCourse === "Course" ? 5 : courses.find(c => c.name === selectedCourse)?.id || 1,
+              school_id: selectedSchool === "School" ? 1 : schools.find(c => c.name === selectedSchool)?.id || 1,
+              // resourceIds: lecturesSelected.map(q => q.lectureid),
+              resourceIds : [2,5, 7]
+            };
+            console.log("Creating Quiz Block:", newQuizBlock);
+        
+            try {
+              setLoading(true); 
+              const response = await apiFetch('/api/admin/lecture-banks', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newQuizBlock),
+              });
+              if (response.ok) {
+                console.log('Lecture Bank created successfully');
+                onClose();
+        
+              }
+            } catch (error) {
+              console.error('Error creating Lecture Bank:', error);
+            }
+            finally{
+              setLoading(false);
+            }
+          }
       
 
     return(
@@ -102,6 +192,25 @@ const CreateLectureBankPopup: React.FC<
                   />
                   <p className="absolute bottom-0 text-[#73777F] text-[11px] right-2">{title.length}/100</p>
                 </div>
+
+                                {/* Description */}
+                <label className="text-[#1A1C1E] font-[500] mb-2 ">Description</label>
+                <div className="relative p-2 h-[56px]">
+                  <textarea
+                    className="w-full absolute top-0 left-0 border-[1px] border-[#C3C6CF] outline-none rounded h-full px-2 py-1 text-xs"
+                    placeholder="Give your lecture bank a description"
+                    style={{ resize: "none" }}
+                    value={description}
+                    onChange={
+                      (e) => {
+                          setDescription(e.target.value)
+                      }
+                    }
+                    maxLength={100}
+                  />
+                  <p className="absolute bottom-0 text-[#73777F] text-[11px] right-2">{title.length}/100</p>
+                </div>
+
 
                
                
@@ -134,20 +243,67 @@ const CreateLectureBankPopup: React.FC<
                                         {filteredCourses.map((item) => (
                                           <li
                                             className="py-1 px-2 hover:bg-[#F2F3FA] cursor-pointer text-xs"
-                                            key={item}
+                                            key={item.id}
                                             onClick={() => {
-                                              setSelectedCourse(item);
+                                              setSelectedCourse(item.name);
                                               setIsDropped(false);
                                               setCourseSearchTerm("");
                                             }}
                                           >
-                                            {item}
+                                            {item.name}
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
+
+                                </div>
+
+                                {/* School  */}
+                                <div className="w-full relative border border-[#C3C6CF] rounded-[6px] text-xs min-h-[28px]">
+                                  {!isSchoolDropped ? (
+                                    <div className="px-2 py-1 flex items-center justify-between w-full cursor-pointer min-h-[28px]" onClick={() => setIsSchoolDropped(true)}>
+                                      <p>{selectedSchool}</p>
+                                      <FaChevronDown className="text-[#73777F] text-xs" />
+                                    </div>
+                                  ) : (
+                                    <div className="w-full h-[28px] relative">
+                                      <IoSearch className="absolute top-1.5 left-2 text-[#73777F] text-[14px]" />
+                                      <input
+                                        type="text"
+                                        className="absolute top-0 h-full w-full outline-none border-none left-0 pl-7 text-xs"
+                                        placeholder="Search school"
+                                        autoFocus
+                                        onChange={e => setSchoolSearchTerm(e.target.value)}
+                                        value={schoolSearchTerm}
+                                      />
+                                      <button onClick={() => setIsSchoolDropped(false)}>
+                                        <FaChevronUp className="text-[#73777F] text-xs absolute top-2 right-2" />
+                                      </button>
+                                    </div>
+                                  )}
+                                  {isSchoolDropped && schools.length !== 0 && (
+                                    <div className="absolute top-8 left-0 bg-white border border-[#C3C6CF] rounded shadow-lg w-full z-10">
+                                      <ul className="p-1 max-h-32 overflow-y-auto">
+                                        {filteredSchools.map((item) => (
+                                          <li
+                                            className="py-1 px-2 hover:bg-[#F2F3FA] cursor-pointer text-xs"
+                                            key={item.id}
+                                            onClick={() => {
+                                              setSelectedSchool(item.name);
+                                              setIsSchoolDropped(false);
+                                              setSchoolSearchTerm("");
+                                            }}
+                                          >
+                                            {item.name}
                                           </li>
                                         ))}
                                       </ul>
                                     </div>
                                   )}
                                 </div>
+
+
                          {/* Tags Dropdown (static) */}
                 <div className="w-full mb-2">
                   <label className="block text-xs font-[500] text-[#1A1C1E] mb-1">Tags</label>
@@ -259,6 +415,19 @@ const CreateLectureBankPopup: React.FC<
                                         </div>
                                       </div>
                                     </div>
+
+
+                                  {/* Create Lecture Bank Button  */}
+
+                        <div className="flex justify-end mt-4">
+                          <button
+                            className="px-4 py-2 bg-[#0360AB] text-white rounded text-xs"
+                            onClick={handleSubmit}
+                            disabled={loading}
+                          >
+                            {loading ? <FaSpinner className="animate-spin text-lg" />: 'Create Lecture Bank'}
+                          </button>
+                        </div>
 
 
 

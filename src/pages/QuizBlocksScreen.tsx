@@ -3,9 +3,21 @@ import React, { useEffect, useState } from "react";
 import CreateQuizBlockModal from "../components/quizblocks/CreateQuizBlockModal";
 import { Link } from "react-router-dom";
 import { useApi } from "../hooks/useApi";
+import logo from '../assets/favicon.svg'
+
 
 
       
+
+export const LoadingAnimation: React.FC = () => (
+  <div className="flex justify-center items-center h-32">
+    <img
+      src={logo}
+      alt="Loading..."
+      className="w-16 h-16 animate-pulse drop-shadow-lg"
+    />
+  </div>
+);
 
 
 
@@ -14,12 +26,14 @@ const QuizBlocksScreen: React.FC = () => {
   const [showCreate, setShowCreate] = useState(false);
   const [quizBlocks, setQuizBlocks] = useState<Array<{ id: number; title: string; quizzesCount: number; tags: string[] }>>([]);
     const { apiFetch } = useApi();
+    const [loading, setLoading] = useState(false);
 
 
      useEffect(() => {
     // Example API call to fetch quiz blocks
     const fetchQuizBlocks = async () => {
       try {
+        setLoading(true);
         const res = await apiFetch('/api/blocks/quiz');
         const data = await res.json();
          // Adjust endpoint as needed
@@ -37,17 +51,30 @@ const QuizBlocksScreen: React.FC = () => {
       } catch (error) {
         console.error('Error fetching quiz blocks:', error);
       }
+      finally {
+        setLoading(false);
+      }
 
     };
     fetchQuizBlocks();
- } , [apiFetch]);
+ } , []);
 
   return (
     <div className="my-4">
       
      
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {quizBlocks.map((block) => (
+        {
+        loading ? (
+          <div className="col-span-full flex justify-center items-center h-32">
+            
+            <LoadingAnimation />
+
+          </div>
+        ) : (
+
+
+        quizBlocks.map((block) => (
           <Link to={`./${block.id}`} key={block.id}>
           <div
             key={block.id}
@@ -75,9 +102,11 @@ const QuizBlocksScreen: React.FC = () => {
             </div>
           </div>
           </Link>
-        ))}
-         
+        ))
+        )
+      }
       </div>
+
       <div className="flex items-center gap-4 mt-6 mb-4">
        
         <button

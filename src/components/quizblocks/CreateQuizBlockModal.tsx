@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import AddQuizzesToBlockModal from "./AddQuizzesToBlockModal";
 import PopUpContainer from "../popups/PopUp";
+import { useApi } from "../../hooks/useApi";
+import { FaSpinner } from "react-icons/fa6";
 
 const CreateQuizBlockModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [title, setTitle] = useState("");
@@ -10,12 +12,55 @@ const CreateQuizBlockModal: React.FC<{ onClose: () => void }> = ({ onClose }) =>
   const [course, setCourse] = useState("");
   const [selectedQuizzes, setSelectedQuizzes] = useState<any[]>([]);
   const [showAddQuiz, setShowAddQuiz] = useState(false);
-
+  const [isPublic, setIsPublic] = useState(true);
+  const {apiFetch} = useApi();
+  const [loading, setLoading] = useState(false);
   const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && tagInput.trim()) {
       setTags([...tags, tagInput.trim()]);
       setTagInput("");
     }
+  };
+
+
+  const handleSubmit = async () => {
+
+    
+    // Handle form submission logic here
+    const newQuizBlock = {
+      name: title,
+      description: subtitle,
+      isPublic: isPublic,
+      tags : tags,
+      courseId: Number(course) || 1,
+      quizIds: selectedQuizzes.map(q => q.id),
+    };
+    console.log("Creating Quiz Block:", newQuizBlock);
+
+    try {
+      setLoading(true); 
+      const response = await apiFetch('/api/admin/quiz-block', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newQuizBlock),
+      });
+      if (response.ok) {
+        console.log('Quiz Block created successfully');
+        onClose();
+
+      }
+    } catch (error) {
+      console.error('Error creating Quiz Block:', error);
+    }
+    finally{
+      setLoading(false);
+    }
+
+
+
+
   };
 
   return (
@@ -26,7 +71,7 @@ const CreateQuizBlockModal: React.FC<{ onClose: () => void }> = ({ onClose }) =>
 
       {/* Main Content */}
         <div className="px-6 py-4 space-y-4 text-xs">
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             <div className="space-y-3">
               {/* Title */}
               <label className="text-[#1A1C1E] font-[500] mb-2">Title</label>
@@ -93,9 +138,7 @@ const CreateQuizBlockModal: React.FC<{ onClose: () => void }> = ({ onClose }) =>
                   placeholder="Type a course"
                 />
               </div>
-            </div>
-            {/* Quiz Block Quizzes */}
-            <div className="space-y-3">
+              <div>
               <label className="block text-xs font-[500] text-[#1A1C1E]">Quiz block</label>
               <p className="text-black font-[400] text-[10px] mb-1">Add quizzes to this block</p>
               <div className="flex items-center gap-2">
@@ -109,9 +152,33 @@ const CreateQuizBlockModal: React.FC<{ onClose: () => void }> = ({ onClose }) =>
                   <span className="text-xs text-[#0360AB]">{selectedQuizzes.length} quizzes selected</span>
                 )}
               </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={isPublic}
+                  onChange={e => setIsPublic(e.target.checked)}
+                />
+                <label className="text-xs text-[#1A1C1E]">Make Quiz Block Public</label>
+              </div>
             </div>
+
+            {/* Create Quiz Block */}
+            <div className="flex justify-end mt-2">
+              <button
+                className="px-4 py-2 bg-[#0360AB] text-white rounded text-xs"
+                onClick={handleSubmit}
+                disabled={loading}
+              >
+                {loading ? <FaSpinner className="animate-spin text-lg" />: 'Create Quiz Block'}
+              </button>
+            </div>
+
           </div>
+
         </div>
+
         
         {showAddQuiz && (
           <AddQuizzesToBlockModal

@@ -6,10 +6,11 @@ const PopUpContainer: React.FC<{
   onClose: () => void;
   children: React.ReactNode;
   footer?: React.ReactNode;
-}> = ({ title, children, onClose , footer }) => {
+  customWidth?: string;
+}> = ({ title, children, onClose , footer , customWidth }) => {
   return (
     <div className="fixed inset-0 bg-[#00000066]  flex items-center justify-center z-[1000] absolute ">
-      <div className="bg-white rounded-[16px] max-h-[85vh] overflow-y-auto w-[577px] shadow-lg relative flex flex-col">
+      <div className={`bg-white rounded-[16px] max-h-[85vh] overflow-y-auto ${customWidth ? customWidth : "w-[577px]"} shadow-lg relative flex flex-col`}>
         {/* Header */}
         <div className="flex items-center justify-between px-14 py-4 border-b border-[#C3C6CF] rounded-t-[16px] bg-[#F8F9FF] sticky top-0 z-10">
           <h2 className="text-[24px] font-semibold text-[#1A1C1E]">{title}</h2>

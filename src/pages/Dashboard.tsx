@@ -61,12 +61,14 @@ const Dashboard: React.FC = () => {
 
         
         console.log(data);
+
       } catch (err) {
         console.error(err);
       }
             }
             loaddata();
-        })
+        } , [])
+        
 
 
 
@@ -113,7 +115,8 @@ const Dashboard: React.FC = () => {
                             pagedData.map((item, index) => (
                                 <div key={index} className="grid grid-cols-[2.5fr_1.5fr_1fr] gap-2 px-3 py-2 border-t-[1px] border-[#C3C6CF]">
                                     <p className='text-[#1A1C1E] text-[14px] flex items-center gap-2'>
-                                        <span>{item.time}</span>
+                                        <span>{new Date(item.time).toISOString().split('T')[0]}</span>
+
                                         <span className='text-[12px] border-[1px] border-[#C3C6CF] p-1 rounded-md'>{item.action_type}</span>
                                         <span>{item.description}</span>
                                     </p>

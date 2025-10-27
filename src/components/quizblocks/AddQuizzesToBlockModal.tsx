@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 
 import PopUpContainer from "../popups/PopUp";
+import thumbnailmain from '../../assets/thumbnail-main.jpg';
+import { BiSearch } from "react-icons/bi";
+
+import { IoFilter } from "react-icons/io5";
 
 const quizzes = [
 	{
@@ -72,19 +76,27 @@ const AddQuizzesToBlockModal: React.FC<{
 	};
 
 	return (
-		<PopUpContainer title="Add Quizzes to “New Quiz Block Name”" onClose={() => onClose()}>
+		<PopUpContainer title="Add Quizzes to “New Quiz Block Name”" onClose={() => onClose()} customWidth="w-[750px]">
 				{/* Main Content */}
-				<div className="flex gap-6 flex-1 min-h-0 px-6 py-4">
+				<div className="flex gap-6 flex-1 min-h-[85vh]  py-4 w-full">
 					{/* Left: Quiz list */}
-					<div className="flex-1 min-w-0 border-r pr-6 flex flex-col">
-						<div className="flex items-center gap-2 mb-4">
-							<input
-								className="flex-1 border rounded px-3 py-2 text-sm"
-								placeholder="Search for Quizzes"
-								value={search}
-								onChange={e => setSearch(e.target.value)}
-							/>
-							<button className="text-xs px-3 py-2 bg-[#F2F3FA] rounded border border-[#C3C6CF]">
+					<div className="flex-1 min-w-[55%] border-r-[1px] border-[#C3C6CF]   flex flex-col">
+						<div className="flex-col px-4 items-center gap-2 mb-4">
+<div className="flex items-center border-[1px] bg-[#F2F3FA] border-[#C3C6CF] rounded px-2 h-[32px]">
+  <BiSearch size={14} className="text-gray-500 mr-2" />
+  <input
+    type="text"
+    placeholder="Search quizzes"
+    value={search}
+    onChange={e => setSearch(e.target.value)}
+    className="flex-1 text-xs outline-none h-full bg-transparent"
+  />
+</div>
+
+
+						<div className="flex items-center ">
+							<button className="text-xs px-3 py-2 bg-[#F2F3FA] rounded border border-[#C3C6CF] flex items-center gap-2 mt-2">
+								<IoFilter />
 								Filter
 							</button>
 							<button
@@ -94,12 +106,13 @@ const AddQuizzesToBlockModal: React.FC<{
 							>
 								↓
 							</button>
+							</div>
 						</div>
 						<div className="overflow-y-auto flex-1 min-h-0">
 							{sorted.map(q => (
 								<div
 									key={q.id}
-									className="flex items-start gap-2 py-3 border-b last:border-b-0"
+									className="flex items-start gap-2 py-3 "
 								>
 									<input
 										type="checkbox"
@@ -107,7 +120,12 @@ const AddQuizzesToBlockModal: React.FC<{
 										onChange={() => handleToggle(q)}
 										className="mt-1"
 									/>
-									<div className="flex-shrink-0 text-2xl">{q.icon}</div>
+									{/* thumbnail  */}
+									<img
+										src={thumbnailmain}
+										alt={q.title}
+										className="w-16 h-12 object-cover rounded-md flex-shrink-0"
+									/>
 									<div className="flex-1 min-w-0">
 										<div className="font-medium text-sm truncate">
 											{q.title}
@@ -133,7 +151,7 @@ const AddQuizzesToBlockModal: React.FC<{
 						</div>
 					</div>
 					{/* Right: Selected quizzes */}
-					<div className="flex-1 min-w-0 pl-6 flex flex-col">
+					<div className="flex-1 min-w-0 flex flex-col">
 						<div className="font-medium text-sm mb-4">
 							<span className="text-[#0360AB]">
 								{selected.length} Quizzes selected
@@ -148,7 +166,7 @@ const AddQuizzesToBlockModal: React.FC<{
 							{selected.map(q => (
 								<div
 									key={q.id}
-									className="flex items-start gap-2 py-3 border-b last:border-b-0"
+									className="flex items-start gap-2 py-3 "
 								>
 									<input
 										type="checkbox"
@@ -156,7 +174,11 @@ const AddQuizzesToBlockModal: React.FC<{
 										onChange={() => handleToggle(q)}
 										className="mt-1"
 									/>
-									<div className="flex-shrink-0 text-2xl">{q.icon}</div>
+																		<img
+										src={thumbnailmain}
+										alt={q.title}
+										className="w-16 h-12 object-cover rounded-md flex-shrink-0"
+									/>
 									<div className="flex-1 min-w-0">
 										<div className="font-medium text-sm truncate">
 											{q.title}
