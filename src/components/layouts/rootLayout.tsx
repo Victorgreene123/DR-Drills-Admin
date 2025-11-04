@@ -19,6 +19,8 @@ const RootLayout: React.FC = () => {
           <Outlet />
         </div>
       </div>
+
+
     </div>
   );
 };

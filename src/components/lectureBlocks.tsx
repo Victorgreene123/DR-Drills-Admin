@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import Stats from "./stats";
 import { Link } from "react-router-dom";
 import { useApi } from "../hooks/useApi";
+import { FaPlus } from "react-icons/fa";
+import CreateLectureBlockPopup from "./popups/CreateLectureBlockPopup";
 
 const LectureBlocks:React.FC = () => {
   const [lectureBlocks, setLectureBlocks] = useState<Array<{ id: number; title: string; bankCount: number; tags: string[] }>>([]);
       const { apiFetch } = useApi();
-  
+    const [isLectureBlockOpened , setIsLectureBlockOpened]= useState(false);
   
        useEffect(() => {
       // Example API call to fetch quiz blocks
@@ -44,6 +46,21 @@ const LectureBlocks:React.FC = () => {
                         <Stats value="40" label="Lecture Blocks" />
                     </div>
 
+
+                            {/* <Filters filterOptions={filterOptions} onFilterChange={setActiveFilters} /> */}
+                            <div className="mt-3">
+                                <button className='bg-[#0360AB] flex  text-white rounded-md w-[200px] h-[32px] flex items-center justify-center' onClick={() => {
+                                    setIsLectureBlockOpened(true);
+                                    console.log("PopUp initiated")
+                    
+                                }}>
+                                    <FaPlus className='mr-2' />
+                                    Upload Lecture Block
+                                    </button>
+                                  </div>
+                    
+                          
+
                     {/* <Filters filterOptions={filterOptions} onFilterChange={setActiveFilters} /> */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 py-3">
                 
@@ -79,7 +96,9 @@ const LectureBlocks:React.FC = () => {
         ))}
         </div>
 
-
+        {
+          isLectureBlockOpened &&  <CreateLectureBlockPopup onClose={() => setIsLectureBlockOpened(false)}/>
+        }
 
         </div>
     )

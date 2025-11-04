@@ -8,6 +8,8 @@ import SelectLecturePopup from "./SelectLecturePopup";
 import SelectQuizBlockPopup from "./SelectQuizBlockPopup";
 import { MdCheckBox, MdCheckBoxOutlineBlank } from "react-icons/md";
 import preview from "../../assets/preview.png"
+import { useApi } from "../../hooks/useApi";
+import { FaSpinner } from "react-icons/fa6";
 
 interface UploadQuizPopUpFlowProps {
   isOpen: boolean;
@@ -62,51 +64,51 @@ const UploadQuizPopUpFlow: React.FC<UploadQuizPopUpFlowProps> = ({
 
   
   
-  const [day , selectedDay] = useState<number | null>()
-  const [year , selectedYear] = useState<String | null>()
-  const [month , selectedMonth] = useState<String | null>()
-  const [datemetric , setDateMetric] = useState<String | null>(null)
+  // const [day , selectedDay] = useState<number | null>()
+  // const [year , selectedYear] = useState<String | null>()
+  // const [month , selectedMonth] = useState<String | null>()
+  // const [datemetric , setDateMetric] = useState<String | null>(null)
 
   const filteredCourses = courses.filter((item) =>
     item.toLowerCase().includes(courseSearchTerm.toLowerCase())
   );
 
   const [title, setTitle] = useState<string>("");
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December"
-  ]
-  const years = [
-      "2025",
-      "2024",
-      "2023",
-      "2022",
-      "2021",
-      "2020",
-      "2019",
-      "2018",
-      "2017",
-      "2016",
-      "2015",
-      "2014",
-      "2013",
-      "2012",
-      "2011",
-      "2010",
-  ]
-  const days = [
-    1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31
-  ]
+  // const months = [
+  //   "January",
+  //   "February",
+  //   "March",
+  //   "April",
+  //   "May",
+  //   "June",
+  //   "July",
+  //   "August",
+  //   "September",
+  //   "October",
+  //   "November",
+  //   "December"
+  // ]
+  // const years = [
+  //     "2025",
+  //     "2024",
+  //     "2023",
+  //     "2022",
+  //     "2021",
+  //     "2020",
+  //     "2019",
+  //     "2018",
+  //     "2017",
+  //     "2016",
+  //     "2015",
+  //     "2014",
+  //     "2013",
+  //     "2012",
+  //     "2011",
+  //     "2010",
+  // ]
+  // const days = [
+  //   1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31
+  // ]
 
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState<string>("");
@@ -189,9 +191,61 @@ const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     }, 2000);
   };
 
-  const [isQuizBlockPopupOpen, setIsQuizBlockPopupOpen] = useState(false);
-  const [selectedQuizBlocks, setSelectedQuizBlocks] = useState<{ id: number; name: string }[]>([]);
+  const question_types = [
+    {
+      label: "Multiple Choice" ,
+      id: "multiple_choice"
+    }
+  ]
+const [questionType, setQuestionType] = useState("multiple_choice");
+const [timeAllowed, setTimeAllowed] = useState<number | "">("");
 
+  const [isQuizBlockPopupOpen, setIsQuizBlockPopupOpen] = useState(false);
+  const [selectedQuizBlocks, setSelectedQuizBlocks] = useState<{ id: string; name: string }[]>([]);
+  const [isSubmitting , setIsSubmitting] = useState(false);
+    const { apiFetch } = useApi();
+  
+  const handleSubmit = async () => {
+  if (!selectedFile) {
+    alert("No file selected");
+    return;
+  }
+
+  try {
+    setIsSubmitting(true);
+
+    // ✅ Build multipart form data
+    const formData = new FormData();
+    formData.append("file", selectedFile); // ✅ Important
+    formData.append("title", title);
+    formData.append("course", selectedCourse);
+    formData.append("tags", JSON.stringify(tags));  // ✅ convert array → string
+    // formData.append("mode", examMode ? "exam" : "quiz");
+    formData.append("quiz_block_id", selectedQuizBlocks[0]?.id ?? "");
+    // formData.append("userRestriction", selectedUserRestriction);
+    formData.append("question_type", questionType);
+formData.append("time_allowed", timeAllowed ? String(timeAllowed) : "0");
+
+
+    // If multiple lectures:
+    // formData.append("lectures", JSON.stringify(lecturesSelected));
+
+    // ✅ call API
+    const response = await apiFetch("/api/admin/quiz/create", {
+      method: "POST",
+      body: formData, // ✅ no headers needed for multipart
+    });
+
+    console.log("Upload success", response);
+    alert("Quiz Uploaded!");
+    onClose();
+  } catch (error) {
+    console.error("Upload error:", error);
+    alert("Failed to upload quiz.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   
   return (
@@ -313,7 +367,7 @@ const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
                   )}
                 </div>
 
-                {/* Source Dropdown (static) */}
+                {/* Source Dropdown (static)
                 <div>
                   
                     <p className="text-[#1A1C1E] font-[500] ">Source</p>
@@ -321,7 +375,7 @@ const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
                  
                 </input>
                    
-                  </div>
+                  </div> */}
                 
                
 
@@ -382,7 +436,7 @@ const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
                 </div>
 
                 {/* Date Inputs */}
-                <div className="flex items-center gap-2 ">
+                {/* <div className="flex items-center gap-2 ">
                   <label className="text-[#1A1C1E] font-[500] ">Date</label>
                   <div className="flex items-center relative p-1 rounded-[4px] border-[1px] border-[#C3C6CF] gap-2 ">
                       <div onClick={() => setDateMetric("Year")} className="cursor-pointer hover:bg-[#F1F5F9] hover:rounded-[4px] px-3 py-1 ">
@@ -435,7 +489,60 @@ const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
 }
                     </div>
                     
-                </div>
+                </div> */}
+
+
+
+                  {/* ================Question Type=====================  */}
+{/* Question Type */}
+<div className="w-full space-y-1">
+  <label className="block text-xs font-[500] text-[#1A1C1E]">
+    Question Type
+  </label>
+  <p className="text-black font-[400] text-[10px]">
+    Select the type of questions in this quiz
+  </p>
+
+  <div className="w-full relative border-[1px] border-[#C3C6CF] rounded-[6px] text-xs min-h-[28px]">
+    <select
+      className="w-full h-full px-2 py-1 outline-none rounded-[6px] bg-white text-xs cursor-pointer"
+      value={questionType}
+      onChange={(e) => setQuestionType(e.target.value)}
+    >
+        {
+          question_types.map((item) => <option value={item.id} >{item.label}</option>)
+        }
+    </select>
+  </div>
+</div>
+
+{/* Time Allowed */}
+<div className="w-full space-y-1">
+  <label className="block text-xs font-[500] text-[#1A1C1E]">
+    Time Allowed (Minutes)
+  </label>
+  <p className="text-black font-[400] text-[10px]">
+    Duration for users if exam mode is enabled
+  </p>
+
+  <input
+    type="number"
+    className="border border-[#C3C6CF] rounded-[6px] px-2 py-1 text-xs w-full h-[28px] outline-none"
+    placeholder="Enter minutes"
+    min={1}
+    value={timeAllowed}
+    onChange={(e) => setTimeAllowed(Number(e.target.value))}
+  />
+</div>
+
+
+
+
+
+
+
+
+
 
               </div>
 
@@ -564,8 +671,16 @@ const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
               <button className="px-3 py-1 text-xs bg-[#D4E3FF] rounded  text-[#0360AB] h-[28px]">
                 Save as Draft
               </button>
-              <button className="px-3 py-1 text-xs rounded bg-[#0360AB] text-white h-[28px]">
-                Publish
+              <button className="px-3 py-1 text-xs rounded bg-[#0360AB] text-white h-[28px]"
+              disabled={isSubmitting}
+              onClick={handleSubmit}
+              >
+                {
+                  isSubmitting ? (
+                      <FaSpinner className="animate-spin text-lg" />
+                  ): "Publish"
+                }
+               
               </button>
             </div>
           )
@@ -605,14 +720,9 @@ const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
           isOpen={isQuizBlockPopupOpen}
           onClose={() => setIsQuizBlockPopupOpen(false)}
           onSelectBlock={(block) => {
-            setSelectedQuizBlocks((prev) => {
-              const exists = prev.some((b) => b.id === block.id);
-              if (exists) {
-                return prev.filter((b) => b.id !== block.id);
-              }
-              return [...prev, block];
-            });
-          }}
+  setSelectedQuizBlocks(block ? [block] : []);
+}}
+
         />
       )}
     </div>

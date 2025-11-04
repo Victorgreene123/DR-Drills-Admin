@@ -156,6 +156,7 @@ const Quizzes: React.FC = () => {
           <Stats value="3,200,000,000" label="Quiz Blocks" />
         </div>
 
+
         <div className="flex flex-wrap items-center gap-4 mt-2 w-full">
           <div className='w-full sm:w-[27%] relative bg-[#F2F3FA] border-[1px] flex items-center border-[#C3C6CF] rounded-[8px] h-[32px] max-w-xs'>
             <IoSearch className='mx-2 text-[#0F172A] opacity-50' />
@@ -170,6 +171,8 @@ const Quizzes: React.FC = () => {
 
           {/* ✅ Reusable Filters component */}
           <Filters filterOptions={filterOptions} onFilterChange={setActiveFilters} />
+            <button className='bg-[#0360AB] flex  text-white rounded-[8px] w-[150px] h-[40px] flex items-center justify-center' onClick={() => setShowPop(true)}>Upload Quiz</button>
+
         </div>
       </div>
 
@@ -199,7 +202,6 @@ const Quizzes: React.FC = () => {
               
             />)
 }
-            <button className='bg-[#0360AB] flex mx-auto text-white rounded-[8px] w-[150px] h-[40px] flex items-center justify-center' onClick={() => setShowPop(true)}>Upload Quiz</button>
           </div>
         ) : (
           <QuizBlocksScreen />
