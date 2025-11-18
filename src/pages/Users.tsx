@@ -1,115 +1,163 @@
-import Stats from '../components/stats'
-import { IoFilterOutline} from 'react-icons/io5';
-// import { FaChevronDown } from "react-icons/fa";
+import Stats from '../components/stats';
 import QuizzesTable from '../components/QuizzesTable';
-import Pfp from '../assets/Users pfp.png'
+import Pfp from '../assets/Users pfp.png';
+import Filters from '../components/Filters'; // ← Reusable Filters
 import { useApi } from '../hooks/useApi';
 import { useEffect, useState } from 'react';
 
+interface User {
+  id: number;
+  image: string;
+  title: string;
+  email: string;
+  plan: "Free" | "Premium";
+  lastSeen: string;
+}
+
 const Users = () => {
-      const [users , setUsers] =useState([]);
-      const { apiFetch } = useApi();
-  
+  const [users, setUsers] = useState<User[]>([]);
+  const { apiFetch } = useApi();
 
+  // Filter + Search state (same as Quizzes page)
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeFilters, setActiveFilters] = useState<{ type: string; value: string }[]>([]);
 
-   const fetchUsers = async () => {
+  const fetchUsers = async () => {
     try {
-      const res = await apiFetch('/api/admin/users'); 
+      const res = await apiFetch('/api/admin/users');
       const data = await res.json();
       const mappedUsers = data.data.map((user: any) => ({
         id: user.user_id,
-        image: user.avatar || Pfp, // Use default if avatar is null
-        title: user.firstname + ' ' + user.surname,
+        image: user.avatar || Pfp,
+        title: `${user.firstname} ${user.surname}`.trim(),
         email: user.email,
-        plan: user.premium === 0 ? "Free": "Premium",
-        lastSeen : user.last_login ? new Date(user.last_login).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Never',
-       }
-       )); // Default plan if not provided
-      console.log('Mapped users:', mappedUsers);
-      setUsers(mappedUsers); 
+        plan: user.premium === 0 ? "Free" : "Premium",
+        lastSeen: user.last_login
+          ? new Date(user.last_login).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+            })
+          : 'Never',
+      }));
+      setUsers(mappedUsers);
     } catch (error) {
       console.error('Error fetching users:', error);
     }
   };
 
- useEffect(() => {
-
+  useEffect(() => {
     fetchUsers();
- } , []);
+  }, []);
 
-  
+  // Dynamic filter options from real data
+  const planOptions = Array.from(new Set(users.map(u => u.plan))); // ["Free", "Premium"]
+
+  const filterOptions = [
+    { label: "Plan", value: "plan", dropdown: true, options: planOptions },
+    // You can easily add more later: Status, Last Active, etc.
+  ];
+
+  // EXACT same filtering logic as your working Quizzes page
+  const filteredData = users.filter((user) => {
+    if (activeFilters.length === 0 && searchTerm.trim() === '') return true;
+
+    // Search in name OR email
+    const matchesSearch =
+      user.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase());
+
+    // Apply filters
+    const matchesFilters = activeFilters.every((filter) => {
+      if (filter.type === "plan") return user.plan === filter.value;
+      return true;
+    });
+
+    return matchesSearch && matchesFilters;
+  });
+
   return (
-    
-
     <div className="space-y-5">
-
       <div className="space-y-10">
+        <h1 className="text-[#004883] font-[500] text-2xl">Users</h1>
 
-         <h1 className='text-[#004883] font-[500]'>Users</h1>
-            <div className=' flex items-center gap-3'>
-                <Stats value={"3,200,000,000"} label='Total Daily Users' />
-                <Stats value={"3,200,000,000"} label='New Sign ups' />
+        <div className="flex flex-wrap items-center gap-4">
+          <Stats value="3,200,000,000" label="Total Daily Users" />
+          <Stats value="3,200,000,000" label="New Sign ups" />
+        </div>
 
-            </div>
+        {/* Filter + Search Bar - Same layout as Quizzes */}
+        <div className="flex flex-wrap items-center gap-4">
+          {/* Search Input */}
+          <div className="relative">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search by name or email..."
+              className="w-full sm:w-80 h-10 pl-10 pr-4 bg-[#F2F3FA] border border-[#C3C6CF] rounded-lg text-sm outline-none"
+            />
+            <svg
+              className="absolute left-3 top-3 w-5 h-5 text-gray-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </div>
 
-            {/*Filter Section */}
-            <div className="relative">
+          {/* Reusable Filters - WORKS 100% */}
+          <Filters
+            filterOptions={filterOptions}
+            onFilterChange={setActiveFilters}
+          />
+        </div>
 
-              <button
-                className="bg-[#F2F3FA] cursor-pointer border-[1px] border-[#C3C6CF] rounded-[8px] px-[12px] h-[32px] flex items-center gap-2 text-[#43474E] text-[13px] min-w-[100px]"
-                // onClick={() => {
-                //   setShowFilterDropdown((v) => !v);
-                //   setDropdownType(null);
-                // }}
-              >
-                Add Filter
-                <IoFilterOutline className="ml-1" />
-              </button>
-
-                <div>
-                  <QuizzesTable 
-                    data = {users}
-                    tableheads={["User" , "Email" , "Plan" , "Last Seen"] }
-                    ids={["title", "email", "plan", "lastSeen"]}
-                    initialRowsPerPage={40} 
-                    renderCell={{
-                            title: (rowData) => ( //This is where the title is modified to accept a pfp
-                                <div style={{ 
-                                    display: 'flex',       
-                                    alignItems: 'center', 
-                                    gap: '15px'            
-                                }}>
-                                    {rowData.image && ( 
-                                        <img
-                                            src={rowData.image} 
-                                            alt={rowData.title}
-                                            style={{
-                                                width: '36px', 
-                                                height: '36px',  
-                                                borderRadius: '50%', 
-                                                objectFit: 'cover',
-                                                objectPosition: 'right'
-                                                   
-                                            }}
-                                        />
-                                    )}
-                                    {/* This <span> holds the user's name */}
-                                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                       {rowData.title} 
-                                    </span>
-                                </div>)
-                    }}
+        {/* Table with filtered data */}
+        <div className="mt-6">
+          <QuizzesTable
+            data={filteredData}
+            tableheads={["User", "Email", "Plan", "Last Seen"]}
+            ids={["title", "email", "plan", "lastSeen"]}
+            initialRowsPerPage={40}
+            renderCell={{
+              title: (rowData) => (
+                <div className="flex items-center gap-4">
+                  {rowData.image && (
+                    <img
+                      src={rowData.image}
+                      alt={rowData.title}
+                      className="w-10 h-10 rounded-full object-cover"
                     />
-                                
+                  )}
+                  <span className="font-medium truncate max-w-xs">
+                    {rowData.title}
+                  </span>
                 </div>
-
-            </div>
-
+              ),
+              plan: (rowData) => (
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    rowData.plan === "Premium"
+                      ? "bg-purple-100 text-purple-800"
+                      : "bg-gray-100 text-gray-700"
+                  }`}
+                >
+                  {rowData.plan}
+                </span>
+              ),
+            }}
+          />
+        </div>
       </div>
-       
-
     </div>
-  )
-}
+  );
+};
 
-export default Users
+export default Users;

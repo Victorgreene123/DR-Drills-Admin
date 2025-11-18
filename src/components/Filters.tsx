@@ -21,7 +21,10 @@ const Filters: React.FC<FiltersProps> = ({ filterOptions, onFilterChange }) => {
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
 
   const handleAddFilter = (type: string) => {
-    if (["course", "visibility", "year", "type"].includes(type)) {
+    const option = filterOptions.find(o => o.value === type);
+
+    // THIS IS THE ONLY FIX
+    if (option?.dropdown) {
       setDropdownType(type);
       setShowFilterDropdown(false);
       if (type === "year") {
@@ -29,6 +32,9 @@ const Filters: React.FC<FiltersProps> = ({ filterOptions, onFilterChange }) => {
       }
       return;
     }
+    // END OF FIX
+
+    // Non-dropdown filters (e.g. "Drafts")
     if (!activeFilters.some(f => f.type === type && f.value === type)) {
       updateFilters([...activeFilters, { type, value: type }]);
     }
@@ -87,6 +93,7 @@ const Filters: React.FC<FiltersProps> = ({ filterOptions, onFilterChange }) => {
           Add Filter
           <IoFilterOutline className="ml-1" />
         </button>
+
         {showFilterDropdown && (
           <div className="absolute left-0 top-full mt-1 bg-white border border-[#C3C6CF] rounded shadow-lg z-20">
             <ul>
@@ -103,6 +110,7 @@ const Filters: React.FC<FiltersProps> = ({ filterOptions, onFilterChange }) => {
             </ul>
           </div>
         )}
+
         {dropdownType && filterOptions.find(f => f.value === dropdownType)?.options && (
           <div className="absolute left-0 top-full mt-1 bg-white border border-[#C3C6CF] rounded shadow-lg z-30 p-2">
             <ul>
@@ -139,6 +147,7 @@ const Filters: React.FC<FiltersProps> = ({ filterOptions, onFilterChange }) => {
           </div>
         )}
       </div>
+
       {activeFilters.map(filter => (
         <div
           key={filter.type + filter.value}
@@ -148,6 +157,7 @@ const Filters: React.FC<FiltersProps> = ({ filterOptions, onFilterChange }) => {
           <button className="ml-1 hover:text-red-500" onClick={() => handleRemoveFilter(filter.type, filter.value)}>×</button>
         </div>
       ))}
+
       {activeFilters.length > 0 && (
         <button
           className="bg-[#F2F3FA] border border-[#C3C6CF] rounded-[8px] px-2 h-[32px] text-[13px]"

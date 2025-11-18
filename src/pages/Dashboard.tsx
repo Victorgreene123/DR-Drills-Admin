@@ -39,7 +39,11 @@ const Dashboard: React.FC = () => {
             const loaddata = async () =>{
                     try {
         const res = await apiFetch("/api/admin/dashboard");
+        if (!res.ok){
+            throw Error("An error occured")
+        }
         const data = await res.json();
+
         const {
             active_users , 
             new_subscriptions , 
