@@ -4,6 +4,7 @@
 
 
 import { useState } from "react";
+import  { forwardRef } from "react";
 import { LiaTimesSolid } from "react-icons/lia";
 import { GoDotFill } from "react-icons/go";
 import { FaChevronRight } from "react-icons/fa";
@@ -21,6 +22,7 @@ interface QuizDetailsPanelProps {
   badge?: string;
   thumbnail?: string;
   leaderboard: any [];
+  
 }
 
 
@@ -42,24 +44,28 @@ interface QuizDetailsPanelProps {
 //                 "is_top_score": 1
 //             },
 
-export default function QuizDetailsPanel({
-  id,
-  data,
-  details,
-  loadingDetails,
-  onClose,
-  onPreview,
-  badge,
-  thumbnail,
-  leaderboard,
-}: QuizDetailsPanelProps) {
+const QuizDetailsPanel = forwardRef<HTMLDivElement, QuizDetailsPanelProps>(
+  (
+    {
+      id,
+      data,
+      details,
+      loadingDetails,
+      onClose,
+      onPreview,
+      badge,
+      thumbnail,
+      leaderboard,
+    },
+    PreviewRef
+  ) =>  {
   const dataItem = data.find((item) => item.id === id);
   const [view, setView] = useState<"details" | "leaderboard">("details");
 
   if (!dataItem) return null;
 
   return (
-    <div className="absolute top-1/8 right-20 h-[438px] w-[410px] bg-white rounded-[8px] shadow-lg border-[1px] border-[#C3C6CF] z-[1500] flex flex-col">
+    <div className="absolute top-1/8 right-20 h-[438px] w-[410px] bg-white rounded-[8px] shadow-lg border-[1px] border-[#C3C6CF] z-[1500] flex flex-col" ref={PreviewRef}>
 
       {/* Header */}
       <div className="w-full p-2 bg-[#F8F9FF] border-t-[1px] relative rounded-t-[8px] border-[#C3C6CF]">
@@ -217,4 +223,7 @@ export default function QuizDetailsPanel({
 
     </div>
   );
-}
+});
+
+
+export default QuizDetailsPanel;

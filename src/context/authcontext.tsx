@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 // -------------------------
 // API URL
 // -------------------------
-const API_URL = "https://dr-drills-be-dev.onrender.com/auth/admin";
+const API_URL = "https://drdrills.achillesdrill.com/auth/admin";
 
 // -------------------------
 // Types

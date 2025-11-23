@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FaChevronDown  , FaChevronRight, FaChevronUp, FaHeart, FaMoneyCheckAlt, FaRegHeart, FaRegUserCircle } from "react-icons/fa";
 import pfp from '../assets/pfp.jpg'
 import { BsWindowSidebar } from "react-icons/bs";
@@ -12,12 +12,44 @@ import CreateLectureBlockPopup from "./popups/CreateLectureBlockPopup";
 import CreateLectureBankPopup from "./popups/CreateLectureBankPopup";
 import UploadQuizPopUpFlow from "./popups/UploadQuizPopUpFlow";
 import CreateQuizBlockModal from "./quizblocks/CreateQuizBlockModal";
+import { useAuth } from "../context/authcontext";
 
 const Sidebar: React.FC = () => {
 
+
+const menuRef = useRef<HTMLDivElement | null>(null);
+
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setCreateClicked(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
     const [isCreateClicked , setCreateClicked] = useState(false)
         const clickCreate = () =>{
             setCreateClicked(!isCreateClicked)
+        }
+    const profileMenuRef = useRef<HTMLDivElement | null>(null);
+
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setShowProfileMenu(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+    const [showProfileMenu , setShowProfileMenu] = useState(false)
+        const clickProfile = () =>{
+            setShowProfileMenu(!showProfileMenu)
         }
 
     const [islectureOpened, setIsLectureOpened] = useState(false);
@@ -28,6 +60,7 @@ const Sidebar: React.FC = () => {
     const onClose = () => {
         setIsLectureOpened(false)
     }
+    const {logout} = useAuth()
     const sidebarArr = [
             {
                 id: 1,
@@ -77,7 +110,7 @@ const Sidebar: React.FC = () => {
   return (
     <aside className="w-full h-full relative bg-[#F2F3FA] border-[1px] border-[#C3C6CF]  space-y-3  box-border">
      
-      <div className="relative px-2 w-full">
+      <div className="relative px-2 w-full"  ref={menuRef}>
       
       <button className="bg-[#0360AB] mx-3 mt-3 rounded-[36px] w-[112px] h-[48px] text-white flex items-center justify-between box-border px-5 " onClick={clickCreate}>
         Create
@@ -156,13 +189,39 @@ const Sidebar: React.FC = () => {
         </ul>
       </nav>
 
-      <div className="w-[93%] bg-white py-1 flex items-center  absolute bottom-20 mx-2 gap-2 px-[8px] border-[1px] border-[#C3C6CF] rounded-[4px] ">
-        <img src={pfp} className="w-[36px] h-[36px] rounded-full object-cover" alt="" />
-        <div>
-            <h2 className="text-[14px] text-[#1A1C1E]">Orisajo Toluwanimi</h2>
-            <p className="text-[11px] text-[#73777F]">Content Manager</p>
-        </div>
-      </div>
+     <div
+  className="w-[93%] cursor-pointer bg-white py-1 flex items-center 
+             absolute bottom-20 mx-2 gap-2 px-[8px] border border-[#C3C6CF] 
+             rounded-[4px] select-none"
+  ref={profileMenuRef}
+  onClick={clickProfile}
+>
+  <img src={pfp} className="w-[36px] h-[36px] rounded-full object-cover" alt="" />
+  <div>
+      <h2 className="text-[14px] text-[#1A1C1E]">Orisajo Toluwanimi</h2>
+      <p className="text-[11px] text-[#73777F]">Content Manager</p>
+  </div>
+
+  {showProfileMenu && (
+    <div
+      className="absolute -top-[150px] left-[0] w-[240px] bg-white rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.12)]
+                 border border-gray-200 p-4 z-20 animate-profileDialog"
+    >
+      <p className="text-sm text-gray-700 font-semibold mb-2">Signed in as</p>
+      <p className="text-xs text-gray-500 mb-4">Orisajo Toluwanimi</p>
+
+     <Link to={"settings"}> <button className="w-full text-left text-sm py-1.5 px-2 rounded hover:bg-gray-100">
+        Account Settings
+      </button></Link>
+      <button className="w-full text-left text-sm py-1.5 px-2 rounded hover:bg-gray-100 text-red-600" onClick={() => logout()}>
+        Logout
+      </button>
+
+      {/* Arrow */}
+      <div className="absolute bottom-[-8px] left-6 w-4 h-4 bg-white rotate-45 border border-white"></div>
+    </div>
+  )}
+</div>
 
 
       {

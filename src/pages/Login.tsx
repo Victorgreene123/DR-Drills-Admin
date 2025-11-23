@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/authcontext";
 import { useNavigate } from "react-router-dom";
 import { FaSpinner } from "react-icons/fa6";
+import logo from '../assets/favicon.svg'
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -32,6 +33,11 @@ const Login: React.FC = () => {
         }}
       >
         {/* Title */}
+        <div className="flex items-center mx-auto w-[50%] gap-3  mb-3">
+              <img src={logo} alt="" className='flex '/>
+        <h2 className="text-3xl font-bold text-[#004883]">Admin Panel</h2>
+        </div>
+
         <h2 className="text-2xl font-bold text-[#004883]">Sign In</h2>
         <p className="mt-1 text-sm text-gray-600">
           Enter your email and password to sign in!

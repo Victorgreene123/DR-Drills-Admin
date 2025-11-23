@@ -204,7 +204,7 @@ const Subscriptions = () => {
               </div>
 
               {/* Validity Period */}
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 mb-4">
                 <label className="text-sm font-medium text-[#1A1C1E]">Validity Period</label>
                 <select
                   value={selectedValue}

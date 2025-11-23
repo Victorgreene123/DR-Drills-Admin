@@ -15,9 +15,10 @@ type RawQuestion = {
   options: RawOption[];
 };
 
-const PreviewQuizOverlay: React.FC<{ onClose: () => void; data: RawQuestion[] }> = ({
+const PreviewQuizOverlay: React.FC<{ onClose: () => void; data: RawQuestion[] ;  }> = ({
   onClose,
   data,
+
 }) => {
   const questions: RawQuestion[] = data || [];
   const total = questions.length;

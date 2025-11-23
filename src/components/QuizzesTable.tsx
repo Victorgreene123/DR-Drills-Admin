@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import badge from "../assets/bxs_badge.png";
 
 import thumbnail from "../assets/thumbnail-1.png";
@@ -77,6 +77,20 @@ const fetchLeaderboard = async (id: any) => {
     console.error("An error has occurred");
   } 
 }
+
+const menuRef = useRef<HTMLDivElement | null>(null);
+    
+    
+      useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+          if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+            setShowPreview(false);
+          }
+        }
+    
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+      }, []);
 
 
 
@@ -284,7 +298,7 @@ const fetchLeaderboard = async (id: any) => {
                   ? "cursor-pointer bg-white "
                   : "cursor-pointer bg-[#FAFAFA] hover:bg-[#F0F0F0] transition"
               }
-onDoubleClick={() => {
+onClick={() => {
   setSelectedQuiz(row["id"]);
   setDetails(null); // ✅ Clear previous quiz data
   setIsDetailsShown(true);
@@ -297,7 +311,7 @@ onDoubleClick={() => {
               {ids.map((id, colIdx) => (
                 <td
                   key={colIdx}
-                  className="px-4 py-3 border-r border-[#E0E0E0] last:border-r-0 whitespace-nowrap"
+                  className="px-4 py-3 border-r border-[#E0E0E0] last:border-r-0 whitespace-nowrap hover:text-[#004883]"
                 >
                   {renderCell[id]
                     ? renderCell[id](row)
@@ -339,11 +353,16 @@ onDoubleClick={() => {
     badge={badge}
     thumbnail={thumbnail}
     leaderboard={leaderboard}
-  />
+        ref={menuRef}
+  />  
 )}
 
 {showPreview && (
-        <PreviewQuizOverlay onClose={() => setShowPreview(false)}  data={details?.preview_questions}/>
+      <div className="w-auto" ref={menuRef}>
+
+      
+        <PreviewQuizOverlay onClose={() => setShowPreview(false)}  data={details?.preview_questions} />
+          </div>
       )}
 
     </div>

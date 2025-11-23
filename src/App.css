@@ -3,3 +3,13 @@
 *{
     font-family: "Fira Sans", sans-serif;
 }
+
+
+@keyframes profileDialog {
+  0% { opacity: 0; transform: scale(0.95) translateY(8px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.animate-profileDialog {
+  animation: profileDialog 0.18s ease-out forwards;
+}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { FaChevronDown } from "react-icons/fa6";
 import UserMetrics from "../components/userMetrics";
@@ -18,6 +18,19 @@ const AnalyticsPage: React.FC = () => {
     ]
 
     const [dayfilter , setDayFilter] = useState(7);
+     const menuRef = useRef<HTMLDivElement | null>(null);
+      
+      
+        useEffect(() => {
+          function handleClickOutside(event: MouseEvent) {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+              setIsDropDown(false);
+            }
+          }
+      
+          document.addEventListener("mousedown", handleClickOutside);
+          return () => document.removeEventListener("mousedown", handleClickOutside);
+        }, []);
     const [isDropDown , setIsDropDown] = useState(false)
 
   return (
@@ -57,7 +70,7 @@ const AnalyticsPage: React.FC = () => {
           </div>
         </div>
 
-        <div>
+        <div ref={menuRef}>
           <h2 className="text-[#73777F] text-[12px]">Aug 30 - Sep 30</h2>
           <div className="relative flex items-center gap-3 text-[#43474E] font-[500] text-[16px]" onClick={() => setIsDropDown(!isDropDown)}>
             

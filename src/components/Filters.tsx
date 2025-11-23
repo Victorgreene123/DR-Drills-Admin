@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { IoFilterOutline } from 'react-icons/io5';
 import { FaChevronDown } from "react-icons/fa";
 
@@ -80,9 +80,22 @@ const Filters: React.FC<FiltersProps> = ({ filterOptions, onFilterChange }) => {
     onFilterChange(filters);
   };
 
+   const menuRef = useRef<HTMLDivElement | null>(null);
+    
+    
+      useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+          if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+            setShowFilterDropdown(false);
+          }
+        }
+    
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+      }, []);
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <div className="relative">
+    <div className="flex flex-wrap items-center gap-2" >
+      <div className="relative" ref = {menuRef}>
         <button
           className="bg-[#F2F3FA] border border-[#C3C6CF] rounded-[8px] px-3 h-[32px] flex items-center gap-2 text-[#43474E] text-[13px]"
           onClick={() => {
