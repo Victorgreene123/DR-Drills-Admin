@@ -4,12 +4,12 @@ import { LiaTimesSolid } from "react-icons/lia";
 import { IoMdCheckmarkCircleOutline } from "react-icons/io";
 
 
-interface FeedbackItem {
-    id: number;
-    user: string;
-    action: string;
-    course: string;
-}
+// interface FeedbackItem {
+//     id: number;
+//     user: string;
+//     action: string;
+//     course: string;
+// }
 
 interface FeedbackProps {
     onClose : () => void;

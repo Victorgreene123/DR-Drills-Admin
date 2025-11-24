@@ -14,6 +14,7 @@ import { AuthProvider} from './context/authcontext';
 import Login from './pages/Login';
 import Entry from './pages/entry';
 import ProtectedRoute from './components/ProtectedRoute';
+import ViewLectureBlockScreen from './pages/ViewLectureBlock';
 // import { useEffect } from 'react';
 
 function App() {
@@ -33,7 +34,8 @@ function App() {
           <Route path = "subscriptions" element = {<Subscription />} /> 
           <Route path="analytics" element={<AnalyticsPage />} />   
           <Route path ="campaigns" element= {<Campaigns />} /> 
-          <Route path="lectures" element={<Lectures />} />                
+          <Route path="lectures" element={<Lectures />} /> 
+          <Route path="lectures/:id" element={<ViewLectureBlockScreen />}/>
           <Route path="settings" element={<Settings />} />                
 
          </Route>

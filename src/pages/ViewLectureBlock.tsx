@@ -1,6 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import Stats from "../components/stats";
 import { useParams } from "react-router-dom";
+import { FaPlus } from "react-icons/fa6";
+import AddQuizzesToBlockModal from "../components/quizblocks/AddQuizzesToBlockModal";
+import blockPic from "../assets/Bank Picture.png"
+import AddLectures from "../components/popups/AddLecturePopup";
+
 
 const quizzes = [
   {
@@ -102,9 +107,15 @@ const quizzes = [
   // ...add more blocks as needed
 ];
 
-const ViewQuizBlockScreen: React.FC = () => {
+const ViewLectureBlockScreen: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const quizBlock = quizzes.find(qb => qb.id === Number(id));
+
+  const [showPopup , setShowPopup] = useState(false);
+  const [selected , setSelected] = useState<any[]>([]); // selected quizzes for the modal
+  const closePopup = () => {
+    setShowPopup(false)
+  }
 
   if (!quizBlock) {
     return <div className="p-6">Quiz block not found.</div>;
@@ -112,7 +123,9 @@ const ViewQuizBlockScreen: React.FC = () => {
 
   return (
     <div className="p-6">
-      <div className="text-sm text-[#0360AB] mb-2">Quizzes / Quiz Blocks</div>
+      <div className="flex items-start w-full justify-between">
+             <div className="w-[50%]">
+              <div className="text-sm text-[#0360AB] mb-2">Lectures / Lecture Blocks</div>
       <div className="font-semibold text-2xl mb-2">{quizBlock.title}</div>
       <div className="text-[#73777F] mb-2">
         {quizBlock.description}
@@ -121,52 +134,56 @@ const ViewQuizBlockScreen: React.FC = () => {
         <span className="rounded-full bg-[#F2F3FA] px-2 py-1 text-xs flex items-center gap-1">
           <span role="img" aria-label="avatar">{quizBlock.avatar}</span> {quizBlock.course}
         </span>
-        <span className="text-xs text-[#73777F]">• {quizBlock.quizzesCount} quizzes</span>
+        <span className="text-xs text-[#73777F]">• {quizBlock.quizzesCount} Lectures</span>
       </div>
+      <hr className="text-[#c3c6cf] my-2"/>
       <div className="flex flex-wrap gap-2 mb-4">
         {quizBlock.tags.map(tag => (
           <span key={tag} className="bg-[#E8F0FE] text-[#0360AB] rounded px-2 py-0.5 text-xs">{tag}</span>
         ))}
       </div>
-          <Stats value={quizBlock.totalVisits} label="Total Visits" />
 
       <div className="flex items-center justify-between mb-4 mt-3">
-        <button className="bg-[#0360AB] text-white px-4 py-2 rounded flex items-center gap-2">
-          Add Quizzes +
+        <button className="bg-[#D4E3FF] border-[1px] border-[#004883]  text-[#004883] px-4 py-2 rounded-lg flex items-center gap-2" onClick={() => setShowPopup(true)}>
+          Add Lectures or Lecture Banks 
+          <FaPlus />
         </button>
+    
+      </div>
+
+
+
         
+        
+      </div> 
+      <div className="space-y-3">
+          <Stats value={quizBlock.totalVisits} label="Question Uploaded" />
+          <Stats value={quizBlock.totalVisits} label="Total Visits" />
         
       </div>
+          
+      </div>
+
       <div className="overflow-x-auto">
-        <table className="min-w-full border rounded">
-          <thead>
-            <tr className="bg-[#F2F3FA] text-[#73777F] text-sm">
-              <th className="px-4 py-2 text-left">Quiz Title</th>
-              <th className="px-4 py-2 text-left">Course</th>
-              <th className="px-4 py-2 text-left">Source</th>
-              <th className="px-4 py-2 text-left">Type</th>
-              <th className="px-4 py-2 text-left">Questions</th>
-              <th className="px-4 py-2 text-left">Year</th>
-              <th className="px-4 py-2 text-left">Visibility</th>
-            </tr>
-          </thead>
-          <tbody>
-            {quizBlock.quizzes.map(q => (
-              <tr key={q.id} className="border-b last:border-b-0">
-                <td className="px-4 py-2">{q.title}</td>
-                <td className="px-4 py-2">{q.course}</td>
-                <td className="px-4 py-2">{q.source}</td>
-                <td className="px-4 py-2">{q.type}</td>
-                <td className="px-4 py-2">{q.questions}</td>
-                <td className="px-4 py-2">{q.year}</td>
-                <td className="px-4 py-2">{q.visibility}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+         <div className="w-[175px]">
+            <img src={blockPic}  height={"115px"} className="w-full"></img>
+            <h4>Introductory Anatomy: All the basics you’ll ever need to know</h4>
+        </div>
       </div>
+
+      {
+        showPopup && (
+          <AddLectures
+          isOpen={showPopup}
+          onAdd={() => setSelected}
+            onClose={() => closePopup()}
+            // selected={selected}
+            // setSelected={setSelected}
+          />
+        )
+      }
     </div>
   );
 };
 
-export default ViewQuizBlockScreen;
+export default ViewLectureBlockScreen;

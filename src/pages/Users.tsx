@@ -1,9 +1,9 @@
 import Stats from '../components/stats';
-import QuizzesTable from '../components/QuizzesTable';
 import Pfp from '../assets/Users pfp.png';
 import Filters from '../components/Filters'; // ← Reusable Filters
 import { useApi } from '../hooks/useApi';
 import { useEffect, useState } from 'react';
+import UsersTable from '../components/UsersTable';
 
 interface User {
   id: number;
@@ -121,7 +121,7 @@ const Users = () => {
 
         {/* Table with filtered data */}
         <div className="mt-6">
-          <QuizzesTable
+          <UsersTable
             data={filteredData}
             tableheads={["User", "Email", "Plan", "Last Seen"]}
             ids={["title", "email", "plan", "lastSeen"]}

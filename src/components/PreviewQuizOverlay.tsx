@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { forwardRef, useEffect, useState } from "react";
 import { LiaTimesSolid } from "react-icons/lia";
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6";
 
@@ -11,38 +11,35 @@ type RawQuestion = {
   points?: number;
   explanation?: string | null;
   year?: number | null;
-  order?: number; // <-- your question-level order (used as correctOrder)
+  order?: number;
   options: RawOption[];
 };
 
-const PreviewQuizOverlay: React.FC<{ onClose: () => void; data: RawQuestion[] ;  }> = ({
-  onClose,
-  data,
+type Props = {
+  onClose: () => void;
+  data: RawQuestion[];
+};
 
-}) => {
+const PreviewQuizOverlay = forwardRef<HTMLDivElement, Props>(({ onClose, data }, ref) => {
   const questions: RawQuestion[] = data || [];
   const total = questions.length;
 
   useEffect(() => {
-    console.log(questions)
-  } ,[])
-  // Start centered at 0 if there are questions
+    console.log(questions);
+  }, []);
+
   const [current, setCurrent] = useState<number>(questions.length ? 0 : 0);
 
-  // Keep editedQuestions as a copy of the original shape but editable
   const [editedQuestions, setEditedQuestions] = useState<
     (RawQuestion & { correctOrder?: number })[]
   >(() =>
     questions.map((q) => ({
       ...q,
-      // ensure we have the same option objects (so id + order preserved)
       options: q.options.map((o) => ({ ...o })),
-      // correctOrder derives from question.order (per your rule)
       correctOrder: q.order ?? undefined,
     }))
   );
 
-  // If `data` changes, re-init editedQuestions (optional, adjust if you want to preserve edits)
   useEffect(() => {
     setEditedQuestions(
       questions.map((q) => ({
@@ -51,11 +48,9 @@ const PreviewQuizOverlay: React.FC<{ onClose: () => void; data: RawQuestion[] ; 
         correctOrder: q.order ?? undefined,
       }))
     );
-    // reset current safely
     if (questions.length) setCurrent(0);
   }, [data]);
 
-  // Keyboard nav
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft" && current > 0) setCurrent((s) => s - 1);
@@ -65,195 +60,182 @@ const PreviewQuizOverlay: React.FC<{ onClose: () => void; data: RawQuestion[] ; 
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [current, total]);
 
-  // Small QuestionCard component (keeps local edit state)
-const QuestionCard: React.FC<{
-  q: RawQuestion & { correctOrder?: number };
-  idx: number;
-  active?: boolean;
-}> = ({ q, idx, active }) => {
-  // Local editable copy
-  const [localQ, setLocalQ] = useState<RawQuestion & { correctOrder?: number }>({
-    ...q,
-    options: q.options.map((o) => ({ ...o })),
-    correctOrder: q.correctOrder,
-  });
-
-  const [isEditing, setIsEditing] = useState(false); // new toggle for editing
-
-  // Keep localQ in sync when parent q changes
-  useEffect(() => {
-    setLocalQ({
+  const QuestionCard: React.FC<{
+    q: RawQuestion & { correctOrder?: number };
+    idx: number;
+    active?: boolean;
+  }> = ({ q, idx, active }) => {
+    const [localQ, setLocalQ] = useState<RawQuestion & { correctOrder?: number }>({
       ...q,
       options: q.options.map((o) => ({ ...o })),
       correctOrder: q.correctOrder,
     });
-  }, [q]);
 
-  // edit handlers
-  const handleOptionChange = (optIdx: number, value: string) => {
-    setLocalQ((lq) => {
-      const newOpts = lq.options.map((o, i) =>
-        i === optIdx ? { ...o, option_text: value } : o
-      );
-      return { ...lq, options: newOpts };
-    });
-  };
+    const [isEditing, setIsEditing] = useState(false);
 
-  const handleQuestionChange = (value: string) => {
-    setLocalQ((lq) => ({ ...lq, text: value }));
-  };
+    useEffect(() => {
+      setLocalQ({
+        ...q,
+        options: q.options.map((o) => ({ ...o })),
+        correctOrder: q.correctOrder,
+      });
+    }, [q]);
 
-  // Mark a specific option as the correct one by using its `order`
-  const handleCorrectChange = (optIdx: number) => {
-    const selected = localQ.options[optIdx];
-    if (!selected) return;
-    setLocalQ((lq) => ({ ...lq, correctOrder: selected.order }));
-  };
+    const handleOptionChange = (optIdx: number, value: string) => {
+      setLocalQ((lq) => {
+        const newOpts = lq.options.map((o, i) =>
+          i === optIdx ? { ...o, option_text: value } : o
+        );
+        return { ...lq, options: newOpts };
+      });
+    };
 
-  // Save local changes back into top-level editedQuestions
-  const handleDone = () => {
-    setEditedQuestions((prev) => {
-      const copy = [...prev];
-      copy[idx] = {
-        ...copy[idx],
-        text: localQ.text,
-        options: copy[idx].options.map((origOpt, i) => ({
-          ...origOpt,
-          option_text: localQ.options[i]?.option_text ?? origOpt.option_text,
-        })),
-        correctOrder: localQ.correctOrder,
-      };
-      return copy;
-    });
-    setIsEditing(false); // exit edit mode
-  };
+    const handleQuestionChange = (value: string) => {
+      setLocalQ((lq) => ({ ...lq, text: value }));
+    };
 
-  // find displayed answer text
-  const answerOption = localQ.options.find((o) => o.order === localQ.correctOrder);
+    const handleCorrectChange = (optIdx: number) => {
+      const selected = localQ.options[optIdx];
+      if (!selected) return;
+      setLocalQ((lq) => ({ ...lq, correctOrder: selected.order }));
+    };
 
-  return (
-    <div
-      className={`
+    const handleDone = () => {
+      setEditedQuestions((prev) => {
+        const copy = [...prev];
+        copy[idx] = {
+          ...copy[idx],
+          text: localQ.text,
+          options: copy[idx].options.map((origOpt, i) => ({
+            ...origOpt,
+            option_text: localQ.options[i]?.option_text ?? origOpt.option_text,
+          })),
+          correctOrder: localQ.correctOrder,
+        };
+        return copy;
+      });
+      setIsEditing(false);
+    };
+
+    const answerOption = localQ.options.find((o) => o.order === localQ.correctOrder);
+
+    return (
+      <div
+        ref={undefined}
+        className={`
         bg-white rounded-xl shadow-lg flex flex-col relative
         ${active ? "w-[370px] min-h-[540px] max-h-[90vh] z-10" : "w-[220px] min-h-[340px] opacity-60 scale-90 z-0"}
         transition-all duration-200
       `}
-      style={{
-        border: active ? "1.5px solid #E0E0E0" : "1px solid #E0E0E0",
-        boxShadow: active ? "0 8px 32px 0 rgba(60,60,60,0.18)" : "0 2px 8px 0 rgba(60,60,60,0.10)",
-      }}
-    >
-      <div className="p-4 pb-2 border-b border-[#C3C6CF] flex items-center justify-between">
-        <span className="font-semibold text-[#1A1C1E]">{q.id}</span>
-        {active && (
-          <button
-            className="w-8 h-8 flex items-center justify-center bg-[#ECEDF4] rounded-full hover:bg-[#d1d3db] transition"
-            onClick={() => setIsEditing((prev) => !prev)}
-            aria-label="Toggle Edit"
-          >
-            {isEditing ? "✏️" : "📝"}
-          </button>
-        )}
-      </div>
+        style={{
+          border: active ? "1.5px solid #E0E0E0" : "1px solid #E0E0E0",
+          boxShadow: active ? "0 8px 32px 0 rgba(60,60,60,0.18)" : "0 2px 8px 0 rgba(60,60,60,0.10)",
+        }}
+      >
+        <div className="p-4 pb-2 border-b border-[#C3C6CF] flex items-center justify-between">
+          <span className="font-semibold text-[#1A1C1E]">{q.id}</span>
+          {active && (
+            <button
+              className="w-8 h-8 flex items-center justify-center bg-[#ECEDF4] rounded-full hover:bg-[#d1d3db] transition"
+              onClick={() => setIsEditing((prev) => !prev)}
+              aria-label="Toggle Edit"
+            >
+              {isEditing ? "✏️" : "📝"}
+            </button>
+          )}
+        </div>
 
-      <div className={`p-4 flex-1 overflow-y-auto ${active ? "" : "pb-0"}`}>
-        <div className="text-xs text-[#73777F] mb-2">
-          {active && <span className="font-semibold text-[#1A1C1E]">Preview Question</span>}
+        <div className={`p-4 flex-1 overflow-y-auto ${active ? "" : "pb-0"}`}>
+          <div className="text-xs text-[#73777F] mb-2">
+            {active && <span className="font-semibold text-[#1A1C1E]">Preview Question</span>}
 
-          <div className="mt-1">
-            {
-              localQ.image_url && (
-                <img src={localQ.image_url} className="w-full h-32"></img>
-              )
-            }
-            {active && isEditing ? (
-              <textarea
-                className="w-full border rounded p-1 text-xs"
-                value={localQ.text}
-                onChange={(e) => handleQuestionChange(e.target.value)}
-                rows={2}
-              />
-            ) : (
-              localQ.text
-            )}
+            <div className="mt-1">
+              {localQ.image_url && <img src={localQ.image_url} className="w-full h-32"></img>}
+              {active && isEditing ? (
+                <textarea
+                  className="w-full border rounded p-1 text-xs"
+                  value={localQ.text}
+                  onChange={(e) => handleQuestionChange(e.target.value)}
+                  rows={2}
+                />
+              ) : (
+                localQ.text
+              )}
+            </div>
           </div>
-        </div>
 
-        <div className="mb-2 text-xs font-medium text-[#1A1C1E]">
-          {active && "Select an answer as correct"}
-        </div>
+          <div className="mb-2 text-xs font-medium text-[#1A1C1E]">
+            {active && "Select an answer as correct"}
+          </div>
 
-        <div className="flex flex-col gap-2">
-          {localQ.options.map((opt, oidx) => {
-            const isCorrect = opt.order === localQ.correctOrder;
-            return (
-              <div
-                key={opt.id ?? oidx}
-                className={`
+          <div className="flex flex-col gap-2">
+            {localQ.options.map((opt, oidx) => {
+              const isCorrect = opt.order === localQ.correctOrder;
+              return (
+                <div
+                  key={opt.id ?? oidx}
+                  className={`
                   flex items-center rounded px-2 py-2 text-xs
                   ${isCorrect ? "bg-[#D4F3E3]" : "bg-[#F8F9FF]"}
                   ${isCorrect ? "border-l-4 border-[#1ABC9C]" : ""}
                 `}
-              >
-                <span
-                  className={`
+                >
+                  <span
+                    className={`
                     mr-2 w-6 h-6 flex items-center justify-center rounded-full font-bold cursor-pointer
                     ${isCorrect ? "bg-[#1ABC9C] text-white" : "bg-[#E0E0E0] text-[#73777F]"}
                   `}
-                  onClick={() => {
-                    if (active && isEditing) handleCorrectChange(oidx);
-                  }}
-                  style={{ userSelect: "none" }}
-                >
-                  {String.fromCharCode(65 + oidx)}
-                </span>
+                    onClick={() => {
+                      if (active && isEditing) handleCorrectChange(oidx);
+                    }}
+                    style={{ userSelect: "none" }}
+                  >
+                    {String.fromCharCode(65 + oidx)}
+                  </span>
 
-                {active && isEditing ? (
-                  <input
-                    className="truncate border rounded px-1 py-0.5 text-xs w-full"
-                    value={opt.option_text}
-                    onChange={(e) => handleOptionChange(oidx, e.target.value)}
-                  />
-                ) : (
-                  <span className="truncate">{opt.option_text}</span>
-                )}
-              </div>
-            );
-          })}
+                  {active && isEditing ? (
+                    <input
+                      className="truncate border rounded px-1 py-0.5 text-xs w-full"
+                      value={opt.option_text}
+                      onChange={(e) => handleOptionChange(oidx, e.target.value)}
+                    />
+                  ) : (
+                    <span className="truncate">{opt.option_text}</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-4 text-xs  ">
+            <p className="text-sm text-[#73777F] font-semibold">Explanation</p>
+            {localQ.explanation}
+          </div>
         </div>
 
-        <div className="mt-4 text-xs  ">
-          <p className="text-sm text-[#73777F] font-semibold">Explanation</p>
-          { localQ.explanation}
+        <div className="px-4 pb-4 text-xs text-[#73777F]">
+          <div>
+            <span className="font-semibold">Answer</span>
+            <div>{answerOption?.option_text ?? "—"}</div>
+          </div>
         </div>
+
+        {active && isEditing && (
+          <div className="px-4 pb-4 flex justify-end gap-2">
+            <button
+              className="bg-[#0360AB] text-white px-4 py-1 rounded text-xs"
+              onClick={handleDone}
+            >
+              Done
+            </button>
+          </div>
+        )}
       </div>
+    );
+  };
 
-      <div className="px-4 pb-4 text-xs text-[#73777F]">
-        <div>
-          <span className="font-semibold">Answer</span>
-          <div>{answerOption?.option_text ?? "—"}</div>
-        </div>
-      </div>
-
-      {active && isEditing && (
-        <div className="px-4 pb-4 flex justify-end gap-2">
-          <button
-            className="bg-[#0360AB] text-white px-4 py-1 rounded text-xs"
-            onClick={handleDone}
-          >
-            Done
-          </button>
-        </div>
-      )}
-    </div>
-  );
-};
-
-
-  // only render if there are questions
   if (!questions.length) return null;
 
-  // carousel windowing logic (same as your original)
   const renderWindow = () => {
     const windowSize = 5;
     let start = Math.max(0, current - 2);
@@ -283,6 +265,7 @@ const QuestionCard: React.FC<{
 
   return (
     <div
+      ref={ref}
       className="fixed inset-0 z-[2000] flex flex-col justify-center items-center"
       style={{
         background: "#000000CC",
@@ -327,7 +310,6 @@ const QuestionCard: React.FC<{
             <FaAngleLeft />
           </button>
 
-          {/* simple pagination — you can reuse your previous logic if you like */}
           {Array.from({ length: total }).map((_, i) => (
             <button
               key={i}
@@ -365,6 +347,6 @@ const QuestionCard: React.FC<{
       </div>
     </div>
   );
-};
+});
 
 export default PreviewQuizOverlay;

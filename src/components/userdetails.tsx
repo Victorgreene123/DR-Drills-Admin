@@ -12,7 +12,7 @@ import { RiSendPlane2Line } from "react-icons/ri";
 import { GrDownload } from "react-icons/gr";
 import { BiTrash } from "react-icons/bi";
 
-interface QuizDetailsPanelProps {
+interface UserDetailsPanelProps {
   id: any;
   data: any[];
   details: any;
@@ -44,7 +44,7 @@ interface QuizDetailsPanelProps {
 //                 "is_top_score": 1
 //             },
 
-const QuizDetailsPanel = forwardRef<HTMLDivElement, QuizDetailsPanelProps>(
+const UserDetailsPanel = forwardRef<HTMLDivElement, UserDetailsPanelProps>(
   (
     {
       id,
@@ -63,16 +63,16 @@ const QuizDetailsPanel = forwardRef<HTMLDivElement, QuizDetailsPanelProps>(
     const [view, setView] = useState<"details" | "leaderboard">("details");
 
     if (!dataItem) return null;
-
+    console.log(dataItem)
     return (
       <div
         ref={ref}   // 🎯 REQUIRED
-        className="absolute top-1/8 right-20 h-[438px] w-[410px] bg-white rounded-[8px] shadow-lg border-[1px] border-[#C3C6CF] z-[1500] flex flex-col"
+        className="absolute top-1/8 right-20 h-[85vh] w-[410px] bg-white rounded-[8px] shadow-lg border-[1px] border-[#C3C6CF] z-[1500] flex flex-col"
       >
       {/* Header */}
-      <div className="w-full p-2 bg-[#F8F9FF] border-t-[1px] relative rounded-t-[8px] border-[#C3C6CF]">
+      <div className="w-full p-2 bg-[#F8F9FF] border-y-[1px] relative rounded-t-[8px] border-[#C3C6CF]">
         <h2 className="text-center font-semibold text-[18px]">
-          {view === "details" ? "Quiz Details" : "Leader Board"}
+          {view === "details" ? "User Details" : "Leader Board"}
         </h2>
         <button
           onClick={onClose}
@@ -83,12 +83,16 @@ const QuizDetailsPanel = forwardRef<HTMLDivElement, QuizDetailsPanelProps>(
         </button>
       </div>
 
-      <div className="w-full gap-4 flex items-start px-4">
-            <div className="flex-1 items-start">
+      <div className="w-full gap-4 flex items-start px-4 mt-2">
+            <div className="flex items-center gap-3">
+            <img src={dataItem?.image ?? badge} alt="" className="w-12 h-12 rounded-full" />
+              <div>
               <h2 className="text-[#1A1C1E] text-[18px] font-semibold mb-1">{dataItem.title}</h2>
-              <span className="bg-[#ECEDF4] rounded-[4px] py-[2px] font-[400] px-[8px] text-xs">{dataItem.course}</span>
+              <h3>{dataItem.email}</h3>
+
+              </div>
+            
             </div>
-            <img src={details?.thumbnail ?? badge} alt="" className="w-10 h-10" />
           </div>
 
       {/* Main view switch */}
@@ -98,22 +102,7 @@ const QuizDetailsPanel = forwardRef<HTMLDivElement, QuizDetailsPanelProps>(
           
 
           {/* Stats */}
-          <div className="mt-2 text-[#73777F] text-[14px] flex flex-wrap gap-2 items-center">
-            <span>{dataItem.questions} questions</span> <GoDotFill />
-            <span>Negative: {details?.negative_marking ?? "-0.5"}</span> <GoDotFill />
-            <span>{dataItem.type}</span>
-          </div>
-
-
-
-        <div className="text-[#73777F] text-[14px] flex flex-wrap gap-2 items-center mt-1">
-          <span>{dataItem.source}</span> <GoDotFill />
-          <span>{dataItem.year}</span>
-        </div>
-
-        <div className="text-[#73777F] text-[14px] mt-2">
-          Uploaded: {dataItem.uploaded ?? "1 August 2026"}
-        </div>
+         
 
         {/* Tags */}
         {loadingDetails ? (
@@ -228,4 +217,4 @@ const QuizDetailsPanel = forwardRef<HTMLDivElement, QuizDetailsPanelProps>(
 });
 
 
-export default QuizDetailsPanel;
+export default UserDetailsPanel;

@@ -84,7 +84,7 @@ const menuRef = useRef<HTMLDivElement | null>(null);
       useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
           if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-            setShowPreview(false);
+            setIsDetailsShown(false);
           }
         }
     
@@ -358,7 +358,7 @@ onClick={() => {
 )}
 
 {showPreview && (
-      <div className="w-auto" ref={menuRef}>
+      <div className="w-auto" >
 
       
         <PreviewQuizOverlay onClose={() => setShowPreview(false)}  data={details?.preview_questions} />
