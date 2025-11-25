@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import Stats from "../components/stats";
 import { useParams } from "react-router-dom";
 import { FaPlus } from "react-icons/fa6";
-import AddQuizzesToBlockModal from "../components/quizblocks/AddQuizzesToBlockModal";
 import blockPic from "../assets/Bank Picture.png"
 import AddLectures from "../components/popups/AddLecturePopup";
 
@@ -112,7 +111,7 @@ const ViewLectureBlockScreen: React.FC = () => {
   const quizBlock = quizzes.find(qb => qb.id === Number(id));
 
   const [showPopup , setShowPopup] = useState(false);
-  const [selected , setSelected] = useState<any[]>([]); // selected quizzes for the modal
+  const [ , setSelected] = useState<any[]>([]); // selected quizzes for the modal
   const closePopup = () => {
     setShowPopup(false)
   }

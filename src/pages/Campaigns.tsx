@@ -1,5 +1,4 @@
 import Stats from "../components/stats";
-import QuizzesTable from "../components/QuizzesTable";
 import addIcon from "../assets/add icon.png";
 import MailIcon from "../assets/mailIcon.png";
 import RightArrowIcon from "../assets/rightArrowIcon.png";
@@ -9,6 +8,7 @@ import Filters from "../components/Filters"; // ← Reusable + Fixed!
 import { useState } from "react";
 import PopUp from "../components/popups/PopUp";
 import { FiChevronRight } from "react-icons/fi";
+import CampaignsTable from "../components/CampaignsTable";
 
 const Campaigns = () => {
   const data = [
@@ -142,7 +142,7 @@ const Campaigns = () => {
 
         {/* Table with filtered data */}
         <div className="mt-6">
-          <QuizzesTable
+          <CampaignsTable
             data={filteredData}
             tableheads={["Live Posts", "Type", "Recipients", "Status", "Time/Date", "Clicks"]}
             ids={["livePosts", "type", "recipients", "status", "timeDate", "clicks"]}

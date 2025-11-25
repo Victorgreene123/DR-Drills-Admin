@@ -13,7 +13,7 @@ interface CampaignsTableProps {
   tableheads: string[];
   currentPage?: number; // ✅ controlled from parent
   totalPages?: number; // ✅ from API
-  onPageChange: (page: number) => void;
+  onPageChange?: (page: number) => void;
   initialRowsPerPage: number; // ✅ parent handles pagination
   // rowsPerPage?: number;
   renderCell?: Record<string, (row: Record<string, any>) => React.ReactNode>;
