@@ -1,10 +1,10 @@
 import Stats from "../components/stats";
 import addIcon from "../assets/add icon.png";
 import Pfp from "../assets/Users pfp.png";
-import QuizzesTable from "../components/QuizzesTable";
 import PopUp from "../components/popups/PopUp";
 import Filters from "../components/Filters";
 import { useState } from "react";
+import SubscriptionsTable from "../components/SubscriptionsTable";
 
 const Subscriptions = () => {
   const data = [
@@ -56,7 +56,7 @@ const Subscriptions = () => {
   const maxLength = 100;
 
   // Search + Filters state
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm] = useState("");
   const [activeFilters, setActiveFilters] = useState<{ type: string; value: string }[]>([]);
 
   // ──────────────────────────────────────────────────────────────
@@ -138,7 +138,7 @@ const Subscriptions = () => {
           // onSearchChange={setSearchTerm}   // assuming your Filters component supports search
         />
 
-        <QuizzesTable
+        <SubscriptionsTable
           data={filteredData}  
           tableheads={["User", "Plan", "Status", "Date"]}
           ids={["title", "plan", "status", "date"]}

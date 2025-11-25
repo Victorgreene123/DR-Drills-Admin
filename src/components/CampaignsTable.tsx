@@ -11,10 +11,11 @@ interface CampaignsTableProps {
   data: Array<Record<string, any>>;
   ids: string[];
   tableheads: string[];
-  currentPage: number; // ✅ controlled from parent
-  totalPages: number; // ✅ from API
-  onPageChange: (page: number) => void; // ✅ parent handles pagination
-  rowsPerPage?: number;
+  currentPage?: number; // ✅ controlled from parent
+  totalPages?: number; // ✅ from API
+  onPageChange: (page: number) => void;
+  initialRowsPerPage: number; // ✅ parent handles pagination
+  // rowsPerPage?: number;
   renderCell?: Record<string, (row: Record<string, any>) => React.ReactNode>;
 }
 
@@ -23,8 +24,8 @@ const CampaignsTable: React.FC<CampaignsTableProps> = ({
   ids,
   tableheads,
   currentPage,
-  totalPages,
-  onPageChange,
+  totalPages = 1,
+  onPageChange = () => console.log("Page Change"),
   // rowsPerPage = 10,
   renderCell = {},
 }) => {

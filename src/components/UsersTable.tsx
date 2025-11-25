@@ -5,17 +5,16 @@ import thumbnail from "../assets/thumbnail-1.png";
 
 import PreviewQuizOverlay from "./PreviewQuizOverlay";
 import { useApi } from "../hooks/useApi";
-import QuizDetailsPanel from "./quizdetails";
 import UserDetailsPanel from "./userdetails";
 
 interface UsersTableProps {
   data: Array<Record<string, any>>;
   ids: string[];
   tableheads: string[];
-  currentPage: number; // ✅ controlled from parent
-  totalPages: number; // ✅ from API
-  onPageChange: (page: number) => void; // ✅ parent handles pagination
-  rowsPerPage?: number;
+  currentPage?: number; // ✅ controlled from parent
+  totalPages?: number; // ✅ from API
+  onPageChange?: (page: number) => void; // ✅ parent handles pagination
+  initialRowsPerPage?: number;
   renderCell?: Record<string, (row: Record<string, any>) => React.ReactNode>;
 }
 
@@ -24,8 +23,8 @@ const UsersTable: React.FC<UsersTableProps> = ({
   ids,
   tableheads,
   currentPage,
-  totalPages,
-  onPageChange,
+  totalPages = 1,
+  onPageChange = () => console.log("Page change"),
   // rowsPerPage = 10,
   renderCell = {},
 }) => {

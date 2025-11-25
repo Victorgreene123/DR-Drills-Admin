@@ -6,7 +6,7 @@
 import { useState } from "react";
 import  { forwardRef } from "react";
 import { LiaTimesSolid } from "react-icons/lia";
-import { GoDotFill } from "react-icons/go";
+
 import { FaChevronRight } from "react-icons/fa";
 import { RiSendPlane2Line } from "react-icons/ri";
 import { GrDownload } from "react-icons/gr";
