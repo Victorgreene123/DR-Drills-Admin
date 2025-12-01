@@ -3,7 +3,6 @@ import badge from "../assets/bxs_badge.png";
 
 import thumbnail from "../assets/thumbnail-1.png";
 
-import PreviewQuizOverlay from "./PreviewQuizOverlay";
 import { useApi } from "../hooks/useApi";
 import UserDetailsPanel from "./userdetails";
 
@@ -35,7 +34,6 @@ const UsersTable: React.FC<UsersTableProps> = ({
 
   const [isDetailsShown, setIsDetailsShown] = useState(false);
   const [selectedQuiz, setSelectedQuiz] = useState<any>();
-  const [showPreview, setShowPreview] = useState(false);
   const {apiFetch }= useApi()
 
   // ✅ Pagination is now controlled externally
@@ -55,8 +53,9 @@ const UsersTable: React.FC<UsersTableProps> = ({
 const fetchQuizDetails = async (id: any) => {
   try {
     setLoadingDetails(true);
-    const res = await apiFetch(`/api/admin/quiz/details/${id}`);
+    const res = await apiFetch(`/api/admin/users/${id}`);
     const data = await res.json();
+    // console.log(data)
     setDetails(data?.data);
 
   } catch (error) {
@@ -171,21 +170,14 @@ onClick={() => {
     details={details}
     loadingDetails={loadingDetails}
     onClose={() => setIsDetailsShown(false)}
-    onPreview={() => setShowPreview(true)}
     badge={badge}
     thumbnail={thumbnail}
-    leaderboard={leaderboard}
+    payment_history={leaderboard}
         ref={menuRef}
   />  
 )}
 
-{showPreview && (
-      <div className="w-auto" >
 
-      
-        <PreviewQuizOverlay onClose={() => setShowPreview(false)}  data={details?.preview_questions} />
-          </div>
-      )}
 
     </div>
   );

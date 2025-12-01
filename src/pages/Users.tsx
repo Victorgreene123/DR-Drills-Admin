@@ -39,6 +39,10 @@ const Users = () => {
               day: 'numeric',
             })
           : 'Never',
+        premium : user.premium,
+        dept: user.dept,
+        level : user.level,
+        university: user.university
       }));
       setUsers(mappedUsers);
     } catch (error) {
@@ -122,6 +126,7 @@ const Users = () => {
         {/* Table with filtered data */}
         <div className="mt-6">
           <UsersTable
+          
             data={filteredData}
             tableheads={["User", "Email", "Plan", "Last Seen"]}
             ids={["title", "email", "plan", "lastSeen"]}

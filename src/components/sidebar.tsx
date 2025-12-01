@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
-import { FaChevronDown  , FaChevronRight, FaChevronUp, FaHeart, FaMoneyCheckAlt, FaRegHeart, FaRegUserCircle } from "react-icons/fa";
+import {  FaHeart, FaMoneyCheckAlt, FaRegHeart, FaRegUserCircle } from "react-icons/fa";
 import pfp from '../assets/pfp.jpg'
 import { BsWindowSidebar } from "react-icons/bs";
 import { PiVideoCameraThin } from "react-icons/pi";
 import { RiBarChartBoxLine } from "react-icons/ri";
 import {  MdOutlineCampaign } from "react-icons/md";
 import { IoMdSettings } from "react-icons/io";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import UploadLecturePopupFlow from "./popups/UploadLecturePopupFlow";
 import CreateLectureBlockPopup from "./popups/CreateLectureBlockPopup";
 import CreateLectureBankPopup from "./popups/CreateLectureBankPopup";
@@ -17,25 +17,26 @@ import { useAuth } from "../context/authcontext";
 const Sidebar: React.FC = () => {
 
 
-const menuRef = useRef<HTMLDivElement | null>(null);
+// const menuRef = useRef<HTMLDivElement | null>(null);
 
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setCreateClicked(false);
-      }
-    }
+  // useEffect(() => {
+  //   function handleClickOutside(event: MouseEvent) {
+  //     if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+  //       setCreateClicked(false);
+  //     }
+  //   }
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-    const [isCreateClicked , setCreateClicked] = useState(false)
-        const clickCreate = () =>{
-            setCreateClicked(!isCreateClicked)
-        }
+  //   document.addEventListener("mousedown", handleClickOutside);
+  //   return () => document.removeEventListener("mousedown", handleClickOutside);
+  // }, []);
+    // const [isCreateClicked , setCreateClicked] = useState(false)
+        // const clickCreate = () =>{
+        //     setCreateClicked(!isCreateClicked)
+        // }
     const profileMenuRef = useRef<HTMLDivElement | null>(null);
-
+    const location = useLocation();
+    
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -66,7 +67,7 @@ const menuRef = useRef<HTMLDivElement | null>(null);
                 id: 1,
                 label : "Dashboard",
                 icon : [<BsWindowSidebar />],
-                link: "/"
+                link: "dashboard"
             },
               {
                 id: 2,
@@ -110,7 +111,7 @@ const menuRef = useRef<HTMLDivElement | null>(null);
   return (
     <aside className="w-full h-full relative bg-[#F2F3FA] border-[1px] border-[#C3C6CF]  space-y-3  box-border">
      
-      <div className="relative px-2 w-full"  ref={menuRef}>
+      {/* <div className="relative px-2 w-full"  ref={menuRef}>
       
       <button className="bg-[#0360AB] mx-3 mt-3 rounded-[36px] w-[112px] h-[48px] text-white flex items-center justify-between box-border px-5 " onClick={clickCreate}>
         Create
@@ -157,21 +158,22 @@ const menuRef = useRef<HTMLDivElement | null>(null);
                 </div>
             )
         }
-      </div>
+      </div> */}
       
-      <nav>
-        <ul className="list-none space-y-[3px] p-0">
+      <nav className="mt-12">
+        <ul className="list-none space-y-[3px] p-0 ">
             {
                 sidebarArr.map((item) =>{
+                    const isActive = location.pathname.includes(item.link)
                     return (
                         <Link to={`${item.link}`} key={item.id}>
                         <li
   key={item.id}
-  className="group flex gap-4 text-black items-center w-full 
+  className={`${isActive && "border-l-[3px] border-[#0360AB] bg-[#D4E3FF]"} group flex gap-4 text-black items-center w-full 
              hover:bg-[#D4E3FF] 
              transition-all duration-300 ease-in-out
              hover:border-l-[3px] hover:border-[#0360AB] 
-             py-2 px-4 box-border border-l-[0px] border-transparent"
+             py-2 px-4 box-border `}
 >
                             <span className={`text-xl group-hover:text-[#004883] ${item.icon[1]? "group-hover:hidden" : " " }`}>{item.icon[0]}</span>
                             {

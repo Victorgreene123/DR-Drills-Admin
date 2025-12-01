@@ -294,7 +294,7 @@ const Settings:React.FC = () =>{
         )
 
   }
-    const [currentView , setCurrentView] = useState("general");
+    const [currentView , setCurrentView] = useState("profile");
     const renderView = () =>{
           switch (currentView) {
             case "roles":
@@ -322,7 +322,7 @@ const Settings:React.FC = () =>{
 
             {/* General , Profile and Roles and permissions  */}
             <ul className="flex flex-col gap-1 w-full   text-[#1A1C1E] text-[14px] font-[400]">
-                <li className={`px-[10px] cursor-pointer py-[6px] hover:bg-[#F2F3FA]  ${currentView == "general" && "bg-[#F2F3FA]"} rounded-[4px] `} onClick={() => setCurrentView("general")}>General</li>
+
                 <li className={`px-[10px] cursor-pointer py-[6px] rounded-[4px] hover:bg-[#F2F3FA] ${currentView == "profile" && "bg-[#F2F3FA]"}`} onClick={() => setCurrentView("profile")}>Profile</li>
                 <li className={`px-[10px] cursor-pointer py-[6px] rounded-[4px] hover:bg-[#F2F3FA] ${currentView == "roles" && "bg-[#F2F3FA]"}`} onClick={() => setCurrentView("roles")}>Roles and permissions</li>
                 

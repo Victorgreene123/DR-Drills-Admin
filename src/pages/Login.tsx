@@ -24,7 +24,12 @@ const Login: React.FC = () => {
   })
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
+    <div className="flex flex-col min-h-screen items-center justify-center bg-gray-100">
+      <div className="flex items-baseline mx-auto w-auto gap-3 mb-3">
+  <img src={logo} alt="Logo" className="h-10 w-auto" />
+  <h2 className="text-[40px] font-bold text-[#004883]">Admin Panel</h2>
+</div>
+
       <div
         className="w-full max-w-md rounded-lg bg-white p-8"
         style={{
@@ -33,10 +38,7 @@ const Login: React.FC = () => {
         }}
       >
         {/* Title */}
-        <div className="flex items-center mx-auto w-[50%] gap-3  mb-3">
-              <img src={logo} alt="" className='flex '/>
-        <h2 className="text-3xl font-bold text-[#004883]">Admin Panel</h2>
-        </div>
+
 
         <h2 className="text-2xl font-bold text-[#004883]">Sign In</h2>
         <p className="mt-1 text-sm text-gray-600">

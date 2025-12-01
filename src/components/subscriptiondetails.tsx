@@ -6,11 +6,9 @@
 import { useState } from "react";
 import  { forwardRef } from "react";
 import { LiaTimesSolid } from "react-icons/lia";
-import { GoDotFill } from "react-icons/go";
-import { FaChevronRight } from "react-icons/fa";
-import { RiSendPlane2Line } from "react-icons/ri";
-import { GrDownload } from "react-icons/gr";
-import { BiTrash } from "react-icons/bi";
+// import { GoDotFill } from "react-icons/go";
+
+import { LuMailPlus } from "react-icons/lu";
 
 interface QuizDetailsPanelProps {
   id: any;
@@ -18,7 +16,7 @@ interface QuizDetailsPanelProps {
   details: any;
   loadingDetails: boolean;
   onClose: () => void;
-  onPreview: () => void;
+  onPreview?: () => void;
   badge?: string;
   thumbnail?: string;
   leaderboard: any [];
@@ -44,7 +42,7 @@ interface QuizDetailsPanelProps {
 //                 "is_top_score": 1
 //             },
 
-const QuizDetailsPanel = forwardRef<HTMLDivElement, QuizDetailsPanelProps>(
+const SubscriptionDetailsPanel = forwardRef<HTMLDivElement, QuizDetailsPanelProps>(
   (
     {
       id,
@@ -52,9 +50,7 @@ const QuizDetailsPanel = forwardRef<HTMLDivElement, QuizDetailsPanelProps>(
       details,
       loadingDetails,
       onClose,
-      onPreview,
       badge,
-      thumbnail,
       leaderboard,
     },
     ref
@@ -67,12 +63,12 @@ const QuizDetailsPanel = forwardRef<HTMLDivElement, QuizDetailsPanelProps>(
     return (
       <div
         ref={ref}   // 🎯 REQUIRED
-        className="absolute top-1/8 right-20 h-[438px] w-[410px] bg-white rounded-[8px] shadow-lg border-[1px] border-[#C3C6CF] z-[1500] flex flex-col"
+        className="absolute top-0 right-20 h-[85vh] w-[410px] bg-white rounded-[8px] shadow-lg border-[1px] border-[#C3C6CF] z-[1500] flex flex-col"
       >
       {/* Header */}
       <div className="w-full p-2 bg-[#F8F9FF] border-t-[1px] relative rounded-t-[8px] border-[#C3C6CF]">
         <h2 className="text-center font-semibold text-[18px]">
-          {view === "details" ? "Quiz Details" : "Leader Board"}
+          {view === "details" ? "Subscription Details" : "Leader Board"}
         </h2>
         <button
           onClick={onClose}
@@ -83,12 +79,17 @@ const QuizDetailsPanel = forwardRef<HTMLDivElement, QuizDetailsPanelProps>(
         </button>
       </div>
 
-      <div className="w-full gap-4 flex items-start px-4">
-            <div className="flex-1 items-start">
-              <h2 className="text-[#1A1C1E] text-[18px] font-semibold mb-1">{dataItem.title}</h2>
-              <span className="bg-[#ECEDF4] rounded-[4px] py-[2px] font-[400] px-[8px] text-xs">{dataItem.course}</span>
+      <div className="w-full gap-4 flex items-start px-4 mt-2">
+            <div className={`flex items-center gap-3`}>
+            <img src={dataItem?.image ?? badge} alt="" className={`w-12 h-12 rounded-full ${dataItem.premium == 1 && "border-4 border-[#004883]"}`} />
+              <div>
+              <h2 className="text-[#1A1C1E] text-[18px] font-semibold leading-tight" >{dataItem.title}</h2>
+              <h5 className="text-[#43474E] flex items-center gap-2">{dataItem.email} <LuMailPlus /></h5>
+              <h6 className="text-[12px] text-[#73777F]">Last Seen : {dataItem.lastSeen || "Never"}</h6>
+
+              </div>
+            
             </div>
-            <img src={details?.thumbnail ?? badge} alt="" className="w-10 h-10" />
           </div>
 
       {/* Main view switch */}
@@ -97,23 +98,7 @@ const QuizDetailsPanel = forwardRef<HTMLDivElement, QuizDetailsPanelProps>(
           {/* Top Info */}
           
 
-          {/* Stats */}
-          <div className="mt-2 text-[#73777F] text-[14px] flex flex-wrap gap-2 items-center">
-            <span>{dataItem.questions} questions</span> <GoDotFill />
-            <span>Negative: {details?.negative_marking ?? "-0.5"}</span> <GoDotFill />
-            <span>{dataItem.type}</span>
-          </div>
-
-
-
-        <div className="text-[#73777F] text-[14px] flex flex-wrap gap-2 items-center mt-1">
-          <span>{dataItem.source}</span> <GoDotFill />
-          <span>{dataItem.year}</span>
-        </div>
-
-        <div className="text-[#73777F] text-[14px] mt-2">
-          Uploaded: {dataItem.uploaded ?? "1 August 2026"}
-        </div>
+        
 
         {/* Tags */}
         {loadingDetails ? (
@@ -152,39 +137,8 @@ const QuizDetailsPanel = forwardRef<HTMLDivElement, QuizDetailsPanelProps>(
           </div>
         </div>
 
-          {/* Leaderboard Button */}
-          <div className="mt-2">
-            <button
-              className="w-full flex items-center justify-between px-3 py-2 rounded bg-[#F8F9FF] text-[#1A1C1E] font-medium"
-              onClick={() => setView("leaderboard")}
-            >
-              Leader Board
-              <FaChevronRight />
-            </button>
-          </div>
+          
 
-          {/* Fast Track */}
-        <div className="mt-2">
-          <h3 className="text-[14px] font-[500]">Fast Track</h3>
-          <div className="flex items-center gap-2 my-2">
-            <img src={thumbnail} alt="user" className="w-[82px] h-[47px] rounded" />
-            <span className="text-xs text-[#73777F]">Introduction to Paris - 101</span>
-          </div>
-
-          <div className="mb-2">
-            <h3 className="text-[14px] font-[500]">Quiz Blocks</h3>
-            <div className="bg-[#F2F3FA] rounded px-3 py-2 mb-2">
-              <div className="font-medium text-xs text-[#1A1C1E]">{details?.block_name}</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Action List */}
-        <div className="p-2 space-y-2 mt-2">
-          <div className="flex items-center gap-3 text-[14px]"><RiSendPlane2Line className="text-[#73777F]" /><p className="text-black">Publish quiz</p></div>
-          <div className="flex items-center gap-3 text-[14px]"><GrDownload className="text-[#73777F]" /><p className="text-black">Download CSV</p></div>
-          <div className="flex items-center gap-3 text-[14px]"><BiTrash className="text-[#73777F]" /><p className="text-black">Delete quiz</p></div>
-        </div>
       </div>
 
 
@@ -213,19 +167,10 @@ const QuizDetailsPanel = forwardRef<HTMLDivElement, QuizDetailsPanelProps>(
         </div>
       )}
 
-      {/* Footer */}
-      {view === "details" && (
-        <div className="flex flex-col gap-2 py-4 px-4 border-t border-[#C3C6CF] bg-white sticky bottom-0">
-          <button className="w-full py-2 rounded bg-[#D4E3FF] text-[#0360AB] font-medium">Edit Quiz details</button>
-          <button className="w-full py-2 rounded bg-[#0360AB] text-white font-medium" onClick={onPreview}>
-            Preview Quiz
-          </button>
-        </div>
-      )}
-
+      
     </div>
   );
 });
 
 
-export default QuizDetailsPanel;
+export default SubscriptionDetailsPanel;

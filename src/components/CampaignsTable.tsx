@@ -1,11 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
-import badge from "../assets/bxs_badge.png";
+import React from "react";
+// import badge from "../assets/bxs_badge.png";
 
-import thumbnail from "../assets/thumbnail-1.png";
+// import thumbnail from "../assets/thumbnail-1.png";
 
-import PreviewQuizOverlay from "./PreviewQuizOverlay";
-import { useApi } from "../hooks/useApi";
-import QuizDetailsPanel from "./quizdetails";
+// import PreviewQuizOverlay from "./PreviewQuizOverlay";
+// import { useApi } from "../hooks/useApi";
+// import QuizDetailsPanel from "./quizdetails";
 
 interface CampaignsTableProps {
   data: Array<Record<string, any>>;
@@ -29,15 +29,13 @@ const CampaignsTable: React.FC<CampaignsTableProps> = ({
   // rowsPerPage = 10,
   renderCell = {},
 }) => {
-  const [details, setDetails] = useState<any>(null);
-  const [leaderboard, setLeaderboard] = useState<any []>([]);
-  const [loadingDetails, setLoadingDetails] = useState(false);
 
 
-  const [isDetailsShown, setIsDetailsShown] = useState(false);
-  const [selectedQuiz, setSelectedQuiz] = useState<any>();
-  const [showPreview, setShowPreview] = useState(false);
-  const {apiFetch }= useApi()
+
+  // const [isDetailsShown, setIsDetailsShown] = useState(false);
+
+  // const [showPreview, setShowPreview] = useState(false);
+  // const {apiFetch }= useApi()
 
   // ✅ Pagination is now controlled externally
   const handlePageChange = (page: number) => {
@@ -53,45 +51,21 @@ const CampaignsTable: React.FC<CampaignsTableProps> = ({
     }
     return pages;
   };
-const fetchQuizDetails = async (id: any) => {
-  try {
-    setLoadingDetails(true);
-    const res = await apiFetch(`/api/admin/quiz/details/${id}`);
-    const data = await res.json();
-    setDetails(data?.data);
 
-  } catch (error) {
-    console.error("An error has occurred");
-  } finally {
-    setLoadingDetails(false);
-  }
-};
 
-const fetchLeaderboard = async (id: any) => {
-  try {
-    // setLoadingDetails(true);
-    const res = await apiFetch(`/api/admin/quiz/leaderboard/${id}`);
-    const data = await res.json();
-    console.log(data)
-    setLeaderboard(data?.data.leaderboard);
-  } catch (error) {
-    console.error("An error has occurred");
-  } 
-}
-
-const menuRef = useRef<HTMLDivElement | null>(null);
+// const menuRef = useRef<HTMLDivElement | null>(null);
     
     
-      useEffect(() => {
-        function handleClickOutside(event: MouseEvent) {
-          if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-            setIsDetailsShown(false);
-          }
-        }
+      // useEffect(() => {
+      //   function handleClickOutside(event: MouseEvent) {
+      //     if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+      //       setIsDetailsShown(false);
+      //     }
+      //   }
     
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-      }, []);
+      //   document.addEventListener("mousedown", handleClickOutside);
+      //   return () => document.removeEventListener("mousedown", handleClickOutside);
+      // }, []);
 
 
   return (
@@ -118,13 +92,13 @@ const menuRef = useRef<HTMLDivElement | null>(null);
                   ? "cursor-pointer bg-white "
                   : "cursor-pointer bg-[#FAFAFA] hover:bg-[#F0F0F0] transition"
               }
-onClick={() => {
-  setSelectedQuiz(row["id"]);
-  setDetails(null); // ✅ Clear previous quiz data
-  setIsDetailsShown(true);
-  fetchQuizDetails(row["id"]);
-  fetchLeaderboard(row["id"]);
-}}
+// onClick={() => {
+//   setSelectedQuiz(row["id"]);
+//   setDetails(null); // ✅ Clear previous quiz data
+//   setIsDetailsShown(true);
+//   fetchQuizDetails(row["id"]);
+//   fetchLeaderboard(row["id"]);
+// }}
 
 
             >
@@ -162,7 +136,7 @@ onClick={() => {
         </div>
       </div>
 
-      {isDetailsShown && (
+      {/* {isDetailsShown && (
   <QuizDetailsPanel
     id={selectedQuiz}
     data={data}
@@ -183,7 +157,7 @@ onClick={() => {
       
         <PreviewQuizOverlay onClose={() => setShowPreview(false)}  data={details?.preview_questions} />
           </div>
-      )}
+      )} */}
 
     </div>
   );

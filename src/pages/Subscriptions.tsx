@@ -3,14 +3,39 @@ import addIcon from "../assets/add icon.png";
 import Pfp from "../assets/Users pfp.png";
 import PopUp from "../components/popups/PopUp";
 import Filters from "../components/Filters";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SubscriptionsTable from "../components/SubscriptionsTable";
+import { useApi } from "../hooks/useApi";
+import { LoadingAnimation } from "./QuizBlocksScreen";
+
+interface Subscription {
+  id: string;
+  email?: string;
+  image: string;
+  title: string ;
+  plan: string;
+  status: string;
+  lastSeen? : string
+  date : string;
+
+}
+
+interface SubscriptionSummary {
+  freePlan: number;
+  monthlyPremium: string ;
+  yearlyPremium : string;
+  avgMonthlySubscription: string;
+  totalSubscriptionsThisMonth: number;
+  subscriptionRate: string;
+
+}
 
 const Subscriptions = () => {
-  const data = [
+  const mockdata = [
     {
       id: 1,
       image: Pfp,
+      email: "yemisiolaoba6@gmail.com",
       title: "Yemisi Olaoba",
       plan: "Premium",
       status: "Success",
@@ -19,6 +44,7 @@ const Subscriptions = () => {
     {
       id: 2,
       image: Pfp,
+      email: "yeiolaoba6@gmail.com",
       title: "Yemisi Olaoba",
       plan: "Premium",
       status: "Success",
@@ -27,6 +53,7 @@ const Subscriptions = () => {
     {
       id: 3,
       image: Pfp,
+      email: "olaoba69@gmail.com",
       title: "Yemisi Olaoba",
       plan: "Premium",
       status: "Success",
@@ -35,6 +62,7 @@ const Subscriptions = () => {
     {
       id: 4,
       image: Pfp,
+      email: "yemisiolaoba20@gmail.com",
       title: "Yemisi Olaoba",
       plan: "Premium",
       status: "Success",
@@ -43,18 +71,86 @@ const Subscriptions = () => {
     {
       id: 5,
       image: Pfp,
+      email: "siolaoba6@gmail.com",
       title: "Yemisi Olaoba",
       plan: "Premium",
       status: "Failed",
       date: "Oct 8, 2025",
     },
   ];
-
+  const { apiFetch } = useApi();
+    const [loading, setLoading] = useState(false);
+    const [totalPages , setTotalPages] = useState(1);
+    const [currentPage , setCurrentPage] = useState(1);
+    const [subscriptionsPerPage , setSubscriptionsPerPage] = useState(10);
+    const [data , setData] = useState<Subscription[]>([])
+    const [summary , setSummary] = useState<SubscriptionSummary>()
   const [showPopup, setShowPopup] = useState(false);
   const [selectedValue, setSelectedValue] = useState("");
   const [titleValue, setTitleValue] = useState("");
   const maxLength = 100;
 
+
+  const fetchData = async (page:number = 1) => {
+       try {
+        setLoading(true);
+        console.log("Fetching Subscription data page :" , page)
+        const res = await apiFetch('/api/admin/subscriptions');
+        const result = await res.json();
+        if (res.status !== 200) {
+          throw new Error('Failed to fetch quizzes');
+        }
+
+        console.log(result);
+
+//         {
+//     "summary": {
+//         "freePlan": 17,
+//         "monthlyPremium": "6",
+//         "yearlyPremium": "8",
+//         "avgMonthlySubscription": "0.00",
+//         "totalSubscriptionsThisMonth": 0,
+//         "subscriptionRate": "0.0"
+//     },
+//     "subscriptions": []
+// }
+        const {subscriptions , pagination} = result
+        setSummary(result.summary)
+        const mappedData = subscriptions.map((item: any) => { 
+            return {
+              id: item.id,
+              title: item.title,
+              course: item.course_names,
+              questions: item.question_count,
+              negative: "0.4",
+              type: item.question_type,
+              source: item.school_names,
+              year: Number(new Date(item.created_at).getFullYear()),
+              visibility: item.is_draft === 1 ? "Published" : "Draft"
+  
+            }
+        });
+        setTotalPages(pagination.totalPages);
+        setSubscriptionsPerPage(pagination.quizzesPerPage)
+        setData(mappedData);
+        setData(result); // Uncomment and implement state if needed
+       } catch (error) {
+        console.error('Error fetching quizzes:', error);
+       }
+       finally{
+        setLoading(false);
+       }
+    };
+  
+    const changePage = (page: number) =>{
+        setCurrentPage(page);
+        fetchData(page);
+    }
+  
+    useEffect(() => {
+      console.log(data)
+      fetchData();
+    }, []); // Empty dependency array to run only once on mount
   // Search + Filters state
   const [searchTerm] = useState("");
   const [activeFilters, setActiveFilters] = useState<{ type: string; value: string }[]>([]);
@@ -62,8 +158,8 @@ const Subscriptions = () => {
   // ──────────────────────────────────────────────────────────────
   // Subscription-specific filter options
   // ──────────────────────────────────────────────────────────────
-  const planOptions = Array.from(new Set(data.map((s) => s.plan)));        // ["Premium"]
-  const statusOptions = Array.from(new Set(data.map((s) => s.status)));    // ["Success", "Failed"]
+  const planOptions = Array.from(new Set(mockdata.map((s) => s.plan)));        // ["Premium"]
+  const statusOptions = Array.from(new Set(mockdata.map((s) => s.status)));    // ["Success", "Failed"]
 
   const filterOptions = [
     { label: "Plan", value: "plan", dropdown: true, options: planOptions },
@@ -73,7 +169,7 @@ const Subscriptions = () => {
   // ──────────────────────────────────────────────────────────────
   // Filtering logic (now works with subscription data)
   // ──────────────────────────────────────────────────────────────
-  const filteredData = data.filter((subscription) => {
+  const filteredData = mockdata.filter((subscription) => {
     if (activeFilters.length === 0 && searchTerm.trim() === "") return true;
 
     // Search in user name
@@ -103,9 +199,9 @@ const Subscriptions = () => {
             <div className="text-[11px] font-[500] text-[#73777F]">Add new plan</div>
           </button>
 
-          <Stats value={"#0"} label="Free Plan" />
-          <Stats value={"5,000"} label="Monthly Premium" />
-          <Stats value={"5,000"} label="Yearly Premium" />
+          <Stats value={summary?.freePlan} label="Free Plan" />
+          <Stats value={summary?.monthlyPremium} label="Monthly Premium" />
+          <Stats value={summary?.yearlyPremium} label="Yearly Premium" />
         </div>
       </div>
 
@@ -113,20 +209,17 @@ const Subscriptions = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-[#F8F9FF] border border-[#C3C6CF] rounded-[4px] p-3 text-center">
           <div className="text-[11px] font-[400]">Avg. monthly<br />subscription</div>
-          <div className="text-[16px] font-[500]">#30,000</div>
+          <div className="text-[16px] font-[500]">#{summary?.avgMonthlySubscription}</div>
         </div>
         <div className="bg-[#F8F9FF] border border-[#C3C6CF] rounded-[4px] p-3 text-center">
           <div className="text-[11px] font-[400]">Total subscriptions<br />this month</div>
-          <div className="text-[16px] font-[500]">30,000</div>
+          <div className="text-[16px] font-[500]">{summary?.totalSubscriptionsThisMonth}</div>
         </div>
         <div className="bg-[#F8F9FF] border border-[#C3C6CF] rounded-[4px] p-3 text-center">
           <div className="text-[11px] font-[400]">Subscription rate</div>
-          <div className="text-[16px] font-[500]">73.4%</div>
+          <div className="text-[16px] font-[500]">{summary?.subscriptionRate}</div>
         </div>
-        <div className="bg-[#F8F9FF] border border-[#C3C6CF] rounded-[4px] p-3 text-center">
-          <div className="text-[11px] font-[400]">Subscription rate</div>
-          <div className="text-[16px] font-[500]">73.4%</div>
-        </div>
+       
       </div>
 
       {/* Filter + Table */}
@@ -138,11 +231,24 @@ const Subscriptions = () => {
           // onSearchChange={setSearchTerm}   // assuming your Filters component supports search
         />
 
+        {
+                      loading ?
+                      (
+                        <div className='w-full'>
+        
+                          <LoadingAnimation />
+        
+        
+                        </div>
+                      ) : (
         <SubscriptionsTable
+          onPageChange={changePage}
+          currentPage={currentPage}
+          totalPages={totalPages}
           data={filteredData}  
           tableheads={["User", "Plan", "Status", "Date"]}
           ids={["title", "plan", "status", "date"]}
-          initialRowsPerPage={40}
+          initialRowsPerPage={subscriptionsPerPage}
           renderCell={{
             title: (rowData) => (
               <div className="flex items-center gap-4">
@@ -168,7 +274,8 @@ const Subscriptions = () => {
               </span>
             ),
           }}
-        />
+        />)
+}
       </div>
 
       {/* Create New Plan Popup */}

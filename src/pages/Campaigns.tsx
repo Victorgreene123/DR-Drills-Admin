@@ -9,6 +9,7 @@ import { useState } from "react";
 import PopUp from "../components/popups/PopUp";
 import { FiChevronRight } from "react-icons/fi";
 import CampaignsTable from "../components/CampaignsTable";
+import { FaEllipsisV } from "react-icons/fa";
 
 const Campaigns = () => {
   const data = [
@@ -163,7 +164,7 @@ const Campaigns = () => {
                     onClick={() => setShowPopup1(showPopup1 === rowData.id ? null : rowData.id)}
                     className="ml-4"
                   >
-                    <img src={Items} alt="menu" className="w-5 h-5 cursor-pointer" />
+                    <FaEllipsisV />
                   </button>
 
                   {showPopup1 === rowData.id && (
@@ -266,7 +267,7 @@ const Campaigns = () => {
                 />
               </div>
 
-              <div className="px-10">
+              <div className="px-10 mb-10">
                 <label className="block text-sm font-medium text-[#1A1C1E] mb-2">Body</label>
                 <textarea
                   value={body}
