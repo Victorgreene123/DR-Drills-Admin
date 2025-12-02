@@ -223,7 +223,7 @@ const Subscriptions = () => {
       </div>
 
       {/* Filter + Table */}
-      <div className="relative">
+      <div >
         <Filters
           filterOptions={filterOptions}
           onFilterChange={setActiveFilters}

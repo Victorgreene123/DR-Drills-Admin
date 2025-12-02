@@ -47,8 +47,8 @@ const Navbar: React.FC<NavProps> = ({onOpenFeedback}) => {
 
       const location = useLocation();
 
-      const currentPage = location.pathname.slice(1)
-      const DisplayPage = currentPage[0].toUpperCase() + currentPage.slice(1)
+      const currentPage = location.pathname === "/" ? "Dashboard" : location.pathname.slice(1);
+      const DisplayPage = currentPage[0].toUpperCase() + currentPage.slice(1);
       
   return (
     <nav className="bg-white h-[52px] border-[1px] px-3 border-[#C3C6CF] flex items-center">

@@ -3,7 +3,6 @@ import badge from "../assets/bxs_badge.png";
 
 import thumbnail from "../assets/thumbnail-1.png";
 
-import PreviewQuizOverlay from "./PreviewQuizOverlay";
 import { useApi } from "../hooks/useApi";
 import SubscriptionDetailsPanel from "./subscriptiondetails";
 
@@ -34,7 +33,7 @@ const SubscriptionsTable: React.FC<SubscriptionsTableProps> = ({
 
   const [isSubscriptionDetailsShown, setIsSubscriptionDetailsShown] = useState(false);
   const [selectedSubscription, setSelectedSubscription] = useState<any>();
-  const [showPreview, setShowPreview] = useState(false);
+  // const [showPreview, setShowPreview] = useState(false);
 
   const { apiFetch } = useApi();
   const menuRef = useRef<HTMLDivElement | null>(null);
@@ -52,7 +51,7 @@ const SubscriptionsTable: React.FC<SubscriptionsTableProps> = ({
   const fetchSubscriptionDetails = async (id: any) => {
     try {
       setLoadingDetails(true);
-      const res = await apiFetch(`/api/admin/subscriptions/details/${id}`);
+      const res = await apiFetch(`/api/admin/subscriptions-history/${id}`);
       const data = await res.json();
       setSubscriptionDetails(data?.data);
     } catch (error) {
@@ -156,7 +155,7 @@ const SubscriptionsTable: React.FC<SubscriptionsTableProps> = ({
           details={subscriptionDetails}
           loadingDetails={loadingDetails}
           onClose={() => setIsSubscriptionDetailsShown(false)}
-          onPreview={() => setShowPreview(true)}
+          
           badge={badge}
           thumbnail={thumbnail}
           leaderboard={leaderboard}
@@ -164,12 +163,7 @@ const SubscriptionsTable: React.FC<SubscriptionsTableProps> = ({
         />
       )}
 
-      {showPreview && (
-        <PreviewQuizOverlay
-          onClose={() => setShowPreview(false)}
-          data={subscriptionDetails?.preview_questions}
-        />
-      )}
+
     </div>
   );
 };

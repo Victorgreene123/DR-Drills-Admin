@@ -9,6 +9,8 @@ import { LiaTimesSolid } from "react-icons/lia";
 // import { GoDotFill } from "react-icons/go";
 
 import { LuMailPlus } from "react-icons/lu";
+// import { LoadingAnimation } from "../pages/QuizBlocksScreen";
+import { FaArrowLeft } from "react-icons/fa6";
 
 interface QuizDetailsPanelProps {
   id: any;
@@ -47,11 +49,10 @@ const SubscriptionDetailsPanel = forwardRef<HTMLDivElement, QuizDetailsPanelProp
     {
       id,
       data,
-      details,
-      loadingDetails,
+      // details,
+      // loadingDetails,
       onClose,
       badge,
-      leaderboard,
     },
     ref
   ) => {
@@ -63,7 +64,7 @@ const SubscriptionDetailsPanel = forwardRef<HTMLDivElement, QuizDetailsPanelProp
     return (
       <div
         ref={ref}   // 🎯 REQUIRED
-        className="absolute top-0 right-20 h-[85vh] w-[410px] bg-white rounded-[8px] shadow-lg border-[1px] border-[#C3C6CF] z-[1500] flex flex-col"
+        className="absolute top-1/8 right-20 h-[85vh] w-[410px] bg-white rounded-[8px] shadow-lg border-[1px] border-[#C3C6CF] z-[1500] flex flex-col"
       >
       {/* Header */}
       <div className="w-full p-2 bg-[#F8F9FF] border-t-[1px] relative rounded-t-[8px] border-[#C3C6CF]">
@@ -93,79 +94,38 @@ const SubscriptionDetailsPanel = forwardRef<HTMLDivElement, QuizDetailsPanelProp
           </div>
 
       {/* Main view switch */}
-      {view === "details" ? (
-        <div className="flex-1 w-full py-6 px-4 flex flex-col overflow-y-auto" style={{ minHeight: 0 }}>
-          {/* Top Info */}
-          
-
+      
+                <div className="flex-1 py-4 px-4 overflow-y-auto">
+                  <button className="flex items-center gap-2 mb-4 text-[14px]" onClick={() => setView("details")}>
+                   <FaArrowLeft/> Back
+                  </button>
         
-
-        {/* Tags */}
-        {loadingDetails ? (
-          <div className="text-xs text-gray-400 mt-3">Loading details...</div>
-        ) : details && (
-          <div className="flex flex-wrap gap-2 mt-3">
-            {(details?.tags || []).map((item: any) => (
-              <span
-                key={item.id}
-                className="bg-[#DFE2EB] text-[#43474E] px-2 py-1 rounded text-[11px]"
-              >
-                {item.name}
-              </span>
-            ))}
-          </div>
-        )}
-           {/* Stats */}
-        <div className="flex gap-2 mt-4">
-          <div className="flex-1 bg-[#ECEDF4] rounded-[6px] p-3 flex flex-col items-center">
-            <span className="text-[12px] text-[#73777F]">Avg. monthly Visits:</span>
-            <span className="text-[16px] font-semibold text-[#1A1C1E]">
-              {dataItem.avgMonthlyVisits ?? "30,000"}
-            </span>
-          </div>
-          <div className="flex-1 bg-[#ECEDF4] rounded-[6px] p-3 flex flex-col items-center">
-            <span className="text-[12px] text-[#73777F]">Total Visits</span>
-            <span className="text-[16px] font-semibold text-[#1A1C1E]">
-              {dataItem.totalVisits ?? "30,000"}
-            </span>
-          </div>
-          <div className="flex-1 bg-[#ECEDF4] rounded-[6px] p-3 flex flex-col items-center">
-            <span className="text-[12px] text-[#73777F]">Average Score</span>
-            <span className="text-[16px] font-semibold text-[#1A1C1E]">
-              {dataItem.averageScore ?? "70%"}
-            </span>
-          </div>
-        </div>
-
-          
-
-      </div>
-
+                  <div>
+                  <h4 className="font-semibold">Payment History</h4>
+        
+                  {/* {
+                    loadingDetails ? <LoadingAnimation /> : details.payment_history?.length > 0? ( */}
+                        <div className="flex items-center w-full justify-between">
+                    <div>
+                      <p className="text-[14px]">11 Oct 2025</p>
+                      <p className="text-[12px] text-[#73777F]">exp : 11 Oct 2026</p>
+                    </div>
+                    <div>
+                      <p className="text-[14px]">New Monthly Premium Subscription</p>
+                    </div>
+                  </div>
+                    {/* ) : "No Data Available"
+                  } */}
+                  
+        
+                  </div>
+                </div>
 
 
          
     
-      ) : (
-        // ✅ Leaderboard View
-        <div className="flex-1 py-4 px-4 overflow-y-auto">
-          <button className="flex items-center gap-2 mb-4 text-[14px]" onClick={() => setView("details")}>
-            ← Back
-          </button>
-
-          {leaderboard && leaderboard.map((user) => (
-            <div key={user.id} className="flex items-center justify-between py-2 border-b border-gray-200">
-              <div className="flex items-center gap-2">
-                <span>
-                    {user.rank}
-                </span>
-                <img src={user.avatar} className="w-8 h-8 rounded-full" />
-                <p className="text-[14px]">{user.firstname + user.surname}</p>
-              </div>
-              <span className="text-[14px] font-medium">{user.score}%</span>
-            </div>
-          ))}
-        </div>
-      )}
+      
+    
 
       
     </div>

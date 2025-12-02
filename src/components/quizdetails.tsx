@@ -216,9 +216,8 @@ const QuizDetailsPanel = forwardRef<HTMLDivElement, QuizDetailsPanelProps>(
       {/* Footer */}
       {view === "details" && (
         <div className="flex flex-col gap-2 py-4 px-4 border-t border-[#C3C6CF] bg-white sticky bottom-0">
-          <button className="w-full py-2 rounded bg-[#D4E3FF] text-[#0360AB] font-medium">Edit Quiz details</button>
           <button className="w-full py-2 rounded bg-[#0360AB] text-white font-medium" onClick={onPreview}>
-            Preview Quiz
+            Preview & Edit Quiz
           </button>
         </div>
       )}

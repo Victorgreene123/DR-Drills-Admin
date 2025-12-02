@@ -1,114 +1,65 @@
-import React, { useState } from "react";
-import Stats from "../components/stats";
+import React, { useEffect, useState } from "react";
+// import Stats from "../components/stats";
 import { useParams } from "react-router-dom";
 import { FaPlus } from "react-icons/fa6";
 import blockPic from "../assets/Bank Picture.png"
 import AddLectures from "../components/popups/AddLecturePopup";
+import { useApi } from "../hooks/useApi";
+import { LoadingAnimation } from "./QuizBlocksScreen";
 
 
-const quizzes = [
-  {
-    id: 1,
-    title: "Practice physiology with these",
-    description: "Learn every detail about the Musculoskeletal system, from the anatomy, the physiology, the way digestive",
-    avatar: "👩‍⚕️",
-    course: "Anatomy",
-    quizzesCount: 5,
-    tags: ["Upper limb", "Axilla", "Blood supply of the upper limb", "Shoulder"],
-    totalVisits: "32,400",
-    quizzes: [
-      {
-        id: 1,
-        title: "Introductory medical anatomy student first middle semester incourse objecti...",
-        course: "Anatomy",
-        source: "University of Lagos",
-        type: "Multiple choice",
-        questions: 305,
-        year: 2015,
-        visibility: "Draft",
-      },
-      {
-        id: 2,
-        title: "Physiology Final",
-        course: "Physiology",
-        source: "Harvard",
-        type: "Essay",
-        questions: 40,
-        year: 2022,
-        visibility: "Published",
-      },
-      {
-        id: 3,
-        title: "Pharmacology Midterm",
-        course: "Pharmacology",
-        source: "Oxford",
-        type: "MCQ",
-        questions: 30,
-        year: 2024,
-        visibility: "Published",
-      },
-    ],
-  },
-  {
-    id: 2,
-    title: "Learn with systems",
-    description: "A block for system-based learning quizzes.",
-    avatar: "🧑‍⚕️",
-    course: "Physiology",
-    quizzesCount: 3,
-    tags: ["Systems", "Cardio", "Respiratory"],
-    totalVisits: "12,000",
-    quizzes: [
-      {
-        id: 4,
-        title: "Cardio Quiz",
-        course: "Physiology",
-        source: "Stanford",
-        type: "MCQ",
-        questions: 50,
-        year: 2023,
-        visibility: "Published",
-      },
-      {
-        id: 5,
-        title: "Respiratory Quiz",
-        course: "Physiology",
-        source: "Yale",
-        type: "Essay",
-        questions: 35,
-        year: 2021,
-        visibility: "Draft",
-      },
-    ],
-  },
-  {
-    id: 3,
-    title: "New to Anatomy",
-    description: "Start your anatomy journey here.",
-    avatar: "📚",
-    course: "Anatomy",
-    quizzesCount: 2,
-    tags: ["Intro", "Basics"],
-    totalVisits: "8,500",
-    quizzes: [
-      {
-        id: 6,
-        title: "Anatomy Basics",
-        course: "Anatomy",
-        source: "MIT",
-        type: "MCQ",
-        questions: 25,
-        year: 2023,
-        visibility: "Published",
-      },
-    ],
-  },
-  // ...add more blocks as needed
-];
+interface Lecture {
+  id: number;
+  name: string;
+  description: string;
+  created_by: number;
+  is_public: number;
+  school_id?: number;
+  thumbnail: string | null;
+  course_id: number;
+  is_active: number;
+  created_at: string;
+  updated_at: string;
+  order?: number;
+}
+
+interface LectureBlock {
+  id: number;
+  name: string;
+  description: string;
+  created_by: number;
+  is_public: number;
+  course_id: number;
+  thumbnail: string | null;
+  is_active: number;
+  created_at: string;
+  updated_at: string;
+  banks?: Lecture[];
+}
 
 const ViewLectureBlockScreen: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const quizBlock = quizzes.find(qb => qb.id === Number(id));
+  const [lectureBlock , setLectureBlock ] = useState<LectureBlock>()
+  const {apiFetch} = useApi()
+  const [loading, setLoading] = useState(true)
+
+  const fetchBlockDetails = async () => {
+      try {
+        const res = await apiFetch(`/api/admin/lecture-block/${id}`)
+        const result = await res.json();
+      if (res.status !== 200) {
+        throw new Error('Failed to fetch lecture block');
+      }
+      const {data } = result
+      setLectureBlock(data)
+
+      } catch (error: any) {
+        console.error("An Error Occured" , error)
+      }
+      finally{
+        setLoading(false)
+      }
+  }
 
   const [showPopup , setShowPopup] = useState(false);
   const [ , setSelected] = useState<any[]>([]); // selected quizzes for the modal
@@ -116,8 +67,16 @@ const ViewLectureBlockScreen: React.FC = () => {
     setShowPopup(false)
   }
 
-  if (!quizBlock) {
-    return <div className="p-6">Quiz block not found.</div>;
+  useEffect(() => {
+    fetchBlockDetails()
+  }, [])
+
+  if (loading){
+    return <LoadingAnimation />
+  }
+
+  if (!lectureBlock && !loading) {
+    return <div className="p-6">Lecture block not found.</div>;
   }
 
   return (
@@ -125,21 +84,23 @@ const ViewLectureBlockScreen: React.FC = () => {
       <div className="flex items-start w-full justify-between">
              <div className="w-[50%]">
               <div className="text-sm text-[#0360AB] mb-2">Lectures / Lecture Blocks</div>
-      <div className="font-semibold text-2xl mb-2">{quizBlock.title}</div>
+
+      <div className="font-semibold text-2xl mb-2">{lectureBlock?.name}</div>
       <div className="text-[#73777F] mb-2">
-        {quizBlock.description}
+        {lectureBlock?.description}
       </div>
       <div className="flex items-center gap-2 mb-2">
         <span className="rounded-full bg-[#F2F3FA] px-2 py-1 text-xs flex items-center gap-1">
-          <span role="img" aria-label="avatar">{quizBlock.avatar}</span> {quizBlock.course}
+          <span role="img" aria-label="avatar">{lectureBlock?.thumbnail}</span> {lectureBlock?.course_id}
         </span>
-        <span className="text-xs text-[#73777F]">• {quizBlock.quizzesCount} Lectures</span>
+        <span className="text-xs text-[#73777F]">• {lectureBlock?.banks?.length} Lectures</span>
       </div>
       <hr className="text-[#c3c6cf] my-2"/>
       <div className="flex flex-wrap gap-2 mb-4">
-        {quizBlock.tags.map(tag => (
+        {/* {quizBlock.tags.map(tag => (
           <span key={tag} className="bg-[#E8F0FE] text-[#0360AB] rounded px-2 py-0.5 text-xs">{tag}</span>
-        ))}
+        ))} */}
+        <p>No Tags Available yet</p>
       </div>
 
       <div className="flex items-center justify-between mb-4 mt-3">
@@ -156,18 +117,25 @@ const ViewLectureBlockScreen: React.FC = () => {
         
       </div> 
       <div className="space-y-3">
-          <Stats value={quizBlock.totalVisits} label="Question Uploaded" />
-          <Stats value={quizBlock.totalVisits} label="Total Visits" />
+          {/* <Stats value={quizBlock.totalVisits} label="Question Uploaded" />
+          <Stats value={quizBlock.totalVisits} label="Total Visits" /> */}
         
       </div>
           
       </div>
 
-      <div className="overflow-x-auto">
-         <div className="w-[175px]">
-            <img src={blockPic}  height={"115px"} className="w-full"></img>
-            <h4>Introductory Anatomy: All the basics you’ll ever need to know</h4>
+      <div className="overflow-x-auto flex gap-3">
+        {
+          lectureBlock?.banks?.map((item) => (
+            <div className="w-[175px] flex-shrink-0 ">
+            <img src={item.thumbnail || blockPic}   className="h-[115px] w-full rounded-md"></img>
+            <h4 >{item.description}</h4>
         </div>
+          )
+
+          )
+        }
+         
       </div>
 
       {

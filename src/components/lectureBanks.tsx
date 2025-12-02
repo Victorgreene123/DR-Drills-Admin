@@ -73,7 +73,7 @@ const loadBanks =  async () => {
           }
       })
       setLectureBanksAndDetails(mappedBlocks)
-      setSelectedBank(mappedBlocks[0]?.id || null);
+      setSelectedBank(mappedBlocks[0]?.id );
     } catch (error) {
       console.error("An Error Occures" , error)
     }

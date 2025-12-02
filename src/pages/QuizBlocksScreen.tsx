@@ -75,7 +75,7 @@ const QuizBlocksScreen: React.FC = () => {
 
 
         quizBlocks.map((block) => (
-          <Link to={`./${block.id}`} key={block.id}>
+            <Link to={`./${block.id}`} key={block.id} state={{ title: block.title, quizzesCount: block.quizzesCount, tags: block.tags }}>
           <div
             key={block.id}
             className="bg-[#F2F3FA] rounded-xl p-4 shadow hover:shadow-lg cursor-pointer"

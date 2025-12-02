@@ -34,7 +34,7 @@ const LectureBlocks:React.FC = () => {
   
       };
       fetchQuizBlocks();
-   } , [apiFetch]);
+   } , []);
   
 
     return (

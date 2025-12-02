@@ -158,20 +158,43 @@ const Campaigns = () => {
                 </div>
               ),
               clicks: (rowData) => (
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between relative">
                   <span className="text-sm">{rowData.clicks}</span>
                   <button
-                    onClick={() => setShowPopup1(showPopup1 === rowData.id ? null : rowData.id)}
-                    className="ml-4"
+                  onClick={() => setShowPopup1(showPopup1 === rowData.id ? null : rowData.id)}
+                  className="ml-4 p-1 hover:bg-gray-100 rounded"
                   >
-                    <FaEllipsisV />
+                  <FaEllipsisV />
                   </button>
 
                   {showPopup1 === rowData.id && (
-                    <div className="absolute right-4 mt-2 w-48 bg-white shadow-xl rounded-lg border border-gray-200 z-50">
-                      <button className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm">Edit</button>
-                      <button className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-red-600">Delete</button>
-                    </div>
+                  <div 
+                    ref={(el) => {
+                    if (el) {
+                      const handleClickOutside = (e: MouseEvent) => {
+                      if (!el.contains(e.target as Node)) {
+                        setShowPopup1(null);
+                      }
+                      };
+                      document.addEventListener('mousedown', handleClickOutside);
+                      return () => document.removeEventListener('mousedown', handleClickOutside);
+                    }
+                    }}
+                    className="absolute right-0 top-8 w-40 bg-white shadow-xl rounded-lg border border-gray-200 z-50 py-1"
+                  >
+                    <button className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-100 text-sm text-left">
+                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    <span>Edit</span>
+                    </button>
+                    <button className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-red-50 text-sm text-red-600 text-left">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    <span>Delete</span>
+                    </button>
+                  </div>
                   )}
                 </div>
               ),
@@ -195,7 +218,7 @@ const Campaigns = () => {
           title="Create New Campaign"
           onClose={() => setShowPopup2(false)}
           children={
-            <div className="flex flex-col gap-6 py-4">
+            <div className="flex flex-col gap-6 py-4 overflow-y-auto max-h-[60vh]">
               {/* Campaign Type */}
               <div className="relative px-10">
                 <button
@@ -256,24 +279,24 @@ const Campaigns = () => {
 
               <hr className="mx-10 border-[#C3C6CF]" />
 
-              <div className="px-10">
-                <label className="block text-sm font-medium text-[#1A1C1E] mb-2">Title</label>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full p-3 border border-[#C3C6CF] rounded-lg text-sm"
-                  placeholder="e.g. New Quiz Block Available!"
-                />
-              </div>
+<div className="px-10">
+  <label className="block text-sm font-medium text-[#1A1C1E] mb-2">Title</label>
+  <input
+    type="text"
+    value={title}
+    onChange={(e) => setTitle(e.target.value)}
+    className="w-full p-3 border border-[#C3C6CF] rounded-lg text-sm"
+    placeholder="e.g. New Quiz Block Available!"
+  />
+</div>
 
-              <div className="px-10 mb-10">
-                <label className="block text-sm font-medium text-[#1A1C1E] mb-2">Body</label>
+<div className="px-10 mb-6 pb-4">
+  <label className="block text-sm font-medium text-[#1A1C1E] mb-2">Body</label>
                 <textarea
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
                   rows={6}
-                  className="w-full p-3 border border-[#C3C6CF] rounded-lg text-sm resize-none"
+                  className="w-full p-3 border  border-[#C3C6CF] rounded-lg text-sm resize-none"
                   placeholder="Write your message here..."
                 />
               </div>
