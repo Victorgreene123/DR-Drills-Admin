@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import SubscriptionsTable from "../components/SubscriptionsTable";
 import { useApi } from "../hooks/useApi";
 import { LoadingAnimation } from "./QuizBlocksScreen";
+import toast, { Toaster } from 'react-hot-toast';
 
 interface Subscription {
   id: string;
@@ -88,6 +89,8 @@ const Subscriptions = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [selectedValue, setSelectedValue] = useState("");
   const [titleValue, setTitleValue] = useState("");
+  const [priceValue, setPriceValue] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
   const maxLength = 100;
 
 
@@ -185,8 +188,86 @@ const Subscriptions = () => {
     return matchesSearch && matchesFilters;
   });
 
+  const handleCreatePlan = async () => {
+    // Validation
+    if (!titleValue.trim()) {
+      toast.error("Please enter a plan title");
+      return;
+    }
+    if (!priceValue.trim() || isNaN(Number(priceValue)) || Number(priceValue) <= 0) {
+      toast.error("Please enter a valid price");
+      return;
+    }
+    if (!selectedValue) {
+      toast.error("Please select a validity period");
+      return;
+    }
+
+    try {
+      setIsCreating(true);
+      const res = await apiFetch('/api/admin/create-subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: titleValue,
+          amount: Number(priceValue),
+          interval: selectedValue, // "weekly", "monthly", or "yearly"
+        }),
+      });
+
+      const result = await res.json();
+
+      if (res.status === 201) {
+        toast.success('Subscription plan created successfully!');
+        // Reset form
+        setTitleValue("");
+        setPriceValue("");
+        setSelectedValue("");
+        setShowPopup(false);
+        // Refresh data
+        fetchData();
+      } else {
+        toast.error(result.message || 'Failed to create subscription plan');
+      }
+    } catch (error) {
+      console.error('Error creating subscription plan:', error);
+      toast.error('An error occurred while creating the plan');
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
   return (
     <div className="space-y-5">
+      {/* Toast Container */}
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: '#fff',
+            color: '#1A1C1E',
+            border: '1px solid #C3C6CF',
+            borderRadius: '8px',
+            padding: '12px 16px',
+          },
+          success: {
+            iconTheme: {
+              primary: '#10B981',
+              secondary: '#fff',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#EF4444',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
+
       <div className="space-y-8">
         <h1 className="text-[#004883] font-[500]">Subscription</h1>
 
@@ -282,7 +363,12 @@ const Subscriptions = () => {
       {showPopup && (
         <PopUp
           title="Create New Plan"
-          onClose={() => setShowPopup(false)}
+          onClose={() => {
+            setShowPopup(false);
+            setTitleValue("");
+            setPriceValue("");
+            setSelectedValue("");
+          }}
           children={
             <div className="flex flex-col gap-6 w-[500px]">
               {/* Title */}
@@ -294,6 +380,7 @@ const Subscriptions = () => {
                   placeholder="e.g. Monthly Premium Plan"
                   className="border border-[#C3C6CF] rounded-lg p-3 text-sm resize-none h-20"
                   maxLength={maxLength}
+                  disabled={isCreating}
                 />
                 <div className="absolute bottom-2 right-3 text-xs text-[#73777F]">
                   {titleValue.length}/{maxLength}
@@ -304,9 +391,14 @@ const Subscriptions = () => {
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-[#1A1C1E]">Price</label>
                 <input
-                  type="text"
+                  type="number"
+                  value={priceValue}
+                  onChange={(e) => setPriceValue(e.target.value)}
                   placeholder="e.g. 5000"
                   className="border border-[#C3C6CF] rounded-lg p-3 text-sm"
+                  disabled={isCreating}
+                  min="0"
+                  step="1"
                 />
               </div>
 
@@ -318,25 +410,39 @@ const Subscriptions = () => {
                   onChange={(e) => setSelectedValue(e.target.value)}
                   className="border border-[#C3C6CF] rounded-lg p-3 text-sm cursor-pointer"
                   style={{ color: selectedValue ? "#000" : "#73777F" }}
+                  disabled={isCreating}
                 >
                   <option value="" disabled>
                     How long will the subscription last?
                   </option>
-                  <option value="1 week">1 week</option>
-                  <option value="1 month">1 month</option>
-                  <option value="3 months">3 months</option>
-                  <option value="6 months">6 months</option>
-                  <option value="1 year">1 year</option>
+                  <option value="weekly">1 week</option>
+                  <option value="monthly">1 month</option>
+                  <option value="yearly">1 year</option>
                 </select>
               </div>
             </div>
           }
           footer={
             <button
-              onClick={() => setShowPopup(false)}
-              className="bg-[#0360AB] hover:bg-[#035fabea] text-white px-6 py-2 rounded-lg transition"
+              onClick={handleCreatePlan}
+              disabled={isCreating}
+              className={`${
+                isCreating
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-[#0360AB] hover:bg-[#035fabea]'
+              } text-white px-6 py-2 rounded-lg transition flex items-center gap-2`}
             >
-              Create
+              {isCreating ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Creating...
+                </>
+              ) : (
+                'Create'
+              )}
             </button>
           }
         />
