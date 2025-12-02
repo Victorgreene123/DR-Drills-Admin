@@ -3,9 +3,9 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { FaPlus } from "react-icons/fa6";
 import blockPic from "../assets/Bank Picture.png"
-import AddLectures from "../components/popups/AddLecturePopup";
 import { useApi } from "../hooks/useApi";
 import { LoadingAnimation } from "./QuizBlocksScreen";
+import AddLectureBankPopUp from "../components/popups/AddLectureBankPopUp";
 
 
 interface Lecture {
@@ -62,7 +62,7 @@ const ViewLectureBlockScreen: React.FC = () => {
   }
 
   const [showPopup , setShowPopup] = useState(false);
-  const [ , setSelected] = useState<any[]>([]); // selected quizzes for the modal
+   // selected quizzes for the modal
   const closePopup = () => {
     setShowPopup(false)
   }
@@ -139,10 +139,12 @@ const ViewLectureBlockScreen: React.FC = () => {
       </div>
 
       {
-        showPopup && (
-          <AddLectures
+        showPopup && id && (
+          <AddLectureBankPopUp
           isOpen={showPopup}
-          onAdd={() => setSelected}
+          
+          blockId={id}
+          // onAdd={() => setSelected}
             onClose={() => closePopup()}
             // selected={selected}
             // setSelected={setSelected}
