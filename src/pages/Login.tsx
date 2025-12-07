@@ -99,12 +99,12 @@ const Login: React.FC = () => {
               />
               <span className="ml-2">Keep me logged in</span>
             </label>
-            <a
-              href="#"
+            <button
+              onClick={() => navigate("/forgot-password")}
               className="text-sm font-medium text-[#004883] hover:underline"
             >
               Forgot password?
-            </a>
+            </button>
           </div>
 {/* Submit */}
 <button

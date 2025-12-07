@@ -15,6 +15,8 @@ import Login from './pages/Login';
 import Entry from './pages/entry';
 import ProtectedRoute from './components/ProtectedRoute';
 import ViewLectureBlockScreen from './pages/ViewLectureBlock';
+import ForgotPassword from './pages/forgotPassword';
+import ResetPassword from './pages/ResetPassword';
 // import { useEffect } from 'react';
 
 function App() {
@@ -24,6 +26,9 @@ function App() {
     <Router>
       <Routes>
         <Route path='/login' element={<Login />} />
+        <Route path='/forgot-password' element={<ForgotPassword />} />
+        <Route path='/reset-password' element={<ResetPassword />} />
+
         <Route element={<ProtectedRoute />} >
         <Route path="/" element={<RootLayout />}>
           <Route index element={<Entry />} />

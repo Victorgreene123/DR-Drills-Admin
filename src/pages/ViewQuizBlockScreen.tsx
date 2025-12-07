@@ -74,10 +74,14 @@ const ViewQuizBlockScreen: React.FC = () => {
     }
 
   const [showPopup , setShowPopup] = useState(false);
-  const [selected , setSelected] = useState<any[]>([]); // selected quizzes for the modal
   const closePopup = () => {
     setShowPopup(false)
   }
+
+  const handleSuccess = () => {
+    // Refresh the quiz block data
+    fetchBlockDetails();
+  };
 
     useEffect(() => {
       fetchBlockDetails()
@@ -163,15 +167,15 @@ const ViewQuizBlockScreen: React.FC = () => {
         </table>
       </div>
 
-      {
-        showPopup && (
-          <AddQuizzesToBlockModal
-            onClose={() => closePopup()}
-            selected={selected}
-            setSelected={setSelected}
-          />
-        )
-      }
+      {showPopup && (
+        <AddQuizzesToBlockModal
+          quizBlockId={id!}
+          name={navigationState?.title || "Quiz Block"}
+          isOpen={showPopup}
+          onClose={closePopup}
+          onSuccess={handleSuccess}
+        />
+      )}
     </div>
   );
 };

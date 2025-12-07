@@ -3,7 +3,7 @@
 
 
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import  { forwardRef } from "react";
 import { LiaTimesSolid } from "react-icons/lia";
 
@@ -60,9 +60,22 @@ const UserDetailsPanel = forwardRef<HTMLDivElement, UserDetailsPanelProps>(
     ref
   ) => {
     const dataItem = data.find((item) => item.id === id);
-  
+    const showPremiumRef = useRef<HTMLDivElement | null>(null);
+        
+        
+          useEffect(() => {
+            function handleClickOutside(event: MouseEvent) {
+              if (showPremiumRef.current && !showPremiumRef.current.contains(event.target as Node)) {
+                setShowAddPremium(false);
+              }
+            }
+        
+            document.addEventListener("mousedown", handleClickOutside);
+            return () => document.removeEventListener("mousedown", handleClickOutside);
+          }, []);
     const [view, setView] = useState<"details" | "history">("details");
-
+    const [showAddPremiumModal , setShowAddPremium] = useState(false)
+    const [validityPeriod , setValidityPeriod] = useState<number>(7)
     if (!dataItem) return null;
     console.log(dataItem)
     return (
@@ -70,9 +83,45 @@ const UserDetailsPanel = forwardRef<HTMLDivElement, UserDetailsPanelProps>(
         ref={ref}   // 🎯 REQUIRED
         className="absolute top-1/8 right-20 h-[85vh] w-[410px] bg-white rounded-[8px] shadow-lg border-[1px] border-[#C3C6CF] z-[1500] flex flex-col"
       >
+
+        {/*Add Premium Subscription Modal */}
+        
+       {
+       showAddPremiumModal && 
+       <div className= "shadow-lg border-[1px] border-[#C3C6CF] z-[1500] bg-white absolute left-[-310px] top-1/3 w-[300px] rounded-[8px] h-[180px]" ref={showPremiumRef}>
+        {/* Header */}
+      <div className="w-full p-2 bg-[#F8F9FF] border-y-[1px] relative rounded-t-[8px] border-[#C3C6CF]">
+        <h2 className="text-center font-semibold text-[16px] text-[#0360AB]">
+         Add Premium Subscription
+        </h2>
+        <button
+          onClick={() => setShowAddPremium(false)}
+          className="w-6 absolute top-2 right-5 h-6 flex items-center justify-center bg-[#ECEDF4] rounded-full hover:bg-[#d1d3db] transition"
+          aria-label="Close"
+        >
+          <LiaTimesSolid className="text-[#1A1C1E] text-sm" />
+        </button>
+      </div>
+
+      {/* Validity Period */}
+      <div className="p-2">
+                      <div className="flex flex-col gap-2 mb-4 w-full">
+                <label className="text-[16px] font-medium text-[#1A1C1E]">Validity Period (Days)</label>
+
+                <input type="number"  className="border border-[#C3C6CF] rounded-lg p-3 text-sm cursor-pointer" value={validityPeriod} onChange={(e) => setValidityPeriod(Number(e.target.value))}/>
+              </div>
+
+              <button className="w-full text-white bg-[#0360AB] rounded-md py-2">
+                  Add Subscription
+              </button>
+      </div>
+
+
+
+        </div>}
       {/* Header */}
       <div className="w-full p-2 bg-[#F8F9FF] border-y-[1px] relative rounded-t-[8px] border-[#C3C6CF]">
-        <h2 className="text-center font-semibold text-[18px]">
+        <h2 className="text-center font-semibold text-[18px] text-[#0360AB]">
           {view === "details" ? "User Details" : "Leader Board"}
         </h2>
         <button
@@ -174,6 +223,13 @@ const UserDetailsPanel = forwardRef<HTMLDivElement, UserDetailsPanelProps>(
              
             >
               Next Billing Date : {loadingDetails ? "loading ..." : details.premium_details ? formatReadableDate(details.premium_details.premium_expiry)  : "--" }
+              <FaChevronRight />
+            </button>
+            <button
+              className="w-full flex items-center justify-between px-3 py-1 rounded bg-[#ECEDF4] text-[#1A1C1E] font-medium"
+              onClick={() => setShowAddPremium(true)}
+            >
+              Add Premium Subscription 
               <FaChevronRight />
             </button>
         </div>

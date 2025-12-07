@@ -171,7 +171,7 @@ const Quizzes: React.FC = () => {
 
           {/* ✅ Reusable Filters component */}
           <Filters filterOptions={filterOptions} onFilterChange={setActiveFilters} />
-            <button className='bg-[#0360AB] flex  text-white rounded-[8px] w-[150px] h-[40px] flex items-center justify-center' onClick={() => setShowPop(true)}>Upload Quiz</button>
+            
 
         </div>
       </div>

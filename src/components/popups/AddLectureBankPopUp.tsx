@@ -133,9 +133,9 @@ const AddLectureBankPopUp: React.FC<AddLectureBankPopUpProps> = ({
 
   return (
     <div className="fixed inset-0 bg-[#00000066] flex items-center justify-center z-[1100]">
-      <div className="bg-white max-w-4xl w-full h-[550px] rounded-xl relative flex flex-col">
+      <div className="bg-white max-w-4xl w-full max-h-[90vh] rounded-xl relative flex flex-col">
         {/* Header */}
-        <div className="flex justify-between items-center border-b-[1px] border-[#C3C6CF] bg-[#F8F9FF] p-4 pb-2">
+        <div className="flex justify-between items-center border-b-[1px] border-[#C3C6CF] bg-[#F8F9FF] p-4 pb-2 flex-shrink-0">
           <h2 className="text-[18px] text-[#1A1C1E] font-semibold">
             Select Lecture Bank
           </h2>
@@ -149,8 +149,8 @@ const AddLectureBankPopUp: React.FC<AddLectureBankPopUpProps> = ({
           </button>
         </div>
 
-        {/* Content */}
-        <div className="flex flex-1 h-0 p-4 gap-4">
+        {/* Content - Fixed height with scrolling */}
+        <div className="flex flex-1 p-4 gap-4 overflow-hidden">
           {loading ? (
             <div className="w-full h-full flex items-center justify-center">
               <LoadingAnimation />
@@ -159,7 +159,7 @@ const AddLectureBankPopUp: React.FC<AddLectureBankPopUpProps> = ({
             <>
               {/* Left Side - Lecture Banks List */}
               <div className="w-1/2 pr-4 border-r-[1px] border-[#C3C6CF] flex flex-col">
-                <div className="mb-3">
+                <div className="mb-3 flex-shrink-0">
                   <div className="w-full relative bg-[#F2F3FA] border-[1px] border-[#C3C6CF] rounded-[8px] h-[35px] flex items-center">
                     <IoSearch className="mx-2 text-xl text-[#0F172A] opacity-50" />
                     <input
@@ -174,10 +174,7 @@ const AddLectureBankPopUp: React.FC<AddLectureBankPopUpProps> = ({
                   </div>
                 </div>
 
-                <div
-                  className="overflow-y-auto flex-1 pr-2 border-t-[1px] border-[#C3C6CF]"
-                  style={{ maxHeight: 400 }}
-                >
+                <div className="overflow-y-auto flex-1">
                   <div role="radiogroup" aria-label="Lecture Banks">
                     {filteredGroups.map((group) => (
                       <div key={group.name} className="mb-4">
@@ -229,17 +226,14 @@ const AddLectureBankPopUp: React.FC<AddLectureBankPopUpProps> = ({
 
               {/* Right Side - Selected Bank Details */}
               <div className="w-1/2 pl-4 flex flex-col">
-                <h3 className="text-[18px] font-semibold mb-2">
+                <h3 className="text-[18px] font-semibold mb-2 flex-shrink-0">
                   Selected Lecture Bank
                 </h3>
-                <p className="text-[#0360AB] text-[16px] font-medium mb-2">
+                <p className="text-[#0360AB] text-[16px] font-medium mb-2 flex-shrink-0">
                   {selectedBank ? selectedBank.name : "None selected"}
                 </p>
 
-                <div
-                  className="overflow-y-auto flex-1 pr-2 border-t-[1px] border-[#C3C6CF] pt-3"
-                  style={{ maxHeight: 400 }}
-                >
+                <div className="overflow-y-auto flex-1 border-t-[1px] border-[#C3C6CF] pt-3">
                   {selectedBank ? (
                     <div className="space-y-4">
                       {/* Thumbnail */}
@@ -298,8 +292,8 @@ const AddLectureBankPopUp: React.FC<AddLectureBankPopUpProps> = ({
           )}
         </div>
 
-        {/* Footer */}
-        <div className="flex justify-end gap-3 p-4 border-t-[1px] border-[#C3C6CF]">
+        {/* Footer - Fixed at bottom */}
+        <div className="flex justify-end gap-3 p-4 border-t-[1px] border-[#C3C6CF] flex-shrink-0">
           <button
             onClick={onClose}
             disabled={submitting}

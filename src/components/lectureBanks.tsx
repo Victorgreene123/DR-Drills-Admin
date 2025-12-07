@@ -197,15 +197,7 @@ const addToLectureBank = (ids: number[]) => {
 
                 {/* Left SECTION - Lectur Bank List  */}
                 <div className="w-[42.5%]">
-                        <button className='bg-[#0360AB] flex  text-white rounded-md  h-[32px] flex items-center px-2  my-2' onClick={() => {
-                                    setIsCreateLectureClicked(true);
-                                    console.log("PopUp initiated")
-                    
-                                }}>
-                                    <FaPlus className='mr-1' />
-                                    New
-
-                                    </button>
+                       
 
                     
                     {
