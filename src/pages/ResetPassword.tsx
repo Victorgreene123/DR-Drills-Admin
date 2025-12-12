@@ -47,23 +47,26 @@ const ResetPassword: React.FC = () => {
     try {
       setLoading(true);
       const resetToken = sessionStorage.getItem("resetToken");
-      const resetEmail = sessionStorage.getItem("resetEmail");
 
-      const res = await apiFetch("/api/admin/reset-password", {
+      if (!resetToken) {
+        toast.error("Reset token not found. Please try again.");
+        navigate("/forgot-password");
+        return;
+      }
+
+      const res = await apiFetch("/auth/admin/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: resetEmail,
-          token: resetToken,
+          resetToken,
           password,
-          confirmPassword,
         }),
       });
 
       const result = await res.json();
 
       if (res.ok) {
-        toast.success("Password reset successfully");
+        toast.success(result.message || "Password reset successfully");
         // Clear session storage
         sessionStorage.removeItem("resetToken");
         sessionStorage.removeItem("resetEmail");

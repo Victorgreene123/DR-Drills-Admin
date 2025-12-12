@@ -14,7 +14,6 @@ const ForgotPassword: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
-  const [, setOtpSent] = useState(false);
   const { apiFetch } = useApi();
   const navigate = useNavigate();
 
@@ -37,21 +36,22 @@ const ForgotPassword: React.FC = () => {
 
     try {
       setLoading(true);
-    //   const res = await apiFetch("/api/admin/forgot-password", {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify({ email }),
-    //   });
+      const res = await apiFetch("/auth/admin/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
 
-    //   const result = await res.json();
+      const result = await res.json();
 
-      if (true) {
-        toast.success("OTP sent to your email");
-        setOtpSent(true);
+      if (res.ok) {
+        toast.success(result.message || "OTP sent to your email");
+        // Store email for next steps
+        sessionStorage.setItem("resetEmail", email);
         setStep("otp");
         setResendTimer(60);
       } else {
-        // toast.error(result.message || "Failed to send OTP");
+        toast.error(result.message || "Failed to send OTP");
       }
     } catch (error) {
       console.error(error);
@@ -71,18 +71,21 @@ const ForgotPassword: React.FC = () => {
 
     try {
       setLoading(true);
-      const res = await apiFetch("/api/admin/verify-otp", {
+      const res = await apiFetch("/auth/admin/verify-forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, otp }),
+        body: JSON.stringify({ 
+          email, 
+          code: otp 
+        }),
       });
 
       const result = await res.json();
 
       if (res.ok) {
-        toast.success("OTP verified successfully");
-        // Store token temporarily for password reset
-        sessionStorage.setItem("resetToken", result.data?.token || "");
+        toast.success(result.message || "OTP verified successfully");
+        // Store reset token from response for password reset
+        sessionStorage.setItem("resetToken", result.data?.resetToken || result.resetToken || "");
         sessionStorage.setItem("resetEmail", email);
         navigate("/reset-password");
       } else {
@@ -99,7 +102,7 @@ const ForgotPassword: React.FC = () => {
   const handleResendOtp = async () => {
     try {
       setResendLoading(true);
-      const res = await apiFetch("/api/admin/forgot-password", {
+      const res = await apiFetch("/auth/admin/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -108,7 +111,7 @@ const ForgotPassword: React.FC = () => {
       const result = await res.json();
 
       if (res.ok) {
-        toast.success("OTP resent to your email");
+        toast.success(result.message || "OTP resent to your email");
         setResendTimer(60);
       } else {
         toast.error(result.message || "Failed to resend OTP");
@@ -195,7 +198,7 @@ const ForgotPassword: React.FC = () => {
             {/* OTP Step */}
             <h2 className="text-2xl font-bold text-[#004883]">Verify OTP</h2>
             <p className="mt-1 text-sm text-gray-600">
-              We've sent a 4-digit code to <br />
+              We've sent a code to <br />
               <span className="font-medium text-[#1A1C1E]">{email}</span>
             </p>
 
@@ -241,7 +244,7 @@ const ForgotPassword: React.FC = () => {
                 <button
                   onClick={handleResendOtp}
                   disabled={resendLoading}
-                  className="text-sm font-medium text-[#004883] hover:text-[#003366] disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="text-sm font-medium text-[#004883] hover:text-[#003366] disabled:opacity-50 flex items-center justify-center gap-2 mx-auto"
                 >
                   {resendLoading ? (
                     <>

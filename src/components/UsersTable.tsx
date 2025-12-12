@@ -5,6 +5,7 @@ import thumbnail from "../assets/thumbnail-1.png";
 
 import { useApi } from "../hooks/useApi";
 import UserDetailsPanel from "./userdetails";
+import  { Toaster } from 'react-hot-toast';
 
 interface UsersTableProps {
   data: Array<Record<string, any>>;
@@ -97,6 +98,7 @@ const menuRef = useRef<HTMLDivElement | null>(null);
 
   return (
     <div className="overflow-x-auto">
+      <Toaster position="top-right" />
       <table className="w-full my-4 text-left text-sm text-[#1A1C1E] border-collapse">
         <thead className="bg-[#F2F3FA] text-[#73777F] text-[15px] font-medium">
           <tr>

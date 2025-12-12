@@ -9,72 +9,70 @@ import { useApi } from '../hooks/useApi';
 
 
 const Dashboard: React.FC = () => {
-
-        const { apiFetch } = useApi();
-        const [active_users , setActiveusers] = useState<number>(0);
-        const [newsubscriptions , setNewSubscriptions] = useState<number>(0);
-        const [userDistribution, setuserDistribution] = useState<any>({
-            free_users: 0,
-            premium_users: 0
-        })
-        const [activity , setActivity] = useState<any []>([
-
-            {
-                        
-            time: "2025-09-16T14:36:04.000Z",
-            action_type: "view",
-            description: "GET action performed on /quiz/all",
-            name: "Medical School Admin",
-            role: "super_admin"
-        
-            }
-        ]);
-        const [topCourses , setTopCourses] = useState<any>();
-        const [topLectures , setTopLectures] = useState<any>();
-        const [topQuizzes , setTopQuizzes] = useState<any>();
-        const [topSchools , setTopSchools] = useState<any>();
-
-
-        useEffect(() => {
-            const loaddata = async () =>{
-                    try {
-        const res = await apiFetch("/api/admin/dashboard");
-        if (!res.ok){
-            throw Error("An error occured")
+    const { apiFetch } = useApi();
+    const [active_users , setActiveusers] = useState<number>(0);
+    const [newsubscriptions , setNewSubscriptions] = useState<number>(0);
+    const [userDistribution, setuserDistribution] = useState<any>({
+        free_users: 0,
+        premium_users: 0
+    })
+    const [activity , setActivity] = useState<any []>([
+        {
+            time: "2025-12-12T02:21:39.000Z",
+            action_type: "Viewed",
+            entity_type: "System",
+            admin: {
+                name: "Medical School Admin",
+                email: "superadmin@medschool.com",
+                role: "Super Admin"
+            },
+            target: null,
+            message: "Medical School Admin viewed a system",
+            status: "Success",
+            entity_id: null
         }
-        const data = await res.json();
+    ]);
+    const [topCourses , setTopCourses] = useState<any>();
+    const [topLectures , setTopLectures] = useState<any>();
+    const [topQuizzes , setTopQuizzes] = useState<any>();
+    const [topSchools , setTopSchools] = useState<any>();
 
-        const {
-            active_users , 
-            new_subscriptions , 
-            users_distribution , 
-            activityLog , 
-            topCourses , 
-            topLectures , 
-            topQuizzes , 
-            topSchools
-        } = data;
-        setActiveusers(active_users);
-        setNewSubscriptions(new_subscriptions);
-        setuserDistribution(users_distribution);
-        setActivity(activityLog);
-        setTopCourses(topCourses);
-        setTopLectures(topLectures);
-        setTopQuizzes(topQuizzes);
-        setTopSchools(topSchools);
 
-        
-        console.log(data);
+    useEffect(() => {
+        const loaddata = async () => {
+            try {
+                const res = await apiFetch("/api/admin/dashboard");
+                if (!res.ok){
+                    throw Error("An error occured")
+                }
+                const data = await res.json();
 
-      } catch (err) {
-        console.error(err);
-      }
+                const {
+                    active_users , 
+                    new_subscriptions , 
+                    users_distribution , 
+                    activityLog , 
+                    topCourses , 
+                    topLectures , 
+                    topQuizzes , 
+                    topSchools
+                } = data;
+                setActiveusers(active_users);
+                setNewSubscriptions(new_subscriptions);
+                setuserDistribution(users_distribution);
+                setActivity(activityLog);
+                setTopCourses(topCourses);
+                setTopLectures(topLectures);
+                setTopQuizzes(topQuizzes);
+                setTopSchools(topSchools);
+
+                console.log(data);
+            } catch (err) {
+                console.error(err);
             }
-            loaddata();
-        } , [])
-        
-
-
+        }
+        loaddata();
+    }, [])
 
     // Example mock user data
 
@@ -95,8 +93,15 @@ const Dashboard: React.FC = () => {
 
     const pagedData = activity.slice(page * pageSize, (page + 1) * pageSize);
 
-    // Mock data for Top Lectures
-
+    // Helper to get status badge color
+    const getStatusColor = (status: string) => {
+        switch (status?.toLowerCase()) {
+            case 'success': return 'bg-green-100 text-green-800';
+            case 'failed': return 'bg-red-100 text-red-800';
+            case 'warning': return 'bg-yellow-100 text-yellow-800';
+            default: return 'bg-gray-100 text-gray-800';
+        }
+    };
 
     return (
         <div className='space-y-4 '>
@@ -109,31 +114,52 @@ const Dashboard: React.FC = () => {
             <div className='flex items-center gap-3'>
                 <div className='w-[68%] border-[1px] bg-white border-[#C3C6CF] rounded-[5px] py-3 min-h-[340px] flex flex-col justify-between'>
                     <div className='w-full flex-1'>
-                        <div className="grid grid-cols-[2.5fr_1.5fr_1fr] gap-2  px-3  pb-2">
+                        <div className="grid grid-cols-[2.5fr_1.5fr_1fr] gap-2 px-3 pb-2">
                             <p className='font-semibold'>Activity Log</p>
-                            <p className=''>Name</p>
-                            <p className=''>Role</p>
+                            <p className=''>Admin</p>
+                            <p className=''>Status</p>
                         </div>
-                        {
-                            pagedData && 
-                            pagedData.map((item, index) => (
-                                <div key={index} className="grid grid-cols-[2.5fr_1.5fr_1fr] gap-2 px-3 py-2 border-t-[1px] border-[#C3C6CF]">
-                                    <p className='text-[#1A1C1E] text-[14px] flex items-center gap-2'>
-                                        <span>{new Date(item.time).toISOString().split('T')[0]}</span>
-
-                                        <span className='text-[12px] border-[1px] border-[#C3C6CF] p-1 rounded-md'>{item.action_type}</span>
-                                        <span>{item.description}</span>
-                                    </p>
-                                    <p className='text-[#1A1C1E] text-[14px] flex items-center gap-2'>
-                                        <FaUserCircle className='text-[#276EF1] text-[24px]' />
-                                        <span className='text-[14px]'>{item.name}</span>
-                                    </p>
-                                    <p>
-                                        {item.role}
-                                    </p>
+                        {pagedData && pagedData.map((item, index) => (
+                            <div key={index} className="grid grid-cols-[2.5fr_1.5fr_1fr] gap-2 px-3 py-2 border-t-[1px] border-[#C3C6CF]">
+                                <div className='text-[#1A1C1E] text-[14px] flex flex-col gap-1'>
+                                    <div className='flex items-center gap-2'>
+                                        <span className='text-[12px] text-[#73777F]'>
+                                            {new Date(item.time).toLocaleString('en-US', {
+                                                month: 'short',
+                                                day: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
+                                        </span>
+                                        <span className='text-[11px] border-[1px] border-[#C3C6CF] px-2 py-0.5 rounded-md bg-[#F2F3FA]'>
+                                            {item.action_type}
+                                        </span>
+                                        <span className='text-[11px] border-[1px] border-[#C3C6CF] px-2 py-0.5 rounded-md bg-[#E8F0FE] text-[#0360AB]'>
+                                            {item.entity_type}
+                                        </span>
+                                    </div>
+                                    <span className='text-[13px] text-[#43474E] line-clamp-1'>
+                                        {item.message}
+                                    </span>
                                 </div>
-                            ))
-                        }
+                                <div className='text-[#1A1C1E] text-[14px] flex items-center gap-2'>
+                                    <FaUserCircle className='text-[#276EF1] text-[24px] flex-shrink-0' />
+                                    <div className='flex flex-col min-w-0'>
+                                        <span className='text-[13px] font-medium truncate'>
+                                            {item.admin?.name || 'Unknown'}
+                                        </span>
+                                        <span className='text-[11px] text-[#73777F] truncate'>
+                                            {item.admin?.role || ''}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className='flex items-center'>
+                                    <span className={`px-2 py-1 rounded-full text-[11px] font-medium ${getStatusColor(item.status)}`}>
+                                        {item.status}
+                                    </span>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                     {/* Pagination controls for activity log */}
                     <div className="flex justify-start mt-2 px-3">
