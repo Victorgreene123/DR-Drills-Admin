@@ -17,6 +17,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import ViewLectureBlockScreen from './pages/ViewLectureBlock';
 import ForgotPassword from './pages/forgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import MobileBlocker from './components/MobileBlocker';
 // import { useEffect } from 'react';
 
 function App() {
@@ -25,9 +26,9 @@ function App() {
     <AuthProvider>
     <Router>
       <Routes>
-        <Route path='/login' element={<Login />} />
-        <Route path='/forgot-password' element={<ForgotPassword />} />
-        <Route path='/reset-password' element={<ResetPassword />} />
+        <Route path='/login' element={<MobileBlocker><Login /></MobileBlocker>} />
+        <Route path='/forgot-password' element={<MobileBlocker><ForgotPassword /></MobileBlocker>} />
+        <Route path='/reset-password' element={<MobileBlocker><ResetPassword /></MobileBlocker>} />
 
         <Route element={<ProtectedRoute />} >
         <Route path="/" element={<RootLayout />}>
