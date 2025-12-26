@@ -19,7 +19,7 @@ const ForgotPassword: React.FC = () => {
 
   // Timer for resend button
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
     if (resendTimer > 0) {
       interval = setInterval(() => setResendTimer(prev => prev - 1), 1000);
     }

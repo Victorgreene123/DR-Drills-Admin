@@ -182,9 +182,13 @@ const CreateQuizBlockModal: React.FC<{ onClose: () => void }> = ({ onClose }) =>
         
         {showAddQuiz && (
           <AddQuizzesToBlockModal
+            quizBlockId={0}
+            name={title}
+            isOpen={showAddQuiz}
             onClose={() => setShowAddQuiz(false)}
-            selected={selectedQuizzes}
-            setSelected={setSelectedQuizzes}
+            onSuccess={() => {
+              // Optionally refresh or update the selected quizzes
+            }}
           />
         )}
 
