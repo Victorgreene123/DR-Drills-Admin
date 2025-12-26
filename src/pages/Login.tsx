@@ -3,6 +3,7 @@ import { useAuth } from "../context/authcontext";
 import { useNavigate } from "react-router-dom";
 import { FaSpinner } from "react-icons/fa6";
 import logo from '../assets/favicon.svg'
+import MetaTags, { pageMetadata } from '../components/MetaTags';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -24,11 +25,17 @@ const Login: React.FC = () => {
   })
 
   return (
-    <div className="flex flex-col min-h-screen items-center justify-center bg-gray-100">
-      <div className="flex items-baseline mx-auto w-auto gap-3 mb-3">
-  <img src={logo} alt="Logo" className="h-10 w-auto" />
-  <h2 className="text-[40px] font-bold text-[#004883]">Admin Panel</h2>
-</div>
+    <>
+      <MetaTags 
+        title={pageMetadata.login.title}
+        description={pageMetadata.login.description}
+        keywords={pageMetadata.login.keywords}
+      />
+      <div className="flex flex-col min-h-screen items-center justify-center bg-gray-100">
+        <div className="flex items-baseline mx-auto w-auto gap-3 mb-3">
+    <img src={logo} alt="Logo" className="h-10 w-auto" />
+    <h2 className="text-[40px] font-bold text-[#004883]">Admin Panel</h2>
+  </div>
 
       <div
         className="w-full max-w-md rounded-lg bg-white p-8"
@@ -130,7 +137,8 @@ const Login: React.FC = () => {
           </a>
         </p>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

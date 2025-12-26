@@ -4,6 +4,7 @@ import { FaUserCircle } from 'react-icons/fa';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import DashboardSection from '../components/dashboardSection';
+import MetaTags, { pageMetadata } from '../components/MetaTags';
 
 import { useApi } from '../hooks/useApi';
 
@@ -104,8 +105,14 @@ const Dashboard: React.FC = () => {
     };
 
     return (
-        <div className='space-y-4 '>
-            <h1 className='text-[#004883] font-[500]'>Dashboard</h1>
+        <>
+            <MetaTags 
+                title={pageMetadata.dashboard.title}
+                description={pageMetadata.dashboard.description}
+                keywords={pageMetadata.dashboard.keywords}
+            />
+            <div className='space-y-4 '>
+                <h1 className='text-[#004883] font-[500]'>Dashboard</h1>
             <div className=' flex items-center gap-3'>
                 <Stats value={active_users} label='Active users' />
                 <Stats value={newsubscriptions} label='New subscriptions' />
@@ -327,7 +334,8 @@ const Dashboard: React.FC = () => {
 
 
                 </div>
-        </div>
+            </div>
+        </>
     );
 };
 
