@@ -10,7 +10,7 @@ const CreateQuizBlockModal: React.FC<{ onClose: () => void }> = ({ onClose }) =>
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [course, setCourse] = useState("");
-  const [selectedQuizzes, setSelectedQuizzes] = useState<any[]>([]);
+  const [selectedQuizzes] = useState<any[]>([]);
   const [showAddQuiz, setShowAddQuiz] = useState(false);
   const [isPublic, setIsPublic] = useState(true);
   const {apiFetch} = useApi();
