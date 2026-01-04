@@ -1,8 +1,10 @@
 import React, { forwardRef, useEffect, useState } from "react";
 import { LiaTimesSolid } from "react-icons/lia";
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6";
+import { useApi } from "../hooks/useApi";
+import toast from "react-hot-toast";
 
-type RawOption = { id: number; option_text: string; order: number };
+type RawOption = { id: number; option_text: string; order: number ; is_correct: 1 | 0;};
 type RawQuestion = {
   id: number | string;
   text: string;
@@ -22,8 +24,8 @@ type Props = {
 
 const PreviewQuizOverlay = forwardRef<HTMLDivElement, Props>(({ onClose, data }, ref) => {
   const questions: RawQuestion[] = data || [];
+  const { apiFetch } = useApi();
   const total = questions.length;
-
   useEffect(() => {
     console.log(questions);
   }, []);
@@ -65,11 +67,14 @@ const PreviewQuizOverlay = forwardRef<HTMLDivElement, Props>(({ onClose, data },
     idx: number;
     active?: boolean;
   }> = ({ q, idx, active }) => {
+    const { apiFetch: _apiFetch } = { apiFetch };
     const [localQ, setLocalQ] = useState<RawQuestion & { correctOrder?: number }>({
       ...q,
       options: q.options.map((o) => ({ ...o })),
       correctOrder: q.correctOrder,
     });
+
+    const [saving, setSaving] = useState(false);
 
     const [isEditing, setIsEditing] = useState(false);
 
@@ -89,6 +94,9 @@ const PreviewQuizOverlay = forwardRef<HTMLDivElement, Props>(({ onClose, data },
         return { ...lq, options: newOpts };
       });
     };
+  const handleExplanationChange =  (value: string ) =>  {
+      setLocalQ((lq) => ({ ...lq, explanation: value}))
+    }
 
     const handleQuestionChange = (value: string) => {
       setLocalQ((lq) => ({ ...lq, text: value }));
@@ -97,27 +105,67 @@ const PreviewQuizOverlay = forwardRef<HTMLDivElement, Props>(({ onClose, data },
     const handleCorrectChange = (optIdx: number) => {
       const selected = localQ.options[optIdx];
       if (!selected) return;
-      setLocalQ((lq) => ({ ...lq, correctOrder: selected.order }));
+      setLocalQ((lq) => ({
+        ...lq,
+        options: lq.options.map((o, i) => ({ ...o, is_correct: i === optIdx ? 1 : 0 })),
+      }));
     };
 
-    const handleDone = () => {
-      setEditedQuestions((prev) => {
-        const copy = [...prev];
-        copy[idx] = {
-          ...copy[idx],
-          text: localQ.text,
-          options: copy[idx].options.map((origOpt, i) => ({
-            ...origOpt,
-            option_text: localQ.options[i]?.option_text ?? origOpt.option_text,
-          })),
-          correctOrder: localQ.correctOrder,
-        };
-        return copy;
-      });
-      setIsEditing(false);
+    const handleDone = async () => {
+      // Prepare payload expected by the API
+      const payload = {
+        text: localQ.text,
+        image_url: localQ.image_url ?? null,
+        options: localQ.options.map((o) => ({
+          ...(o.id ? { id: o.id } : {}),
+          option_text: o.option_text,
+          image_url: (o as any).image_url ?? null,
+          is_correct: o.is_correct === 1,
+        })),
+      };
+
+      try {
+        setSaving(true);
+        const res = await _apiFetch(`/api/admin/questions/${q.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const result = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          toast.error(result.message || "Failed to save question");
+          return;
+        }
+
+        // update local editedQuestions with the saved values
+        setEditedQuestions((prev) => {
+          const copy = [...prev];
+          copy[idx] = {
+            ...copy[idx],
+            text: localQ.text,
+            explanation: localQ.explanation,
+            options: copy[idx].options.map((origOpt, i) => ({
+              ...origOpt,
+              option_text: localQ.options[i]?.option_text ?? origOpt.option_text,
+              is_correct: localQ.options[i]?.is_correct ?? origOpt.is_correct ?? 0,
+              // image_url: localQ.options[i]?.image_url ?? (origOpt as any).image_url ?? null,
+            })),
+            correctOrder: localQ.correctOrder,
+          };
+          return copy;
+        });
+
+        toast.success("Question saved");
+        setIsEditing(false);
+      } catch (err) {
+        console.error(err);
+        toast.error("Error saving question");
+      } finally {
+        setSaving(false);
+      }
     };
 
-    const answerOption = localQ.options.find((o) => o.order === localQ.correctOrder);
+    const answerOption = localQ.options.find((o) => o.is_correct === 1) ?? localQ.options.find((o) => o.order === localQ.correctOrder);
 
     return (
       <div
@@ -170,7 +218,7 @@ const PreviewQuizOverlay = forwardRef<HTMLDivElement, Props>(({ onClose, data },
 
           <div className="flex flex-col gap-2">
             {localQ.options.map((opt, oidx) => {
-              const isCorrect = opt.order === localQ.correctOrder;
+              const isCorrect = opt.is_correct === 1;
               return (
                 <div
                   key={opt.id ?? oidx}
@@ -200,7 +248,12 @@ const PreviewQuizOverlay = forwardRef<HTMLDivElement, Props>(({ onClose, data },
                       onChange={(e) => handleOptionChange(oidx, e.target.value)}
                     />
                   ) : (
-                    <span className="truncate">{opt.option_text}</span>
+                    <div className="flex items-center justify-between w-full">
+                      <span className="truncate">{opt.option_text}</span>
+                      {!isEditing && isCorrect && (
+                        <span className="ml-2 text-[#0F9D58] font-semibold">✓</span>
+                      )}
+                    </div>
                   )}
                 </div>
               );
@@ -209,7 +262,17 @@ const PreviewQuizOverlay = forwardRef<HTMLDivElement, Props>(({ onClose, data },
 
           <div className="mt-4 text-xs  ">
             <p className="text-sm text-[#73777F] font-semibold">Explanation</p>
-            {localQ.explanation}
+            {active && isEditing ? (
+                <textarea
+                  className="w-full border rounded p-1 text-xs"
+                  value={localQ.explanation ?? ''}
+                  onChange={(e) => handleExplanationChange(e.target.value)}
+                  rows={2}
+                />
+              ) : (
+                localQ.explanation
+              )}
+           
           </div>
         </div>
 
@@ -223,10 +286,21 @@ const PreviewQuizOverlay = forwardRef<HTMLDivElement, Props>(({ onClose, data },
         {active && isEditing && (
           <div className="px-4 pb-4 flex justify-end gap-2">
             <button
-              className="bg-[#0360AB] text-white px-4 py-1 rounded text-xs"
+              className="bg-[#0360AB] text-white px-4 py-1 rounded text-xs disabled:opacity-50 flex items-center gap-2"
               onClick={handleDone}
+              disabled={saving}
             >
-              Done
+              {saving ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Saving...
+                </>
+              ) : (
+                'Done'
+              )}
             </button>
           </div>
         )}

@@ -32,7 +32,7 @@ const Login: React.FC = () => {
         keywords={pageMetadata.login.keywords}
       />
       <div className="flex flex-col min-h-screen items-center justify-center bg-gray-100">
-        <div className="flex items-baseline mx-auto w-auto gap-3 mb-3">
+        <div className="flex flex-col items-baseline mx-auto w-auto gap-3 mb-3">
     <img src={logo} alt="Logo" className="h-10 w-auto" />
     <h2 className="text-[40px] font-bold text-[#004883]">Admin Panel</h2>
   </div>

@@ -29,7 +29,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
   renderCell = {},
 }) => {
   const [details, setDetails] = useState<any>(null);
-  const [leaderboard, setLeaderboard] = useState<any []>([]);
+
   const [loadingDetails, setLoadingDetails] = useState(false);
 
 
@@ -58,6 +58,7 @@ const fetchQuizDetails = async (id: any) => {
     const data = await res.json();
     // console.log(data)
     setDetails(data?.data);
+    console.log(data?.data)
 
   } catch (error) {
     console.error("An error has occurred");
@@ -66,17 +67,7 @@ const fetchQuizDetails = async (id: any) => {
   }
 };
 
-const fetchLeaderboard = async (id: any) => {
-  try {
-    // setLoadingDetails(true);
-    const res = await apiFetch(`/api/admin/quiz/leaderboard/${id}`);
-    const data = await res.json();
-    console.log(data)
-    setLeaderboard(data?.data.leaderboard);
-  } catch (error) {
-    console.error("An error has occurred");
-  } 
-}
+
 
 const menuRef = useRef<HTMLDivElement | null>(null);
     
@@ -126,7 +117,7 @@ onClick={() => {
   setDetails(null); // ✅ Clear previous quiz data
   setIsDetailsShown(true);
   fetchQuizDetails(row["id"]);
-  fetchLeaderboard(row["id"]);
+
 }}
 
 
@@ -174,7 +165,8 @@ onClick={() => {
     onClose={() => setIsDetailsShown(false)}
     badge={badge}
     thumbnail={thumbnail}
-    payment_history={leaderboard}
+    
+    payment_history={details?.payment_history}
         ref={menuRef}
   />  
 )}

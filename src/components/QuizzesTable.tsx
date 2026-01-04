@@ -361,7 +361,7 @@ onClick={() => {
       <div className="w-auto" >
 
       
-        <PreviewQuizOverlay onClose={() => setShowPreview(false)}  data={details?.preview_questions} />
+        <PreviewQuizOverlay onClose={() => setShowPreview(false)}  data={details?.questions} />
           </div>
       )}
 

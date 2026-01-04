@@ -7,6 +7,9 @@ import { IoSearch } from 'react-icons/io5';
 import SelectLecturePopup from './SelectLecturePopup';
 // import SelectQuizBlockPopup from './SelectQuizBlockPopup';
 import SelectQuizPopup from './SelectQuizPopup';
+import { useApi } from "../../hooks/useApi";
+import toast from "react-hot-toast";
+// import axios from "axios";
 
 interface UploadLecturePopUpFlowProps {
   onClose: () => void;
@@ -31,6 +34,36 @@ const UploadLecturePopupFlow: React.FC<UploadLecturePopUpFlowProps> = ({ onClose
    const [isQuizBlockPopupOpen, setIsQuizBlockPopupOpen] = useState(false);
     const [selectedQuizBlocks, setSelectedQuizBlocks] = useState<{ id: number; name: string }[]>([]);
   const [selectedAdditionalFile, setSelectedAdditionalFile] = useState<File | null>(null);
+  const [cloudinaryUrl, ] = useState<string | null>(null);
+  const [uploadingToCloudinary, setUploadingToCloudinary] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const { apiFetch } = useApi();
+
+  // Cloudinary config - replace these with your keys/preset
+  // const CLOUDINARY_CLOUD_NAME = (import.meta as any).env?.VITE_CLOUDINARY_CLOUD_NAME || 'YOUR_CLOUD_NAME';
+  // const CLOUDINARY_UPLOAD_PRESET = (import.meta as any).env?.VITE_CLOUDINARY_UPLOAD_PRESET || 'YOUR_UPLOAD_PRESET';
+
+  // const uploadToCloudinary = async (file: File, onProgress?: (p: number) => void): Promise<string> => {
+  //   const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`;
+  //   const fd = new FormData();
+  //   fd.append('file', file); 
+  //   fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+  //   const res = await axios.post(url, fd, {
+  //     headers: { 'Content-Type': 'multipart/form-data' },
+  //     onUploadProgress: (progressEvent) => {
+  //       if (progressEvent.total && onProgress) {
+  //         const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+  //         onProgress(percent);
+  //       }
+  //     },
+  //   });
+
+  //   if (res.status >= 200 && res.status < 300) {
+  //     return res.data.secure_url || res.data.url;
+  //   }
+  //   throw new Error('Upload failed');
+  // };
 
    
   const courses = [
@@ -116,8 +149,42 @@ const UploadLecturePopupFlow: React.FC<UploadLecturePopUpFlowProps> = ({ onClose
   };
 
   const handleSubmit = () => {
-    console.log("Lecture uploaded successfully!", selectedFile);
-    onClose();
+    // Create lecture on backend; require cloudinaryUrl
+    (async () => {
+      if (!cloudinaryUrl) {
+        alert('Please upload the video to Cloudinary before publishing.');
+        return;
+      }
+
+      const payload = {
+        title,
+        subtitle: subTitle,
+        course: selectedCourse,
+        tags,
+        user_restriction: selectedUserRestriction,
+        quiz_blocks: selectedQuizBlocks.map((b) => b.id),
+        video_url: cloudinaryUrl,
+        additional_file_name: selectedAdditionalFile?.name ?? null,
+      };
+
+      try {
+        const res = await apiFetch('/api/admin/lectures/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const result = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          toast.error(result.message || 'Failed to create lecture');
+          return;
+        }
+        toast.success('Lecture created');
+        onClose();
+      } catch (err) {
+        console.error(err);
+        toast.error('Error creating lecture');
+      }
+    })();
   };
 
   const renderStep = () => {
@@ -402,6 +469,40 @@ const UploadLecturePopupFlow: React.FC<UploadLecturePopUpFlowProps> = ({ onClose
                     )
                 }
 
+                {/* Cloudinary upload controls */}
+                {selectedFile && (
+                  <div className="mt-3">
+                    <div className="flex items-center gap-2">
+                      <button
+                        className="px-3 py-1 text-xs rounded bg-[#0360AB] text-white h-[32px] disabled:opacity-50"
+                        onClick={async () => {
+                          if (!selectedFile) return;
+                          // start upload
+                          try {
+                            setUploadingToCloudinary(true);
+                            setUploadProgress(0);
+                            // const url = await uploadToCloudinary(selectedFile, (p) => setUploadProgress(p));
+                            // setCloudinaryUrl(url);
+                            toast.success('Uploaded to Cloudinary');
+                          } catch (err) {
+                            console.error(err);
+                            toast.error('Cloudinary upload failed');
+                          } finally {
+                            setUploadingToCloudinary(false);
+                          }
+                        }}
+                        disabled={uploadingToCloudinary || !!cloudinaryUrl}
+                      >
+                        {uploadingToCloudinary ? `Uploading ${uploadProgress}%` : (cloudinaryUrl ? 'Uploaded' : 'Upload to Cloudinary')}
+                      </button>
+
+                      {cloudinaryUrl && (
+                        <a className="text-xs text-[#0360AB] truncate" href={cloudinaryUrl} target="_blank" rel="noreferrer">View video</a>
+                      )}
+                    </div>
+                  </div>
+                )}
+
             </div>
 
             </div>
@@ -437,7 +538,7 @@ const UploadLecturePopupFlow: React.FC<UploadLecturePopUpFlowProps> = ({ onClose
             <button onClick={prevStep} className="px-3 py-1 text-xs bg-[#D4E3FF] rounded text-[#0360AB] h-[28px]">
               Go to Previous
             </button>
-            <button onClick={handleSubmit} className="px-3 py-1 text-xs rounded bg-[#0360AB] text-white h-[28px]">
+            <button onClick={handleSubmit} className="px-3 py-1 text-xs rounded bg-[#0360AB] text-white h-[28px]" disabled={!cloudinaryUrl}>
               Publish
             </button>
           </div>

@@ -21,7 +21,7 @@ interface UserDetailsPanelProps {
   onPreview?: () => void;
   badge?: string;
   thumbnail?: string;
-  payment_history: any [];
+  payment_history?: any[];
   
 }
 
@@ -44,6 +44,19 @@ interface UserDetailsPanelProps {
 //                 "is_top_score": 1
 //             },
 
+
+// "payment_history": [
+//             {
+//                 "transaction_id": 73,
+//                 "amount": "4000.00",
+//                 "payment_method": "card",
+//                 "payment_gateway": "paystack",
+//                 "status": "success",
+//                 "created_at": "2026-01-02T00:48:18.000Z",
+//                 "subscription_type": "monthly",
+//                 "premium_expiry": "2026-02-02T00:48:28.000Z"
+//             }
+
 const UserDetailsPanel = forwardRef<HTMLDivElement, UserDetailsPanelProps>(
   (
     {
@@ -53,6 +66,7 @@ const UserDetailsPanel = forwardRef<HTMLDivElement, UserDetailsPanelProps>(
       loadingDetails,
       onClose,
       badge,
+      payment_history
     },
     ref
   ) => {
@@ -470,18 +484,24 @@ const UserDetailsPanel = forwardRef<HTMLDivElement, UserDetailsPanelProps>(
               <h4 className="font-semibold">Payment History</h4>
               {loadingDetails ? (
                 <LoadingAnimation />
-              ) : details?.payment_history?.length > 0 ? (
-                <div className="flex items-center w-full justify-between">
-                  <div>
-                    <p className="text-[14px]">11 Oct 2025</p>
-                    <p className="text-[12px] text-[#73777F]">exp: 11 Oct 2026</p>
-                  </div>
-                  <div>
-                    <p className="text-[14px]">New Monthly Premium Subscription</p>
-                  </div>
+              ) : payment_history && payment_history.length > 0 ? (
+                <div className="space-y-3 mt-2">
+                  {payment_history.map((ph: any) => (
+                    <div key={ph.transaction_id ?? ph.created_at} className="flex items-center w-full justify-between bg-[#F8F9FF] p-3 rounded">
+                      <div>
+                        <p className="text-[14px]">{formatReadableDate(ph.created_at)}</p>
+                        <p className="text-[12px] text-[#73777F]">{ph.premium_expiry ? `exp: ${formatReadableDate(ph.premium_expiry)}` : ''}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[14px]">{ph.subscription_type ? `${ph.subscription_type[0].toUpperCase()}${ph.subscription_type.slice(1)} Subscription` : 'Subscription'}</p>
+                        {ph.amount && <p className="text-[12px] text-[#73777F]">Amount: {ph.amount}</p>}
+                        {ph.payment_method && <p className="text-[12px] text-[#73777F]">Method: {ph.payment_method}</p>}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : (
-                "No Data Available"
+                <div className="text-xs text-[#73777F] mt-2">No Data Available</div>
               )}
             </div>
           </div>
