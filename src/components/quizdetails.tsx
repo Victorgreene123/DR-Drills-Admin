@@ -8,7 +8,7 @@ import  { forwardRef } from "react";
 import { LiaTimesSolid } from "react-icons/lia";
 import { GoDotFill } from "react-icons/go";
 import { FaChevronRight } from "react-icons/fa";
-import { RiSendPlane2Line } from "react-icons/ri";
+
 import { GrDownload } from "react-icons/gr";
 import { BiTrash } from "react-icons/bi";
 
@@ -54,7 +54,7 @@ const QuizDetailsPanel = forwardRef<HTMLDivElement, QuizDetailsPanelProps>(
       onClose,
       onPreview,
       badge,
-      thumbnail,
+      // thumbnail,
       leaderboard,
     },
     ref
@@ -164,7 +164,7 @@ const QuizDetailsPanel = forwardRef<HTMLDivElement, QuizDetailsPanelProps>(
           </div>
 
           {/* Fast Track */}
-        <div className="mt-2">
+        {/* <div className="mt-2">
           <h3 className="text-[14px] font-[500]">Fast Track</h3>
           <div className="flex items-center gap-2 my-2">
             <img src={thumbnail} alt="user" className="w-[82px] h-[47px] rounded" />
@@ -177,13 +177,21 @@ const QuizDetailsPanel = forwardRef<HTMLDivElement, QuizDetailsPanelProps>(
               <div className="font-medium text-xs text-[#1A1C1E]">{details?.block_name}</div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Action List */}
         <div className="p-2 space-y-2 mt-2">
-          <div className="flex items-center gap-3 text-[14px]"><RiSendPlane2Line className="text-[#73777F]" /><p className="text-black">Publish quiz</p></div>
-          <div className="flex items-center gap-3 text-[14px]"><GrDownload className="text-[#73777F]" /><p className="text-black">Download CSV</p></div>
-          <div className="flex items-center gap-3 text-[14px]"><BiTrash className="text-[#73777F]" /><p className="text-black">Delete quiz</p></div>
+          {/* <div className="flex items-center gap-3 text-[14px]"><RiSendPlane2Line className="text-[#73777F]" /><p className="text-black">Publish quiz</p></div> */}
+          <div className="flex gap-2">
+            <button className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded bg-[#F8F9FF] text-[#73777F] hover:bg-[#ECEDF4] transition text-[14px]">
+              <GrDownload />
+              Download CSV
+            </button>
+            <button className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded bg-[#FFE8E8] text-[#D32F2F] hover:bg-[#FFCCCC] transition text-[14px]">
+              <BiTrash />
+              Delete quiz
+            </button>
+          </div>
         </div>
       </div>
 
