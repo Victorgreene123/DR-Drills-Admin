@@ -90,9 +90,9 @@ const ViewLectureBlockScreen: React.FC = () => {
         {lectureBlock?.description}
       </div>
       <div className="flex items-center gap-2 mb-2">
-        <span className="rounded-full bg-[#F2F3FA] px-2 py-1 text-xs flex items-center gap-1">
-          <span role="img" aria-label="avatar">{lectureBlock?.thumbnail}</span> {lectureBlock?.course_id}
-        </span>
+        {/* <span className="rounded-full bg-[#F2F3FA] p-1 text-xs flex items-center gap-1"> */}
+          <img src={lectureBlock?.thumbnail || ""}  className="w-12 h-12 object-cover rounded-full"/> 
+        {/* </span> */}
         <span className="text-xs text-[#73777F]">• {lectureBlock?.banks?.length} Lectures</span>
       </div>
       <hr className="text-[#c3c6cf] my-2"/>

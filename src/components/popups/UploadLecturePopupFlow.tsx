@@ -9,6 +9,11 @@ import SelectLecturePopup from './SelectLecturePopup';
 import SelectQuizPopup from './SelectQuizPopup';
 import { useApi } from "../../hooks/useApi";
 import toast from "react-hot-toast";
+import {
+  uploadLectureVideo,
+  formatFileSize,
+  validateVideoFile,
+} from "../../utils/uploadLectureVideo";
 // import axios from "axios";
 
 interface UploadLecturePopUpFlowProps {
@@ -18,6 +23,8 @@ interface UploadLecturePopUpFlowProps {
 const UploadLecturePopupFlow: React.FC<UploadLecturePopUpFlowProps> = ({ onClose }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [step, setStep] = useState(1);
   const [title, setTitle] = useState("");
@@ -34,9 +41,6 @@ const UploadLecturePopupFlow: React.FC<UploadLecturePopUpFlowProps> = ({ onClose
    const [isQuizBlockPopupOpen, setIsQuizBlockPopupOpen] = useState(false);
     const [selectedQuizBlocks, setSelectedQuizBlocks] = useState<{ id: number; name: string }[]>([]);
   const [selectedAdditionalFile, setSelectedAdditionalFile] = useState<File | null>(null);
-  const [cloudinaryUrl, ] = useState<string | null>(null);
-  const [uploadingToCloudinary, setUploadingToCloudinary] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<number>(0);
   const { apiFetch } = useApi();
 
   // Cloudinary config - replace these with your keys/preset
@@ -65,7 +69,6 @@ const UploadLecturePopupFlow: React.FC<UploadLecturePopUpFlowProps> = ({ onClose
   //   throw new Error('Upload failed');
   // };
 
-   
   const courses = [
     "Anatomy",
     "Physiology",
@@ -127,9 +130,9 @@ const UploadLecturePopupFlow: React.FC<UploadLecturePopUpFlowProps> = ({ onClose
   };
 
   const validateFile = (file: File) => {
-    const validTypes = ["video/mp4"];
-    if (!validTypes.includes(file.type)) {
-      alert("Only mp4 files are allowed.");
+    const validation = validateVideoFile(file, ["video/mp4"]);
+    if (!validation.valid) {
+      toast.error(validation.error || "Invalid file");
       return false;
     }
     return true;
@@ -137,54 +140,78 @@ const UploadLecturePopupFlow: React.FC<UploadLecturePopUpFlowProps> = ({ onClose
 
   const uploadFile = (file: File) => {
     setIsUploading(true);
+    setUploadError(null);
     console.log("Uploading file:", file.name);
-    
 
     setTimeout(() => {
       setSelectedFile(file);
       setIsUploading(false);
       setStep(2);
-      console.log("Upload complete!");
-    }, 2000);
+      console.log("File ready for metadata entry!");
+    }, 500);
   };
 
-  const handleSubmit = () => {
-    // Create lecture on backend; require cloudinaryUrl
-    (async () => {
-      if (!cloudinaryUrl) {
-        alert('Please upload the video to Cloudinary before publishing.');
+  const handleSubmit = async () => {
+    // Validate form
+    if (!selectedFile) {
+      toast.error("Please select a video file");
+      return;
+    }
+
+    if (!title.trim()) {
+      toast.error("Please enter a lecture title");
+      return;
+    }
+
+    if (selectedCourse === "Course") {
+      toast.error("Please select a course");
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadError(null);
+    setUploadProgress(0);
+
+    try {
+      // Prepare lecture metadata
+      const lectureMeta = {
+        fileName: selectedFile.name,
+        name: title,
+        description: subTitle,
+        course: 1,
+        // tags: tags,
+        // user_restriction: selectedUserRestriction,
+        // quiz_blocks: selectedQuizBlocks.map((b) => b.id),
+        // additional_file_name: selectedAdditionalFile?.name || null,
+      };
+
+      // Upload lecture and video to Bunny.net
+      const result = await uploadLectureVideo(
+        selectedFile,
+        lectureMeta,
+        apiFetch,
+        (progress) => {
+          setUploadProgress(progress);
+        }
+      );
+
+      if (!result.success) {
+        setUploadError(result.error || "Upload failed");
+        toast.error(result.error || "Failed to upload lecture");
         return;
       }
 
-      const payload = {
-        title,
-        subtitle: subTitle,
-        course: selectedCourse,
-        tags,
-        user_restriction: selectedUserRestriction,
-        quiz_blocks: selectedQuizBlocks.map((b) => b.id),
-        video_url: cloudinaryUrl,
-        additional_file_name: selectedAdditionalFile?.name ?? null,
-      };
-
-      try {
-        const res = await apiFetch('/api/admin/lectures/create', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-        const result = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          toast.error(result.message || 'Failed to create lecture');
-          return;
-        }
-        toast.success('Lecture created');
-        onClose();
-      } catch (err) {
-        console.error(err);
-        toast.error('Error creating lecture');
-      }
-    })();
+      toast.success("Lecture created and video uploaded successfully!");
+      onClose();
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "An unexpected error occurred";
+      setUploadError(errorMessage);
+      toast.error(errorMessage);
+      console.error("Upload error:", err);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const renderStep = () => {
@@ -464,42 +491,44 @@ const UploadLecturePopupFlow: React.FC<UploadLecturePopUpFlowProps> = ({ onClose
                 {
                     selectedFile && (
                     <div className='mt-2 text-xs text-[#73777F]'>   
-                        {selectedFile.name} ({(selectedFile.size / (1024 * 1024)).toFixed(2)} MB)
+                        {selectedFile.name} ({formatFileSize(selectedFile.size)})
                     </div>
                     )
                 }
 
-                {/* Cloudinary upload controls */}
+                {/* Video upload and progress */}
                 {selectedFile && (
-                  <div className="mt-3">
-                    <div className="flex items-center gap-2">
-                      <button
-                        className="px-3 py-1 text-xs rounded bg-[#0360AB] text-white h-[32px] disabled:opacity-50"
-                        onClick={async () => {
-                          if (!selectedFile) return;
-                          // start upload
-                          try {
-                            setUploadingToCloudinary(true);
-                            setUploadProgress(0);
-                            // const url = await uploadToCloudinary(selectedFile, (p) => setUploadProgress(p));
-                            // setCloudinaryUrl(url);
-                            toast.success('Uploaded to Cloudinary');
-                          } catch (err) {
-                            console.error(err);
-                            toast.error('Cloudinary upload failed');
-                          } finally {
-                            setUploadingToCloudinary(false);
-                          }
-                        }}
-                        disabled={uploadingToCloudinary || !!cloudinaryUrl}
-                      >
-                        {uploadingToCloudinary ? `Uploading ${uploadProgress}%` : (cloudinaryUrl ? 'Uploaded' : 'Upload to Cloudinary')}
-                      </button>
+                  <div className="mt-3 space-y-2">
+                    {/* Progress bar */}
+                    {isUploading && (
+                      <div className="space-y-1">
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="text-[#73777F]">Uploading...</span>
+                          <span className="font-semibold text-[#0360AB]">
+                            {uploadProgress}%
+                          </span>
+                        </div>
+                        <div className="w-full bg-[#E0E0E0] rounded-full h-2 overflow-hidden">
+                          <div
+                            className="bg-[#0360AB] h-full transition-all duration-300 ease-out"
+                            style={{ width: `${uploadProgress}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
 
-                      {cloudinaryUrl && (
-                        <a className="text-xs text-[#0360AB] truncate" href={cloudinaryUrl} target="_blank" rel="noreferrer">View video</a>
-                      )}
-                    </div>
+                    {/* Error message */}
+                    {uploadError && (
+                      <div className="p-2 bg-red-50 border border-red-200 rounded text-red-700 text-xs">
+                        <p className="font-semibold">Upload failed:</p>
+                        <p>{uploadError}</p>
+                      </div>
+                    )}
+
+                    {/* Upload info */}
+                    <p className="text-[10px] text-[#73777F]">
+                      <strong>Note:</strong> Upload URL expires in 1 hour and is single-use.
+                    </p>
                   </div>
                 )}
 
@@ -535,11 +564,15 @@ const UploadLecturePopupFlow: React.FC<UploadLecturePopUpFlowProps> = ({ onClose
         {/* Footer */}
         {step !== 1 && (
           <div className="flex justify-end gap-4 mt-3 p-2 bg-[#F8F9FF] sticky bottom-0 z-[1100]">
-            <button onClick={prevStep} className="px-3 py-1 text-xs bg-[#D4E3FF] rounded text-[#0360AB] h-[28px]">
+            <button onClick={prevStep} className="px-3 py-1 text-xs bg-[#D4E3FF] rounded text-[#0360AB] h-[28px]" disabled={isUploading}>
               Go to Previous
             </button>
-            <button onClick={handleSubmit} className="px-3 py-1 text-xs rounded bg-[#0360AB] text-white h-[28px]" disabled={!cloudinaryUrl}>
-              Publish
+            <button
+              onClick={handleSubmit}
+              className="px-3 py-1 text-xs rounded bg-[#0360AB] text-white h-[28px] disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!selectedFile || isUploading || !title.trim()}
+            >
+              {isUploading ? `Publishing... ${uploadProgress}%` : "Publish"}
             </button>
           </div>
         )}

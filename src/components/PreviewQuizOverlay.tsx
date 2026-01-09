@@ -122,11 +122,14 @@ const PreviewQuizOverlay = forwardRef<HTMLDivElement, Props>(({ onClose, data },
           image_url: (o as any).image_url ?? null,
           is_correct: o.is_correct === 1,
         })),
+        explanation : localQ.explanation
+
       };
+      console.log(payload)
 
       try {
         setSaving(true);
-        const res = await _apiFetch(`/api/admin/questions/${q.id}`, {
+        const res = await _apiFetch(`/api/admin/question/${q.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),

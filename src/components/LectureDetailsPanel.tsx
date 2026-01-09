@@ -182,9 +182,9 @@ const LectureDetailsPanel = forwardRef<HTMLDivElement, LectureDetailsPanelProps>
               <FaEye />
               View Lecture
             </a>
-            <button className="w-full px-4 py-2 rounded bg-[#ECEDF4] text-[#1A1C1E] font-medium hover:bg-[#d1d3db] transition">
+            {/* <button className="w-full px-4 py-2 rounded bg-[#ECEDF4] text-[#1A1C1E] font-medium hover:bg-[#d1d3db] transition">
               Edit Lecture
-            </button>
+            </button> */}
             <button className="w-full px-4 py-2 rounded bg-red-100 text-red-800 font-medium hover:bg-red-200 transition">
               Delete Lecture
             </button>

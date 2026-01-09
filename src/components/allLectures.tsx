@@ -43,10 +43,21 @@ const AllLectures: React.FC = () => {
       try {
         setLoading(true);
         const res = await apiFetch('/api/admin/all-lectures');
-        const response = await res.json();
         
-        if (response.lectures) {
-          setLectures(response.lectures);
+        // Handle 304 Not Modified - still parse the response
+        if (res.status === 304 || res.ok) {
+          const response = await res.json();
+          
+          // Handle nested response structure (data.lectures)
+          const lecturesList = response.data?.lectures || response.lectures || [];
+          
+          if (lecturesList.length > 0) {
+            setLectures(lecturesList);
+          } else {
+            toast.success('No lectures found');
+          }
+        } else {
+          toast.error('Failed to load lectures');
         }
       } catch (error) {
         console.error('Error fetching lectures:', error);
