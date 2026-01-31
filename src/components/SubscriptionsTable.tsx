@@ -28,7 +28,7 @@ const SubscriptionsTable: React.FC<SubscriptionsTableProps> = ({
   renderCell = {},
 }) => {
   const [subscriptionDetails, setSubscriptionDetails] = useState<any>(null);
-  const [leaderboard, setLeaderboard] = useState<any[]>([]);
+  const [leaderboard, ] = useState<any[]>([]);
   const [loadingDetails, setLoadingDetails] = useState(false);
 
   const [isSubscriptionDetailsShown, setIsSubscriptionDetailsShown] = useState(false);
@@ -51,9 +51,9 @@ const SubscriptionsTable: React.FC<SubscriptionsTableProps> = ({
   const fetchSubscriptionDetails = async (id: any) => {
     try {
       setLoadingDetails(true);
-      const res = await apiFetch(`/api/admin/subscriptions-history/${id}`);
+      const res = await apiFetch(`/api/admin/subscription-history/${id}`);
       const data = await res.json();
-      setSubscriptionDetails(data?.data);
+      setSubscriptionDetails(data?.data || data);
     } catch (error) {
       console.error("Error fetching subscription details");
     } finally {
@@ -61,15 +61,7 @@ const SubscriptionsTable: React.FC<SubscriptionsTableProps> = ({
     }
   };
 
-  const fetchSubscriptionLeaderboard = async (id: any) => {
-    try {
-      const res = await apiFetch(`/api/admin/subscriptions/leaderboard/${id}`);
-      const data = await res.json();
-      setLeaderboard(data?.data.leaderboard);
-    } catch (error) {
-      console.error("Error fetching subscription leaderboard");
-    }
-  };
+  
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -110,7 +102,7 @@ const SubscriptionsTable: React.FC<SubscriptionsTableProps> = ({
                 setIsSubscriptionDetailsShown(true);
 
                 fetchSubscriptionDetails(row["id"]);
-                fetchSubscriptionLeaderboard(row["id"]);
+
               }}
             >
               {ids.map((id, colIdx) => (
