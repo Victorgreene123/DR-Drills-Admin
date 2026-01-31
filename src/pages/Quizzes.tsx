@@ -198,6 +198,7 @@ const Quizzes: React.FC = () => {
               totalPages={totalPages}
               currentPage={currentPage}
               onPageChange={changePage}
+              onRefresh={() => fetchData(currentPage)}
               rowsPerPage={quizzesPerPage}
               
             />)

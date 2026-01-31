@@ -4,6 +4,7 @@ import CreateQuizBlockModal from "../components/quizblocks/CreateQuizBlockModal"
 import { Link } from "react-router-dom";
 import { useApi } from "../hooks/useApi";
 import logo from '../assets/favicon.svg'
+import { BiTrash } from "react-icons/bi";
 
 
 
@@ -27,10 +28,9 @@ const QuizBlocksScreen: React.FC = () => {
   const [quizBlocks, setQuizBlocks] = useState<Array<{ id: number; title: string; quizzesCount: number; tags: string[] }>>([]);
     const { apiFetch } = useApi();
     const [loading, setLoading] = useState(false);
+    const [isDeleting, setIsDeleting] = useState<number | null>(null);
 
 
-     useEffect(() => {
-    // Example API call to fetch quiz blocks
     const fetchQuizBlocks = async () => {
       try {
         setLoading(true);
@@ -56,8 +56,38 @@ const QuizBlocksScreen: React.FC = () => {
       }
 
     };
+
+     useEffect(() => {
+    // Example API call to fetch quiz blocks
     fetchQuizBlocks();
  } , []);
+
+    const handleDelete = async (e: React.MouseEvent, blockId: number) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (!window.confirm("Are you sure you want to delete this quiz block?")) return;
+
+      try {
+        setIsDeleting(blockId);
+        const res = await apiFetch(`/api/admin/quiz-block/${blockId}`, {
+          method: "DELETE",
+        });
+
+        if (res.ok) {
+          alert("Quiz block deleted successfully");
+          fetchQuizBlocks();
+        } else {
+          const errorData = await res.json();
+          alert(`Error: ${errorData.message || "Failed to delete quiz block"}`);
+        }
+      } catch (error) {
+        console.error("Error deleting quiz block:", error);
+        alert("An error occurred while deleting the quiz block.");
+      } finally {
+        setIsDeleting(null);
+      }
+    };
 
   return (
     <div className="my-4">
@@ -78,9 +108,17 @@ const QuizBlocksScreen: React.FC = () => {
             <Link to={`./${block.id}`} key={block.id} state={{ title: block.title, quizzesCount: block.quizzesCount, tags: block.tags }}>
           <div
             key={block.id}
-            className="bg-[#F2F3FA] rounded-xl p-4 shadow hover:shadow-lg cursor-pointer"
+            className="bg-[#F2F3FA] rounded-xl p-4 shadow hover:shadow-lg cursor-pointer relative group"
           >
-            <div className="font-semibold text-[#1A1C1E] text-lg">
+            <button
+              onClick={(e) => handleDelete(e, block.id)}
+              disabled={isDeleting === block.id}
+              className="absolute top-2 right-2 p-2 text-red-600 hover:bg-red-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
+              title="Delete Quiz Block"
+            >
+              <BiTrash size={18} />
+            </button>
+            <div className="font-semibold text-[#1A1C1E] text-lg pr-8">
               {block.title}
             </div>
             <div className="text-[#73777F] text-sm mb-2">
@@ -107,15 +145,7 @@ const QuizBlocksScreen: React.FC = () => {
       }
       </div>
 
-      <div className="flex items-center gap-4 mt-6 mb-4">
-       
-        <button
-          className="ml-auto bg-[#0360AB] text-white px-4 py-2 rounded"
-          onClick={() => setShowCreate(true)}
-        >
-          Create Quiz Block
-        </button>
-      </div>
+      
       {showCreate && (
     
             <CreateQuizBlockModal onClose={() => setShowCreate(false)} />

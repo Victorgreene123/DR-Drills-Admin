@@ -37,36 +37,36 @@ const AllLectures: React.FC = () => {
   const [isDetailsShown, setIsDetailsShown] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
+  const fetchLectures = async () => {
+    try {
+      setLoading(true);
+      const res = await apiFetch('/api/admin/all-lectures');
+      
+      // Handle 304 Not Modified - still parse the response
+      if (res.status === 304 || res.ok) {
+        const response = await res.json();
+        
+        // Handle nested response structure (data.lectures)
+        const lecturesList = response.data?.lectures || response.lectures || [];
+        
+        if (lecturesList.length > 0) {
+          setLectures(lecturesList);
+        } else {
+          toast.success('No lectures found');
+        }
+      } else {
+        toast.error('Failed to load lectures');
+      }
+    } catch (error) {
+      console.error('Error fetching lectures:', error);
+      toast.error('Failed to load lectures');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Fetch lectures from API
   useEffect(() => {
-    const fetchLectures = async () => {
-      try {
-        setLoading(true);
-        const res = await apiFetch('/api/admin/all-lectures');
-        
-        // Handle 304 Not Modified - still parse the response
-        if (res.status === 304 || res.ok) {
-          const response = await res.json();
-          
-          // Handle nested response structure (data.lectures)
-          const lecturesList = response.data?.lectures || response.lectures || [];
-          
-          if (lecturesList.length > 0) {
-            setLectures(lecturesList);
-          } else {
-            toast.success('No lectures found');
-          }
-        } else {
-          toast.error('Failed to load lectures');
-        }
-      } catch (error) {
-        console.error('Error fetching lectures:', error);
-        toast.error('Failed to load lectures');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchLectures();
   }, []);
 
@@ -230,6 +230,7 @@ const AllLectures: React.FC = () => {
         <LectureDetailsPanel
           lecture={selectedLecture}
           onClose={() => setIsDetailsShown(false)}
+          onRefresh={fetchLectures}
           ref={menuRef}
         />
       )}

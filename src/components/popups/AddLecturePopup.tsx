@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import thumbnail1 from '../../assets/thumbnail-1.png';
 import thumbnailmain from '../../assets/thumbnail-1.png'; // update if needed
 import { LiaTimesSolid } from 'react-icons/lia';
 import { MdCheckBox, MdCheckBoxOutlineBlank } from 'react-icons/md';
 import { IoFilterOutline, IoSearch } from 'react-icons/io5';
-import { FaArrowDown, FaArrowUp } from 'react-icons/fa';
+import { FaArrowDown, FaArrowUp, FaSpinner } from 'react-icons/fa';
 import { FaChevronRight } from 'react-icons/fa6';
+import { useApi } from '../../hooks/useApi';
 
 type Lecture = {
   id: number;
@@ -16,26 +17,14 @@ type Lecture = {
 interface AddLecturesProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (selectedIds: number[]) => void;
+  onAdd: (selectedLectures: Lecture[]) => void;
 }
 
-const AllLectures: Lecture[] = [
-  { id: 1, title: "Introduction to Anatomy", thumbnail: thumbnailmain },
-  { id: 2, title: "Skeletal System Overview", thumbnail: thumbnailmain },
-  { id: 3, title: "Muscular System Basics", thumbnail: thumbnailmain },
-  { id: 4, title: "Cardiovascular System", thumbnail: thumbnailmain },
-  { id: 5, title: "Nervous System Fundamentals", thumbnail: thumbnailmain },
-  { id: 6, title: "Digestive System Overview", thumbnail: thumbnailmain },
-  { id: 7, title: "Respiratory System Basics", thumbnail: thumbnailmain },
-  { id: 8, title: "Endocrine System Essentials", thumbnail: thumbnailmain },
-  { id: 9, title: "Reproductive System Overview", thumbnail: thumbnailmain },
-  { id: 10, title: "Urinary System Basics", thumbnail: thumbnailmain },
-  { id: 11, title: "Integumentary System Essentials", thumbnail: thumbnailmain },
-  { id: 12, title: "Lymphatic System Overview", thumbnail: thumbnailmain }
-];
-
 const AddLectures: React.FC<AddLecturesProps> = ({ isOpen, onClose, onAdd }) => {
-  const [selectedLectures, setSelectedLectures] = useState<number[]>([]);
+  const [allLectures, setAllLectures] = useState<Lecture[]>([]);
+  const [loading, setLoading] = useState(false);
+  const { apiFetch } = useApi();
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [search, setSearch] = useState('');
   const [sortOrder, setSortOrder] = useState(1);
   const [filterDropdown, setFilterDropdown] = useState(false);
@@ -43,47 +32,42 @@ const AddLectures: React.FC<AddLecturesProps> = ({ isOpen, onClose, onAdd }) => 
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [showCourseSubmenu, setShowCourseSubmenu] = useState(false);
 
-  const filterOptions = [
-    { label: "Last Modified", value: "lastModified" },
-    { label: "Views", value: "views" },
-    { label: "Course", value: "course" },
-    { label: "Tags", value: "tags" }
-  ];
-
-  const courseOptions = [
-    { label: "Anatomy", icon: <img src={thumbnail1} alt="Anatomy" className="w-4 h-4 rounded-full inline mr-1" /> },
-    { label: "Physiology", icon: <span className="inline-block w-4 h-4 rounded-full bg-red-200 mr-1" /> },
-    { label: "Biochemistry", icon: <span className="inline-block w-4 h-4 rounded-full bg-green-200 mr-1" /> },
-    { label: "Pharmacology", icon: <span className="inline-block w-4 h-4 rounded-full bg-blue-200 mr-1" /> }
-  ];
+  useEffect(() => {
+    if (isOpen) {
+      const fetchLectures = async () => {
+        try {
+          setLoading(true);
+          const res = await apiFetch('/api/admin/all-lectures');
+          if (res.ok) {
+            const response = await res.json();
+            const lecturesList = response.data?.lectures || response.lectures || [];
+            setAllLectures(lecturesList);
+          }
+        } catch (error) {
+          console.error('Error fetching lectures:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchLectures();
+    }
+  }, [isOpen]);
 
   const toggleLecture = (id: number) => {
-    setSelectedLectures(prev =>
+    setSelectedIds(prev =>
       prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
     );
   };
 
-  const handleFilterToggle = (value: string) => {
-    setSelectedFilters(prev =>
-      prev.includes(value) ? prev.filter(f => f !== value) : [...prev, value]
-    );
-    if (value !== "course") setShowCourseSubmenu(false);
-  };
-
-  const handleCourseToggle = (course: string) => {
-    setSelectedCourses(prev =>
-      prev.includes(course) ? prev.filter(c => c !== course) : [...prev, course]
-    );
-  };
-
   const handleAdd = () => {
-    onAdd(selectedLectures);
+    const selected = allLectures.filter(l => selectedIds.includes(l.id));
+    onAdd(selected);
     onClose();
   };
 
   if (!isOpen) return null;
 
-  const filteredLectures = AllLectures.filter(lecture =>
+  const filteredLectures = allLectures.filter(lecture =>
     lecture.title.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -113,7 +97,7 @@ const AddLectures: React.FC<AddLecturesProps> = ({ isOpen, onClose, onAdd }) => 
 						   <input
 							 type="text"
 							 className="w-full flex items-center outline-none border-none pl-8 rounded-[8px] h-full absolute top-0 text-[14px] text-[#73777F]"
-							 placeholder="Search for Quiz Blocks"
+							 placeholder="Search for Lectures"
 							 value={search}
 							 onChange={(e) => setSearch(e.target.value)}
 						   />
@@ -205,17 +189,25 @@ const AddLectures: React.FC<AddLecturesProps> = ({ isOpen, onClose, onAdd }) => 
             </div>
 
             <div className="overflow-y-auto flex-1 pr-2 border-t border-[#C3C6CF]" style={{ maxHeight: 450 }}>
-              {filteredLectures.map(lecture => (
-                <div key={lecture.id} className="flex items-center gap-3 py-2">
-                  {selectedLectures.includes(lecture.id)
-                    ? <MdCheckBox className="text-[#0360AB] text-[28px]" onClick={() => toggleLecture(lecture.id)} />
-                    : <MdCheckBoxOutlineBlank className="bg-white text-[28px]" onClick={() => toggleLecture(lecture.id)} />}
-                  <img src={lecture.thumbnail} alt="thumb" className="w-[82px] h-[47px] rounded" />
-                  <span className="truncate w-full text-sm">{lecture.title}</span>
+              {loading ? (
+                <div className="flex justify-center items-center py-8">
+                  <FaSpinner className="animate-spin text-[#0360AB] text-2xl" />
                 </div>
-              ))}
-              {filteredLectures.length === 0 && (
-                <div className="text-center text-gray-400 py-8">No lectures found.</div>
+              ) : (
+                <>
+                  {filteredLectures.map(lecture => (
+                    <div key={lecture.id} className="flex items-center gap-3 py-2">
+                      {selectedIds.includes(lecture.id)
+                        ? <MdCheckBox className="text-[#0360AB] text-[28px] cursor-pointer" onClick={() => toggleLecture(lecture.id)} />
+                        : <MdCheckBoxOutlineBlank className="bg-white text-[28px] cursor-pointer" onClick={() => toggleLecture(lecture.id)} />}
+                      <img src={lecture.thumbnail || thumbnailmain} alt="thumb" className="w-[82px] h-[47px] rounded object-cover" />
+                      <span className="truncate w-full text-sm">{lecture.title}</span>
+                    </div>
+                  ))}
+                  {filteredLectures.length === 0 && (
+                    <div className="text-center text-gray-400 py-8">No lectures found.</div>
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -224,21 +216,21 @@ const AddLectures: React.FC<AddLecturesProps> = ({ isOpen, onClose, onAdd }) => 
           <div className="w-1/2 pl-4 flex flex-col">
             <h3 className="text-[18px] font-semibold mb-2">Selected Lectures</h3>
             <p className="text-[#0360AB] text-[16px]">
-              {selectedLectures.length} {selectedLectures.length === 1 ? 'Lecture' : 'Lectures'} selected
+              {selectedIds.length} {selectedIds.length === 1 ? 'Lecture' : 'Lectures'} selected
             </p>
             <div className="overflow-y-auto flex-1 pr-2" style={{ maxHeight: 500 }}>
-              {selectedLectures.map(id => {
-                const lecture = AllLectures.find(l => l.id === id);
+              {selectedIds.map(id => {
+                const lecture = allLectures.find(l => l.id === id);
                 if (!lecture) return null;
                 return (
                   <div key={id} className="flex items-center gap-3 py-2">
-                    <MdCheckBox className="text-[#0360AB] text-[28px]" />
-                    <img src={lecture.thumbnail} alt="thumb" className="w-[82px] h-[47px] rounded" />
+                    <MdCheckBox className="text-[#0360AB] text-[28px] cursor-pointer" onClick={() => toggleLecture(id)} />
+                    <img src={lecture.thumbnail || thumbnailmain} alt="thumb" className="w-[82px] h-[47px] rounded object-cover" />
                     <span className="truncate w-full text-sm">{lecture.title}</span>
                   </div>
                 );
               })}
-              {selectedLectures.length === 0 && (
+              {selectedIds.length === 0 && (
                 <div className="text-center text-gray-400 py-8">No lecture selected.</div>
               )}
             </div>

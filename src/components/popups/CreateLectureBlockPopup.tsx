@@ -34,9 +34,9 @@ const CreateLectureBlockPopup: React.FC<
                     }
                     
                     setlectures((prev: any[]) => {
-                        const exists = prev.some((b) => b.id === lecturebody.lectureid);
+                        const exists = prev.some((b) => b.lectureid === lecturebody.lectureid);
                       if (exists) {
-                        return prev.filter((b) => b.id !== lecturebody.lectureid);
+                        return prev.filter((b) => b.lectureid !== lecturebody.lectureid);
                       }
                       return [...prev, lecturebody];
                     })
@@ -120,8 +120,7 @@ const CreateLectureBlockPopup: React.FC<
               tags : tags,
               course_id:  selectedCourse === "Course" ? 5 : courses.find(c => c.name === selectedCourse)?.id || 1,
   
-              // resourceIds: lecturesSelected.map(q => q.lectureid),
-              resourceIds : [2,5, 7]
+              resourceIds: lecturesSelected.map(q => q.lectureid)
             };
             console.log("Creating Quiz Block:", newQuizBlock);
         

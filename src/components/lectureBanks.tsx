@@ -14,20 +14,7 @@ const LectureBanks:React.FC = () => {
     const [isCreateLectureClicked , setIsCreateLectureClicked]= useState(false)
 
     const [isLoading, setIsLoading] = useState(true);
-    const AllLectures = [
-      { id: 1, title: "Introduction to Anatomy", thumbnail: thumbnailmain , description: "An overview of human anatomy covering basic concepts and terminology."},
-      { id: 2, title: "Skeletal System Overview", thumbnail: thumbnailmain , description: "Detailed study of the human skeletal system, including bone structure and function."},
-      { id: 3, title: "Muscular System Basics", thumbnail: thumbnailmain },
-      { id: 4, title: "Cardiovascular System", thumbnail: thumbnailmain },
-      { id: 5, title: "Nervous System Fundamentals", thumbnail: thumbnailmain },
-      { id: 6, title: "Digestive System Overview", thumbnail: thumbnailmain },
-      { id: 7, title: "Respiratory System Basics", thumbnail: thumbnailmain },
-      { id: 8, title: "Endocrine System Essentials", thumbnail: thumbnailmain },
-      { id: 9, title: "Reproductive System Overview", thumbnail: thumbnailmain },
-      { id: 10, title: "Urinary System Basics", thumbnail: thumbnailmain },
-      { id: 11, title: "Integumentary System Essentials", thumbnail: thumbnailmain },
-      { id: 12, title: "Lymphatic System Overview", thumbnail: thumbnailmain }
-    ];
+
 const [lectureBanksAndDetails, setLectureBanksAndDetails] = useState( [
   {
     id: 1,
@@ -89,15 +76,18 @@ useEffect(() => {
 , []);
 
 
-const addToLectureBank = (ids: number[]) => {
+const addToLectureBank = (selectedLectures: any[]) => {
   console.log("Adding");
 
   setLectureBanksAndDetails(prevBanks => {
     return prevBanks.map(bank => {
       if (bank.id === selectedBank) {
-        const newLecturesToAdd = ids
-          .map(id => AllLectures.find(l => l.id === id))
-          .filter(Boolean) as { id: number, title: string, thumbnail: string , description: string }[];
+        const newLecturesToAdd = selectedLectures.map(l => ({
+          id: l.id,
+          title: l.title,
+          thumbnail: l.thumbnail || thumbnailmain,
+          description: l.description || ""
+        }));
 
         const updatedLectures = [...bank.lectures, ...newLecturesToAdd];
 

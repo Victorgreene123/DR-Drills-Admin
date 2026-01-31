@@ -11,6 +11,7 @@ import { FaChevronRight } from "react-icons/fa";
 
 import { GrDownload } from "react-icons/gr";
 import { BiTrash } from "react-icons/bi";
+import { useApi } from "../hooks/useApi";
 
 interface QuizDetailsPanelProps {
   id: any;
@@ -19,6 +20,7 @@ interface QuizDetailsPanelProps {
   loadingDetails: boolean;
   onClose: () => void;
   onPreview: () => void;
+  onRefresh?: () => void;
   badge?: string;
   thumbnail?: string;
   leaderboard: any [];
@@ -53,6 +55,7 @@ const QuizDetailsPanel = forwardRef<HTMLDivElement, QuizDetailsPanelProps>(
       loadingDetails,
       onClose,
       onPreview,
+      onRefresh,
       badge,
       // thumbnail,
       leaderboard,
@@ -61,6 +64,33 @@ const QuizDetailsPanel = forwardRef<HTMLDivElement, QuizDetailsPanelProps>(
   ) => {
     const dataItem = data.find((item) => item.id === id);
     const [view, setView] = useState<"details" | "leaderboard">("details");
+    const { apiFetch } = useApi();
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const handleDelete = async () => {
+      if (!window.confirm("Are you sure you want to delete this quiz?")) return;
+
+      try {
+        setIsDeleting(true);
+        const res = await apiFetch(`/api/admin/quiz/${id}`, {
+          method: "DELETE",
+        });
+
+        if (res.ok) {
+          alert("Quiz deleted successfully");
+          onClose();
+          if (onRefresh) onRefresh();
+        } else {
+          const errorData = await res.json();
+          alert(`Error: ${errorData.message || "Failed to delete quiz"}`);
+        }
+      } catch (error) {
+        console.error("Error deleting quiz:", error);
+        alert("An error occurred while deleting the quiz.");
+      } finally {
+        setIsDeleting(false);
+      }
+    };
 
     if (!dataItem) return null;
 
@@ -187,9 +217,13 @@ const QuizDetailsPanel = forwardRef<HTMLDivElement, QuizDetailsPanelProps>(
               <GrDownload />
               Download CSV
             </button>
-            <button className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded bg-[#FFE8E8] text-[#D32F2F] hover:bg-[#FFCCCC] transition text-[14px]">
+            <button
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded bg-[#FFE8E8] text-[#D32F2F] hover:bg-[#FFCCCC] transition text-[14px] disabled:opacity-50"
+            >
               <BiTrash />
-              Delete quiz
+              {isDeleting ? "Deleting..." : "Delete quiz"}
             </button>
           </div>
         </div>

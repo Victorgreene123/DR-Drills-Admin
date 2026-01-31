@@ -14,6 +14,7 @@ interface QuizzesTableProps {
   currentPage: number; // ✅ controlled from parent
   totalPages: number; // ✅ from API
   onPageChange: (page: number) => void; // ✅ parent handles pagination
+  onRefresh?: () => void;
   rowsPerPage?: number;
   renderCell?: Record<string, (row: Record<string, any>) => React.ReactNode>;
 }
@@ -25,6 +26,7 @@ const QuizzesTable: React.FC<QuizzesTableProps> = ({
   currentPage,
   totalPages,
   onPageChange,
+  onRefresh,
   // rowsPerPage = 10,
   renderCell = {},
 }) => {
@@ -350,6 +352,7 @@ onClick={() => {
     loadingDetails={loadingDetails}
     onClose={() => setIsDetailsShown(false)}
     onPreview={() => setShowPreview(true)}
+    onRefresh={onRefresh}
     badge={badge}
     thumbnail={thumbnail}
     leaderboard={leaderboard}

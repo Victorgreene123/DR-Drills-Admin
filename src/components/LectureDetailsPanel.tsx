@@ -1,16 +1,46 @@
-import { forwardRef } from "react";
+import { forwardRef, useState } from "react";
 import { LiaTimesSolid } from "react-icons/lia";
 import { FaDownload, FaEye } from "react-icons/fa";
 import { formatReadableDate } from "../utils/formatDate";
+import { useApi } from "../hooks/useApi";
 
 interface LectureDetailsPanelProps {
   lecture: any;
   onClose: () => void;
+  onRefresh?: () => void;
 }
 
 const LectureDetailsPanel = forwardRef<HTMLDivElement, LectureDetailsPanelProps>(
-  ({ lecture, onClose }, ref) => {
+  ({ lecture, onClose, onRefresh }, ref) => {
+    const { apiFetch } = useApi();
+    const [isDeleting, setIsDeleting] = useState(false);
+
     if (!lecture) return null;
+
+    const handleDelete = async () => {
+      if (!window.confirm("Are you sure you want to delete this lecture?")) return;
+
+      try {
+        setIsDeleting(true);
+        const res = await apiFetch(`/api/admin/lecture/${lecture.id}`, {
+          method: "DELETE",
+        });
+
+        if (res.ok) {
+          alert("Lecture deleted successfully");
+          onClose();
+          if (onRefresh) onRefresh();
+        } else {
+          const errorData = await res.json();
+          alert(`Error: ${errorData.message || "Failed to delete lecture"}`);
+        }
+      } catch (error) {
+        console.error("Error deleting lecture:", error);
+        alert("An error occurred while deleting the lecture.");
+      } finally {
+        setIsDeleting(false);
+      }
+    };
 
     const formatFileSize = (bytes: number) => {
       if (bytes < 1024) return `${bytes} B`;
@@ -185,8 +215,12 @@ const LectureDetailsPanel = forwardRef<HTMLDivElement, LectureDetailsPanelProps>
             {/* <button className="w-full px-4 py-2 rounded bg-[#ECEDF4] text-[#1A1C1E] font-medium hover:bg-[#d1d3db] transition">
               Edit Lecture
             </button> */}
-            <button className="w-full px-4 py-2 rounded bg-red-100 text-red-800 font-medium hover:bg-red-200 transition">
-              Delete Lecture
+            <button
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="w-full px-4 py-2 rounded bg-red-100 text-red-800 font-medium hover:bg-red-200 transition disabled:opacity-50"
+            >
+              {isDeleting ? "Deleting..." : "Delete Lecture"}
             </button>
           </div>
         </div>

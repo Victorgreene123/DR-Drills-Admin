@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import thumbnail1 from '../../assets/thumbnail-1.png';
-import thumbnail2 from '../../assets/thumbnail-2.png';
 import { LiaTimesSolid } from 'react-icons/lia';
 
 import { MdCheckBox, MdCheckBoxOutlineBlank } from 'react-icons/md';
 import { IoFilterOutline, IoSearch } from 'react-icons/io5';
 
-import { FaArrowDown, FaArrowUp } from 'react-icons/fa';
+import { FaArrowDown, FaArrowUp, FaSpinner } from 'react-icons/fa';
 import { FaChevronRight } from 'react-icons/fa6';
+import { useApi } from '../../hooks/useApi';
 
 type Lecture = {
 	id: number;
@@ -22,50 +22,36 @@ interface SelectLecturePopupProps {
 	onSelectLecture: (lecture: string , lectureid: any) => void;
 }
 
-const mockLectures: Lecture[] = [
-	{
-		id: 1,
-		title: 'Anatomical Naming conventions, Planes and Axes',
-		thumbnail: thumbnail1
-	},
-	{
-		id: 2,
-		title: 'Anatomical Naming conventions, Planes and Axes',
-		thumbnail: thumbnail1
-	},
-	{
-		id: 3,
-		title: 'Anatomical Naming conventions, Planes and Axes',
-		thumbnail: thumbnail1
-	},
-	{
-		id: 4,
-		title: 'The Lecture bank/Playlist Title. (should be truncated if the title goes too long)',
-		thumbnail: thumbnail2
-	},
-	{
-		id: 5,
-		title: 'The Lecture bank/Playlist Title. (should be truncated if the title goes too long)',
-		thumbnail: thumbnail2
-	},
-	{
-		id: 6,
-		title: 'The Lecture bank/Playlist Title. (should be truncated if the title goes too long)',
-		thumbnail: thumbnail1
-	},
-	{
-		id: 7,
-		title: 'Anatomical Naming conventions, Planes and Axes',
-		thumbnail: thumbnail2
-	}
-];
-
 const SelectLecturePopup: React.FC<SelectLecturePopupProps> = ({ isOpen, onClose, onSelectLecture, lectures }) => {
 	const [selectedLectures, setSelectedLectures] = useState<any[]>([]);
+	const { apiFetch } = useApi();
+	const [allLectures, setAllLectures] = useState<Lecture[]>([]);
+	const [loading, setLoading] = useState(false);
 
 	useEffect(() => {
 		setSelectedLectures(lectures || []);
 	}, [lectures, isOpen]);
+
+	useEffect(() => {
+		if (isOpen) {
+			const fetchLectures = async () => {
+				try {
+					setLoading(true);
+					const res = await apiFetch('/api/admin/all-lectures');
+					if (res.ok) {
+						const response = await res.json();
+						const lecturesList = response.data?.lectures || response.lectures || [];
+						setAllLectures(lecturesList);
+					}
+				} catch (error) {
+					console.error('Error fetching lectures:', error);
+				} finally {
+					setLoading(false);
+				}
+			};
+			fetchLectures();
+		}
+	}, [isOpen]);
 
 	const [search, setSearch] = useState<string>('');
 
@@ -75,7 +61,7 @@ const SelectLecturePopup: React.FC<SelectLecturePopupProps> = ({ isOpen, onClose
 	if (!isOpen) return null;
 
 	const isLectureSelected = (lecture: Lecture) =>
-		selectedLectures.some((l) => l.lectureid === lecture.id);
+		selectedLectures.some((l) => l.lectureid === lecture.id || l.id === lecture.id);
 
 	const toggleLecture = (id: number, title: string) => {
 		let lectureObj = {
@@ -83,16 +69,16 @@ const SelectLecturePopup: React.FC<SelectLecturePopupProps> = ({ isOpen, onClose
 			lectureid: id
 		};
 		setSelectedLectures((prev) => {
-			const exists = prev.some((l) => l.lectureid === id);
+			const exists = prev.some((l) => l.lectureid === id || l.id === id);
 			if (exists) {
-				return prev.filter((i) => i.lectureid !== id);
+				return prev.filter((i) => i.lectureid !== id && i.id !== id);
 			}
 			return [...prev, lectureObj];
 		});
 		onSelectLecture(title, id);
 	};
 
-	const filteredLectures = mockLectures.filter((lecture) =>
+	const filteredLectures = allLectures.filter((lecture) =>
 		lecture.title.toLowerCase().includes(search.toLowerCase())
 	);
 
@@ -269,36 +255,44 @@ const SelectLecturePopup: React.FC<SelectLecturePopupProps> = ({ isOpen, onClose
 							className="overflow-y-auto flex-1 pr-2 border-t-[1px] border-[#C3C6CF] "
 							style={{ maxHeight: 450 }}
 						>
-							{filteredLectures.map((lecture) => (
-								<div
-									key={lecture.id}
-									className="flex items-center gap-3 py-2 "
-								>
-									{isLectureSelected(lecture) ? (
-										<MdCheckBox
-											className="text-[#0360AB] text-[28px]"
-											onClick={() => toggleLecture(lecture.id, lecture.title)}
-										/>
-									) : (
-										<MdCheckBoxOutlineBlank
-											className="bg-white text-[28px]"
-											onClick={() => toggleLecture(lecture.id, lecture.title)}
-										/>
+							{loading ? (
+								<div className="flex justify-center items-center py-8">
+									<FaSpinner className="animate-spin text-[#0360AB] text-2xl" />
+								</div>
+							) : (
+								<>
+									{filteredLectures.map((lecture) => (
+										<div
+											key={lecture.id}
+											className="flex items-center gap-3 py-2 "
+										>
+											{isLectureSelected(lecture) ? (
+												<MdCheckBox
+													className="text-[#0360AB] text-[28px] cursor-pointer"
+													onClick={() => toggleLecture(lecture.id, lecture.title)}
+												/>
+											) : (
+												<MdCheckBoxOutlineBlank
+													className="bg-white text-[28px] cursor-pointer"
+													onClick={() => toggleLecture(lecture.id, lecture.title)}
+												/>
+											)}
+											<img
+												src={lecture.thumbnail || thumbnail1}
+												alt="thumb"
+												className="w-[82px] h-[47px] rounded object-cover"
+											/>
+											<span className="truncate w-full text-sm">
+												{lecture.title}
+											</span>
+										</div>
+									))}
+									{filteredLectures.length === 0 && (
+										<div className="text-center text-gray-400 py-8">
+											No lectures found.
+										</div>
 									)}
-									<img
-										src={lecture.thumbnail}
-										alt="thumb"
-										className="w-[82px] h-[47px] rounded"
-									/>
-									<span className="truncate w-full text-sm">
-										{lecture.title}
-									</span>
-								</div>
-							))}
-							{filteredLectures.length === 0 && (
-								<div className="text-center text-gray-400 py-8">
-									No lectures found.
-								</div>
+								</>
 							)}
 						</div>
 					</div>
@@ -316,18 +310,22 @@ const SelectLecturePopup: React.FC<SelectLecturePopupProps> = ({ isOpen, onClose
 							style={{ maxHeight: 500 }}
 						>
 							{selectedLectures.map((lectureObj) => {
-								const lecture = mockLectures.find((l) => l.id === lectureObj.lectureid);
+								const lectureId = lectureObj.lectureid || lectureObj.id;
+								const lecture = allLectures.find((l) => l.id === lectureId);
 								if (!lecture) return null;
 								return (
 									<div
-										key={lectureObj.lectureid}
+										key={lectureId}
 										className="flex items-center gap-3 py-2 "
 									>
-										<MdCheckBox className="text-[#0360AB] text-[28px]" />
+										<MdCheckBox
+											className="text-[#0360AB] text-[28px] cursor-pointer"
+											onClick={() => toggleLecture(lecture.id, lecture.title)}
+										/>
 										<img
-											src={lecture.thumbnail}
+											src={lecture.thumbnail || thumbnail1}
 											alt="thumb"
-											className="w-[82px] h-[47px] rounded"
+											className="w-[82px] h-[47px] rounded object-cover"
 										/>
 										<span className="truncate w-full text-sm">
 											{lecture.title}
