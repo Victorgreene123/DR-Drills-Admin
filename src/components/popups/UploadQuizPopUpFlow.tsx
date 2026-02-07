@@ -28,6 +28,7 @@ const UploadQuizPopUpFlow: React.FC<UploadQuizPopUpFlowProps> = ({
   const [selectedCourse, setSelectedCourse] = useState("Course");
   const [courseSearchTerm, setCourseSearchTerm] = useState<string>("");
 
+    const { apiFetch } = useApi();
  
 
   // const [isFastTrackOpen, setIsFastTrackOpen] = useState(false);
@@ -42,15 +43,20 @@ const UploadQuizPopUpFlow: React.FC<UploadQuizPopUpFlowProps> = ({
   console.log("Selected Lecture: ", selectedLecture);
   const [lecturesSelected , setlectures ] = useState<any>([])
 
-  const courses = [
-    "Anatomy",
-    "Physiology",
-    "Psychology",
-    "Neurology",
-    "Biomedics",
-    "Biotechnology",
-    "Devops Engineeering"
-  ];
+
+  
+  const [courses, setCourses] = useState<{course_id:number, course_name:string}[]>([]);
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await apiFetch('/api/courses/fetch');
+        const data = await res.json();
+        if (data && Array.isArray(data.courses)) {
+          setCourses(data.courses.map((c:any) => ({ course_id: c.course_id, course_name: c.course_name })));
+        }
+      } catch (e) { /* Optionally handle error */ }
+    })();
+  }, [apiFetch]);
  
   
   const userRestrictions = [
@@ -70,7 +76,7 @@ const UploadQuizPopUpFlow: React.FC<UploadQuizPopUpFlowProps> = ({
   // const [datemetric , setDateMetric] = useState<String | null>(null)
 
   const filteredCourses = courses.filter((item) =>
-    item.toLowerCase().includes(courseSearchTerm.toLowerCase())
+    item.course_name.toLowerCase().includes(courseSearchTerm.toLowerCase())
   );
 
   const [title, setTitle] = useState<string>("");
@@ -203,7 +209,6 @@ const [timeAllowed, setTimeAllowed] = useState<number | "">("");
   const [isQuizBlockPopupOpen, setIsQuizBlockPopupOpen] = useState(false);
   const [selectedQuizBlocks, setSelectedQuizBlocks] = useState<{ id: string; name: string }[]>([]);
   const [isSubmitting , setIsSubmitting] = useState(false);
-    const { apiFetch } = useApi();
   
   const handleSubmit = async () => {
   if (!selectedFile) {
@@ -352,14 +357,14 @@ formData.append("time_allowed", timeAllowed ? String(timeAllowed) : "0");
                         {filteredCourses.map((item) => (
                           <li
                             className="py-1 px-2 hover:bg-[#F2F3FA] cursor-pointer text-xs"
-                            key={item}
+                            key={item.course_id}
                             onClick={() => {
-                              setSelectedCourse(item);
+                              setSelectedCourse(item.course_name);
                               setIsDropped(false);
                               setCourseSearchTerm("");
                             }}
                           >
-                            {item}
+                            {item.course_name}
                           </li>
                         ))}
                       </ul>

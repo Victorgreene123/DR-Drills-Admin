@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import thumbnailmain from "../assets/thumbnail-main.jpg";
 import { FaPlus } from "react-icons/fa";
-import AddLectures from "./popups/AddLecturePopup";
+import  AddLectures  from "./popups/AddLecturePopup";
 import CreateLectureBankPopup from "./popups/CreateLectureBankPopup";
 import { useApi } from "../hooks/useApi";
 import  { LoadingAnimation } from "../pages/QuizBlocksScreen";
+import toast from "react-hot-toast";
 const LectureBanks:React.FC = () => {
 
     const [selectedBank, setSelectedBank] = React.useState<number | null>(null);
@@ -43,6 +44,7 @@ const loadBanks =  async () => {
       }
 
       const {data: blocks} = data;
+      console.log("Api lectue banks" , blocks)
       const mappedBlocks = blocks.map((item: any , index: number) => {
           return {
               id: index,
@@ -60,7 +62,8 @@ const loadBanks =  async () => {
           }
       })
       setLectureBanksAndDetails(mappedBlocks)
-      setSelectedBank(mappedBlocks[0]?.id );
+    //   console.log("Mapped Blocks : " , mappedBlocks[0].id)
+      setSelectedBank(mappedBlocks[0].id );
     } catch (error) {
       console.error("An Error Occures" , error)
     }
@@ -77,25 +80,33 @@ useEffect(() => {
 
 
 const addToLectureBank = (selectedLectures: any[]) => {
-  console.log("Adding");
+    if (selectedBank === null) {
+        console.log("No selected bank")
+        return;
+    }
 
-  setLectureBanksAndDetails(prevBanks => {
-    return prevBanks.map(bank => {
-      if (bank.id === selectedBank) {
-        const newLecturesToAdd = selectedLectures.map(l => ({
-          id: l.id,
-          title: l.title,
-          thumbnail: l.thumbnail || thumbnailmain,
-          description: l.description || ""
-        }));
-
-        const updatedLectures = [...bank.lectures, ...newLecturesToAdd];
-
-        return { ...bank, lectures: updatedLectures };
-      }
-      return bank;
+    
+    
+    // For each selected lecture, call the PATCH endpoint
+    Promise.all(selectedLectures.map(async (lecture) => {
+        try {
+            const res = await apiFetch(`/api/admin/lecture-banks/${selectedBank}/${lecture.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+            });
+            if (!res.ok) {
+                const result = await res.json();
+                toast.error(result.message || `Failed to add lecture ${lecture.title}`);
+            } else {
+                toast.success(`Lecture "${lecture.title}" added to bank!`);
+            }
+        } catch (error) {
+            toast.error(`Error adding lecture: ${lecture.title}`);
+        }
+    })).then(() => {
+        // Optionally reload banks after all
+        loadBanks();
     });
-  });
 };
 
 

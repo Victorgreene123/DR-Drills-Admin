@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import thumbnail1 from '../../assets/thumbnail-1.png';
+// Removed unused thumbnail1 import
 import thumbnailmain from '../../assets/thumbnail-1.png'; // update if needed
 import { LiaTimesSolid } from 'react-icons/lia';
 import { MdCheckBox, MdCheckBoxOutlineBlank } from 'react-icons/md';
@@ -32,6 +32,34 @@ const AddLectures: React.FC<AddLecturesProps> = ({ isOpen, onClose, onAdd }) => 
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [showCourseSubmenu, setShowCourseSubmenu] = useState(false);
 
+  // Define filterOptions and courseOptions
+  const filterOptions: { label: string; value: string }[] = [
+    { label: 'Course', value: 'course' },
+    { label: 'Difficulty', value: 'difficulty' },
+    { label: 'Type', value: 'type' },
+    // Add more filter options as needed
+  ];
+
+  const courseOptions: { label: string }[] = [
+    { label: 'Math' },
+    { label: 'Science' },
+    { label: 'History' },
+    // Add more course options as needed
+  ];
+
+  // Define handler functions
+  const handleFilterToggle = (value: string) => {
+    setSelectedFilters(prev =>
+      prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
+    );
+  };
+
+  const handleCourseToggle = (label: string) => {
+    setSelectedCourses(prev =>
+      prev.includes(label) ? prev.filter(l => l !== label) : [...prev, label]
+    );
+  };
+
   useEffect(() => {
     if (isOpen) {
       const fetchLectures = async () => {
@@ -61,8 +89,13 @@ const AddLectures: React.FC<AddLecturesProps> = ({ isOpen, onClose, onAdd }) => 
 
   const handleAdd = () => {
     const selected = allLectures.filter(l => selectedIds.includes(l.id));
-    onAdd(selected);
-    onClose();
+    setLoading(true);
+    const addLectures = async () => {
+       onAdd(selected);
+      setLoading(false);
+      // onClose();
+    };
+    addLectures();
   };
 
   if (!isOpen) return null;
@@ -127,7 +160,7 @@ const AddLectures: React.FC<AddLecturesProps> = ({ isOpen, onClose, onAdd }) => 
                     {filterDropdown && (
                       <div className="absolute left-0 top-8 bg-white border border-[#C3C6CF] rounded shadow-lg min-w-[180px] z-20">
                         <ul>
-                          {filterOptions.map(option => (
+                          {filterOptions.map((option: { label: string; value: string }) => (
                             <li
                               key={option.value}
                               className={`px-4 group py-2 flex items-center justify-between cursor-pointer hover:bg-[#F2F3FA] text-[#1A1C1E] text-sm ${selectedFilters.includes(option.value) ? "bg-[#F2F3FA]" : ""}`}
@@ -156,7 +189,7 @@ const AddLectures: React.FC<AddLecturesProps> = ({ isOpen, onClose, onAdd }) => 
                         {showCourseSubmenu && (
                           <div className="absolute left-full top-0 bg-white border border-[#C3C6CF] rounded shadow-lg min-w-[180px] z-30">
                             <ul>
-                              {courseOptions.map(course => (
+                              {courseOptions.map((course: { label: string }) => (
                                 <li
                                   key={course.label}
                                   className="flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-[#F2F3FA] text-[#1A1C1E] text-sm"
@@ -168,7 +201,7 @@ const AddLectures: React.FC<AddLecturesProps> = ({ isOpen, onClose, onAdd }) => 
                                   {selectedCourses.includes(course.label)
                                     ? <MdCheckBox className="text-[#0360AB] text-[18px]" />
                                     : <MdCheckBoxOutlineBlank className="text-[#C3C6CF] text-[18px]" />}
-                                  {course.icon}
+                                  {/* Removed course.icon, as courseOptions only has label */}
                                   {course.label}
                                 </li>
                               ))}
@@ -192,6 +225,7 @@ const AddLectures: React.FC<AddLecturesProps> = ({ isOpen, onClose, onAdd }) => 
               {loading ? (
                 <div className="flex justify-center items-center py-8">
                   <FaSpinner className="animate-spin text-[#0360AB] text-2xl" />
+                  <span className="ml-2 text-[#0360AB]">Processing...</span>
                 </div>
               ) : (
                 <>

@@ -55,55 +55,37 @@ const CreateLectureBankPopup: React.FC<
           
         
 
-         const schools= [
-          {
-            id: 1,
-            name: "University of Lagos"
-          },
-          {
-            id: 2,
-            name: "Obafemi Awolowo University"
-          },
-          {
-            id: 3,
-            name: "University of Ibadan"
-          } 
-         ]
-
-     const courses = [
-      {
-        id: 1,
-        name: "Anatomy"
-      },
-      {
-        id: 2,
-        name: "Physiology"
-      },
-      {
-        id: 3,
-        name: "Pharmacology"
-      },
-      {
-        id: 4,
-        name: "Pathology"
-      },
-      {
-        id: 5,
-        name: "Microbiology"
-      },
-      {
-        id: 6,
-        name: "Biochemistry"
-      },
-
-      ];
+  const [courses, setCourses] = useState<{course_id:number, course_name:string, description?:string}[]>([]);
+  const [schools, setSchools] = useState<{id:number, name:string}[]>([]);
+  useEffect(() => {
+    // Fetch courses
+    (async () => {
+      try {
+        const res = await apiFetch('/api/courses/fetch');
+        const data = await res.json();
+        if (data && Array.isArray(data.courses)) {
+          setCourses(data.courses.map((c:any) => ({ course_id: c.course_id, course_name: c.course_name, description: c.description })));
+        }
+      } catch (e) { /* Optionally handle error */ }
+    })();
+    // Fetch schools
+    (async () => {
+      try {
+        const res = await apiFetch('/api/universities/fetch');
+        const data = await res.json();
+        if (data && Array.isArray(data.universities)) {
+          setSchools(data.universities.map((s:any) => ({ id: s.id, name: s.name })));
+        }
+      } catch (e) { /* Optionally handle error */ }
+    })();
+  }, []);
         const userRestrictions = [
         "All Users",
         "Premium Users",
         "Admins Only"
       ];
       const filteredCourses = courses.filter((item) =>
-        item.name.toLowerCase().includes(courseSearchTerm.toLowerCase())
+        item.course_name.toLowerCase().includes(courseSearchTerm.toLowerCase())
       );
         const filteredSchools = schools.filter((item) =>
         item.name.toLowerCase().includes(schoolSearchTerm.toLowerCase())
@@ -141,7 +123,7 @@ const CreateLectureBankPopup: React.FC<
               // isPublic: isPublic,
               thumbnail: null,
               tags : tags,
-              course_id:  selectedCourse === "Course" ? 5 : courses.find(c => c.name === selectedCourse)?.id || 1,
+              course_id:  selectedCourse === "Course" ? 5 : courses.find(c => c.course_name === selectedCourse)?.course_id || 1,
               school_id: selectedSchool === "School" ? 1 : schools.find(c => c.name === selectedSchool)?.id || 1,
               resourceIds: lecturesSelected.map(q => q.lectureid)
             };
@@ -242,14 +224,14 @@ const CreateLectureBankPopup: React.FC<
                                         {filteredCourses.map((item) => (
                                           <li
                                             className="py-1 px-2 hover:bg-[#F2F3FA] cursor-pointer text-xs"
-                                            key={item.id}
+                                            key={item.course_id}
                                             onClick={() => {
-                                              setSelectedCourse(item.name);
+                                              setSelectedCourse(item.course_name);
                                               setIsDropped(false);
                                               setCourseSearchTerm("");
                                             }}
                                           >
-                                            {item.name}
+                                            {item.course_name}
                                           </li>
                                         ))}
                                       </ul>

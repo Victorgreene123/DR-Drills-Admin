@@ -42,49 +42,29 @@ const UploadLecturePopupFlow: React.FC<UploadLecturePopUpFlowProps> = ({ onClose
     const [selectedQuizBlocks, setSelectedQuizBlocks] = useState<{ id: number; name: string }[]>([]);
   const [selectedAdditionalFile, setSelectedAdditionalFile] = useState<File | null>(null);
   const { apiFetch } = useApi();
+  const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(null);
 
-  // Cloudinary config - replace these with your keys/preset
-  // const CLOUDINARY_CLOUD_NAME = (import.meta as any).env?.VITE_CLOUDINARY_CLOUD_NAME || 'YOUR_CLOUD_NAME';
-  // const CLOUDINARY_UPLOAD_PRESET = (import.meta as any).env?.VITE_CLOUDINARY_UPLOAD_PRESET || 'YOUR_UPLOAD_PRESET';
 
-  // const uploadToCloudinary = async (file: File, onProgress?: (p: number) => void): Promise<string> => {
-  //   const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`;
-  //   const fd = new FormData();
-  //   fd.append('file', file); 
-  //   fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-
-  //   const res = await axios.post(url, fd, {
-  //     headers: { 'Content-Type': 'multipart/form-data' },
-  //     onUploadProgress: (progressEvent) => {
-  //       if (progressEvent.total && onProgress) {
-  //         const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-  //         onProgress(percent);
-  //       }
-  //     },
-  //   });
-
-  //   if (res.status >= 200 && res.status < 300) {
-  //     return res.data.secure_url || res.data.url;
-  //   }
-  //   throw new Error('Upload failed');
-  // };
-
-  const courses = [
-    "Anatomy",
-    "Physiology",
-    "Psychology",
-    "Neurology",
-    "Biomedics",
-    "Biotechnology",
-    "Devops Engineeering"
-  ];
+  
+  const [courses, setCourses] = useState<{course_id:number, course_name:string}[]>([]);
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await apiFetch('/api/courses/fetch');
+        const data = await res.json();
+        if (data && Array.isArray(data.courses)) {
+          setCourses(data.courses.map((c:any) => ({ course_id: c.course_id, course_name: c.course_name })));
+        }
+      } catch (e) { /* Optionally handle error */ }
+    })();
+  }, [apiFetch]);
     const userRestrictions = [
     "All Users",
     "Premium Users",
     "Admins Only"
   ];
   const filteredCourses = courses.filter((item) =>
-    item.toLowerCase().includes(courseSearchTerm.toLowerCase())
+    item.course_name.toLowerCase().includes(courseSearchTerm.toLowerCase())
   );
     const [tags, setTags] = useState<string[]>([]);
     const [tagInput, setTagInput] = useState<string>("");
@@ -108,6 +88,16 @@ const UploadLecturePopupFlow: React.FC<UploadLecturePopUpFlowProps> = ({ onClose
        }
      }, [tagInput, tags]);
   
+useEffect(() => {
+  if (!selectedFile) return;
+
+  const url = URL.createObjectURL(selectedFile);
+  setVideoPreviewUrl(url);
+
+  return () => {
+    URL.revokeObjectURL(url); // cleanup
+  };
+}, [selectedFile]);
 
 
   const prevStep = () => setStep(prev => prev - 1);
@@ -321,14 +311,14 @@ const UploadLecturePopupFlow: React.FC<UploadLecturePopUpFlowProps> = ({ onClose
                                         {filteredCourses.map((item) => (
                                           <li
                                             className="py-1 px-2 hover:bg-[#F2F3FA] cursor-pointer text-xs"
-                                            key={item}
+                                            key={item.course_id}
                                             onClick={() => {
-                                              setSelectedCourse(item);
+                                              setSelectedCourse(item.course_name);
                                               setIsDropped(false);
                                               setCourseSearchTerm("");
                                             }}
                                           >
-                                            {item}
+                                            {item.course_name}
                                           </li>
                                         ))}
                                       </ul>
@@ -475,17 +465,18 @@ const UploadLecturePopupFlow: React.FC<UploadLecturePopUpFlowProps> = ({ onClose
 
                 <div className='w-full h-[300px] rounded-md border-[#73777F] border-[1px]  mt-4'>
 
-                    {selectedFile ? (
-                        <video
-                        src={URL.createObjectURL(selectedFile)}
-                        controls
-                        className="w-full h-full object-cover rounded-md"
-                        />
-                    ) : (
-                        <div className="flex items-center justify-center h-full text-[#73777F]">
-                        No video selected
-                        </div>
-                    )}
+                   {videoPreviewUrl ? (
+  <video
+    src={videoPreviewUrl}
+    controls
+    className="w-full h-full object-cover rounded-md"
+  />
+) : (
+  <div className="flex items-center justify-center h-full text-[#73777F]">
+    No video selected
+  </div>
+)}
+
                 
                 </div>
                 {
