@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import thumbnailmain from "../assets/thumbnail-main.jpg";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaTrash } from "react-icons/fa";
 import  AddLectures  from "./popups/AddLecturePopup";
 import CreateLectureBankPopup from "./popups/CreateLectureBankPopup";
 import { useApi } from "../hooks/useApi";
@@ -9,12 +9,13 @@ import toast from "react-hot-toast";
 const LectureBanks:React.FC = () => {
 
     const [selectedBank, setSelectedBank] = React.useState<number | null>(null);
-          const { apiFetch } = useApi();
+    const { apiFetch } = useApi();
   
     const [isOpen, setIsOpen] = React.useState(false);
     const [isCreateLectureClicked , setIsCreateLectureClicked]= useState(false)
 
     const [isLoading, setIsLoading] = useState(true);
+    const [removingLectureId, setRemovingLectureId] = useState<number | null>(null);
 
 const [lectureBanksAndDetails, setLectureBanksAndDetails] = useState( [
   {
@@ -151,12 +152,44 @@ const addToLectureBank = (selectedLectures: any[]) => {
                 </div>
                 <div className="flex-col space-y-1">
                     {bank.lectures.map(lecture => (
-                        <div key={lecture.id} className=" flex items-start gap-3 ">
+                        <div key={lecture.id} className=" flex items-start gap-3 relative group">
                             <img src={lecture.thumbnail} alt={lecture.title} className="w-[120px] h-[75px] object-cover rounded-md mb-2" />
-                            <div>
-                            <h3 className="text-[14px] font-regular">{lecture.title}</h3>
-                            <p className="text-[#73777F] text-[12px]"> {lecture.description}</p>
+                            <div className="flex-1">
+                                <h3 className="text-[14px] font-regular">{lecture.title}</h3>
+                                <p className="text-[#73777F] text-[12px]"> {lecture.description}</p>
                             </div>
+                            <button 
+                                className="absolute top-2 right-2 text-red-500 bg-white p-1 rounded-full shadow opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50"
+                                onClick={async (e) => {
+                                    e.stopPropagation();
+                                    if (!window.confirm(`Remove "${lecture.title}" from this lecture bank?`)) return;
+                                    
+                                    setRemovingLectureId(lecture.id);
+                                    try {
+                                        // Use the correct API endpoint to detach/remove lecture from bank
+                                        const res = await apiFetch(`/api/admin/lecture-banks/${bank.id}/${lecture.id}`, {
+                                            method: 'DELETE',
+                                        });
+                                        
+                                        if (res.ok) {
+                                            toast.success("Lecture removed from bank");
+                                            loadBanks(); // Reload to reflect changes
+                                        } else {
+                                            const result = await res.json();
+                                            toast.error(result.message || "Failed to remove lecture");
+                                        }
+                                    } catch (error) {
+                                        console.error("Error removing lecture:", error);
+                                        toast.error("Error removing lecture");
+                                    } finally {
+                                        setRemovingLectureId(null);
+                                    }
+                                }}
+                                disabled={removingLectureId === lecture.id}
+                                title="Remove from bank"
+                            >
+                                <FaTrash size={12} />
+                            </button>
                         </div>
                     ))}
                 </div>

@@ -7,8 +7,12 @@ export const useApi = () => {
   const { token, logout } = useAuth();
 
   const apiFetch = async (url: string, options: RequestInit = {}) => {
+    const defaultHeaders: Record<string, string> = options.body instanceof FormData 
+      ? {} 
+      : { "Content-Type": "application/json" };
+
     const headers: Record<string, string> = {
-      "Content-Type": "application/json",
+      ...defaultHeaders,
       ...(options.headers as Record<string, string>),
     };
 

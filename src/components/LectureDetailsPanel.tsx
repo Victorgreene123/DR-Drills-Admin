@@ -1,8 +1,9 @@
-import { forwardRef, useState } from "react";
+import { forwardRef, useState, useEffect, useRef } from "react";
 import { LiaTimesSolid } from "react-icons/lia";
-import { FaDownload, FaEye } from "react-icons/fa";
+import { FaDownload, FaEye, FaEdit, FaSave, FaTimes, FaCamera } from "react-icons/fa";
 import { formatReadableDate } from "../utils/formatDate";
 import { useApi } from "../hooks/useApi";
+import toast from "react-hot-toast";
 
 interface LectureDetailsPanelProps {
   lecture: any;
@@ -14,8 +15,68 @@ const LectureDetailsPanel = forwardRef<HTMLDivElement, LectureDetailsPanelProps>
   ({ lecture, onClose, onRefresh }, ref) => {
     const { apiFetch } = useApi();
     const [isDeleting, setIsDeleting] = useState(false);
+    
+    // Edit state
+    const [isEditing, setIsEditing] = useState(false);
+    const [editTitle, setEditTitle] = useState("");
+    const [editDescription, setEditDescription] = useState("");
+    const [editThumbnailFile, setEditThumbnailFile] = useState<File | null>(null);
+    const [previewThumbnail, setPreviewThumbnail] = useState<string | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (lecture) {
+            setEditTitle(lecture.title || lecture.name || "");
+            setEditDescription(lecture.description || "");
+            setPreviewThumbnail(lecture.thumbnail || null);
+            setEditThumbnailFile(null);
+            setIsEditing(false);
+        }
+    }, [lecture]);
 
     if (!lecture) return null;
+
+    const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            setEditThumbnailFile(file);
+            setPreviewThumbnail(URL.createObjectURL(file));
+        }
+    };
+
+    const handleSave = async () => {
+        setIsSaving(true);
+        try {
+            const formData = new FormData();
+            formData.append("_method", "PATCH"); 
+            formData.append("title", editTitle);
+            formData.append("description", editDescription);
+            if (editThumbnailFile) {
+                formData.append("thumbnail", editThumbnailFile);
+            }
+
+            const res = await apiFetch(`/api/admin/lecture/${lecture.id}`, {
+                method: "POST",
+                body: formData,
+            });
+
+            if (res.ok) {
+                toast.success("Lecture updated successfully");
+                setIsEditing(false);
+                if (onRefresh) onRefresh();
+            } else {
+                const errorData = await res.json();
+                toast.error(errorData.message || "Failed to update lecture");
+            }
+        } catch (error) {
+            console.error("Error updating lecture:", error);
+            toast.error("Failed to update lecture");
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
 
     const handleDelete = async () => {
       if (!window.confirm("Are you sure you want to delete this lecture?")) return;
@@ -68,26 +129,68 @@ const LectureDetailsPanel = forwardRef<HTMLDivElement, LectureDetailsPanelProps>
         </div>
 
         {/* Thumbnail */}
-        {lecture.thumbnail && (
-          <div className="w-full h-48 bg-gray-100">
+        <div className="w-full h-48 bg-gray-100 relative group">
+          {previewThumbnail ? (
             <img
-              src={lecture.thumbnail}
+              src={previewThumbnail}
               alt={lecture.title}
               className="w-full h-full object-cover"
             />
-          </div>
-        )}
+          ) : (
+             <div className="w-full h-full flex items-center justify-center text-gray-400">No Thumbnail</div>
+          )}
+          
+          {isEditing && (
+             <label className="absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                <FaCamera className="text-white text-3xl mb-2" />
+                <span className="text-white text-sm font-medium">Change Thumbnail</span>
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  className="hidden" 
+                  accept="image/*" 
+                  onChange={handleThumbnailChange} 
+                />
+             </label>
+          )}
+        </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {/* Title & Description */}
           <div>
-            <h3 className="text-[18px] font-semibold text-[#1A1C1E] mb-2">
-              {lecture.title}
-            </h3>
-            <p className="text-[14px] text-[#73777F]">
-              {lecture.description}
-            </p>
+            {isEditing ? (
+                <div className="space-y-3 mb-4">
+                    <div>
+                        <label className="text-xs font-semibold text-[#73777F] uppercase mb-1 block">Title</label>
+                        <input 
+                            className="w-full border border-[#C3C6CF] rounded-[4px] p-2 text-[14px] outline-none focus:border-[#0360AB]"
+                            value={editTitle}
+                            onChange={(e) => setEditTitle(e.target.value)}
+                            placeholder="Lecture Title"
+                        />
+                    </div>
+                    <div>
+                        <label className="text-xs font-semibold text-[#73777F] uppercase mb-1 block">Description</label>
+                        <textarea 
+                            className="w-full border border-[#C3C6CF] rounded-[4px] p-2 text-[14px] outline-none focus:border-[#0360AB]"
+                            value={editDescription}
+                            onChange={(e) => setEditDescription(e.target.value)}
+                            placeholder="Description"
+                            rows={4}
+                        />
+                    </div>
+                </div>
+            ) : (
+                <>
+                    <h3 className="text-[18px] font-semibold text-[#1A1C1E] mb-2">
+                    {lecture.title || lecture.name}
+                    </h3>
+                    <p className="text-[14px] text-[#73777F]">
+                    {lecture.description}
+                    </p>
+                </>
+            )}
           </div>
 
           {/* Stats */}
@@ -202,26 +305,59 @@ const LectureDetailsPanel = forwardRef<HTMLDivElement, LectureDetailsPanelProps>
           </div>
 
           {/* Actions */}
-          <div className="space-y-2 pt-4 border-t">
-            <a
-              href={lecture.file_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded bg-[#0360AB] text-white font-medium hover:bg-[#035fabea] transition"
-            >
-              <FaEye />
-              View Lecture
-            </a>
-            {/* <button className="w-full px-4 py-2 rounded bg-[#ECEDF4] text-[#1A1C1E] font-medium hover:bg-[#d1d3db] transition">
-              Edit Lecture
-            </button> */}
-            <button
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="w-full px-4 py-2 rounded bg-red-100 text-red-800 font-medium hover:bg-red-200 transition disabled:opacity-50"
-            >
-              {isDeleting ? "Deleting..." : "Delete Lecture"}
-            </button>
+          <div className="space-y-2 pt-4 border-t sticky bottom-0 bg-white p-4">
+             {!isEditing ? (
+                <>
+                    <a
+                    href={lecture.file_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded bg-[#0360AB] text-white font-medium hover:bg-[#035fabea] transition"
+                    >
+                    <FaEye />
+                    View Lecture
+                    </a>
+                    
+                    <button 
+                    onClick={() => setIsEditing(true)}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded bg-[#ECEDF4] text-[#1A1C1E] font-medium hover:bg-[#d1d3db] transition"
+                    >
+                        <FaEdit />
+                        Edit Lecture
+                    </button>
+
+                    <button
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    className="w-full px-4 py-2 rounded bg-red-100 text-red-800 font-medium hover:bg-red-200 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                    {isDeleting ? "Deleting..." : "Delete Lecture"}
+                    </button>
+                </>
+             ) : (
+                <div className="flex gap-2">
+                    <button 
+                      onClick={() => {
+                          setIsEditing(false);
+                          setEditTitle(lecture.title || lecture.name || "");
+                          setEditDescription(lecture.description || "");
+                          setPreviewThumbnail(lecture.thumbnail || null);
+                          setEditThumbnailFile(null);
+                      }}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded bg-gray-200 text-gray-800 font-medium hover:bg-gray-300 transition"
+                      disabled={isSaving}
+                    >
+                       <FaTimes /> Cancel
+                    </button>
+                    <button 
+                      onClick={handleSave}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded bg-[#0360AB] text-white font-medium hover:bg-[#035fabea] transition disabled:opacity-50"
+                      disabled={isSaving}
+                    >
+                       {isSaving ? "Saving..." : <><FaSave /> Save Changes</>}
+                    </button>
+                </div>
+             )}
           </div>
         </div>
       </div>
